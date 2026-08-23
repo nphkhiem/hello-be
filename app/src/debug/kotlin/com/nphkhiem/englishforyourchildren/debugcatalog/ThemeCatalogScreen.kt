@@ -3,7 +3,6 @@ package com.nphkhiem.englishforyourchildren.debugcatalog
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -155,22 +154,6 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
         modifier =
             Modifier
                 .scale(scale)
-                .then(
-                    if (isFocused) {
-                        Modifier.border(focus.ringWidth, colors.focusRing, HelloBeShapes.large)
-                    } else {
-                        Modifier
-                    }
-                )
-                .padding(focus.ringWidth)
-                .then(
-                    if (isFocused) {
-                        Modifier.border(focus.guardWidth, colors.focusGuard, HelloBeShapes.large)
-                    } else {
-                        Modifier
-                    }
-                )
-                .padding(focus.guardWidth)
                 .widthIn(min = 96.dp)
                 .clip(HelloBeShapes.large)
                 .background(background)
