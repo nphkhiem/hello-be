@@ -5,7 +5,6 @@ package com.nphkhiem.englishforyourchildren.debugcatalog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Border
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.FilterChip
@@ -127,22 +125,23 @@ internal fun CatalogSectionHeading(title: String) {
     )
 }
 
-private val SELECTED_OUTLINE_WIDTH = 3.dp
-
 /**
  * Uses the official [FilterChip] from `androidx.tv.material3` instead of a hand-rolled
  * clickable box. Google's own [FilterChipDefaults] models "focused" and "selected" as
  * independently combinable states (see `focusedSelectedContainerColor` etc.), which is the
- * state a hand-rolled implementation kept losing across earlier iterations: selection must
- * stay visible even while an item is focused, per DESIGN_TOKENS.md's "Focused, selected" row.
+ * state a hand-rolled implementation kept losing across earlier iterations. The gold focus
+ * ring (`colors.focusRing`) marks both focused and selected so the state is never lost.
  */
 @Composable
 private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> Unit) {
     val colors = HelloBeTheme.colors
     val focus = HelloBeTheme.focus
     val interactionSource = remember { MutableInteractionSource() }
-    val isFocused by interactionSource.collectIsFocusedAsState()
-    val checkmarkColor = if (isFocused) colors.onPrimary else colors.accentGrowth
+    val goldRing =
+        Border(
+            border = BorderStroke(focus.ringWidth, colors.focusRing),
+            shape = HelloBeShapes.large
+        )
 
     FilterChip(
         selected = selected,
@@ -174,26 +173,10 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
         border =
             FilterChipDefaults.border(
                 border = Border.None,
-                focusedBorder = Border.None,
-                selectedBorder =
-                    Border(
-                        border = BorderStroke(SELECTED_OUTLINE_WIDTH, colors.accentGrowth),
-                        shape = HelloBeShapes.large
-                    ),
-                focusedSelectedBorder = Border.None
-            ),
-        leadingIcon =
-            if (selected) {
-                {
-                    Text(
-                        text = "✓",
-                        style = HelloBeTheme.typography.labelMedium,
-                        color = checkmarkColor
-                    )
-                }
-            } else {
-                null
-            }
+                focusedBorder = goldRing,
+                selectedBorder = goldRing,
+                focusedSelectedBorder = goldRing
+            )
     ) {
         Text(text = label, style = HelloBeTheme.typography.labelMedium)
     }
