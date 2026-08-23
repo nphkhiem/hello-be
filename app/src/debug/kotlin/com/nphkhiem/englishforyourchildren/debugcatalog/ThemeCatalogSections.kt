@@ -256,9 +256,10 @@ private fun MotionDemoColumn(label: String, reduceMotion: Boolean) {
         Box(
             modifier =
                 Modifier
-                    .clickable { focused = !focused }
                     .size((72 * scale).dp)
-                    .background(colors.actionPrimary, HelloBeShapes.large)
+                    .clip(HelloBeShapes.large)
+                    .background(colors.actionPrimary)
+                    .clickable { focused = !focused }
         )
         Text(text = label, style = HelloBeTheme.typography.labelSmall, color = colors.textSecondary)
     }

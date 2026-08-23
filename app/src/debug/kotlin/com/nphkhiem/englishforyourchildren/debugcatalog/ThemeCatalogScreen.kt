@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
@@ -132,8 +133,9 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
         modifier =
             Modifier
                 .widthIn(min = 96.dp)
+                .clip(HelloBeShapes.large)
+                .background(background)
                 .clickable(onClick = onClick)
-                .background(background, HelloBeShapes.large)
                 .padding(horizontal = HelloBeSpacing.space5, vertical = HelloBeSpacing.space3),
         contentAlignment = Alignment.Center
     ) {
