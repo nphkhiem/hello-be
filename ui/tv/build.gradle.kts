@@ -12,4 +12,9 @@ dependencies {
     implementation(libs.androidx.compose.foundation)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.tv.material)
+
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.truth)
 }
