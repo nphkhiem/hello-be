@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme_catalog_app_name">Hello Bé Theme Catalog</string>
+    <string name="theme_catalog_title">Storybook Stage token catalog</string>
+    <string name="theme_catalog_mode_day">Day</string>
+    <string name="theme_catalog_mode_night">Night</string>
+    <string name="theme_catalog_high_contrast">High contrast</string>
+    <string name="theme_catalog_reduced_motion_label">Reduced motion</string>
+    <string name="theme_catalog_standard_motion_label">Standard motion</string>
+    <string name="theme_catalog_colors_heading">Color</string>
+    <string name="theme_catalog_typography_heading">Type</string>
+    <string name="theme_catalog_spacing_heading">Spacing</string>
+    <string name="theme_catalog_shapes_heading">Shape</string>
+    <string name="theme_catalog_elevation_heading">Elevation</string>
+    <string name="theme_catalog_motion_heading">Motion</string>
+    <string name="theme_catalog_sample_en">Hello Bé, little words, big adventures</string>
+    <string name="theme_catalog_sample_vi">Bé yêu học bảng chữ cái mỗi ngày</string>
+</resources>
