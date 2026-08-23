@@ -1,19 +1,16 @@
+@file:OptIn(ExperimentalTvMaterial3Api::class)
+
 package com.nphkhiem.englishforyourchildren.debugcatalog
 
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -21,12 +18,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.tv.material3.Border
+import androidx.tv.material3.ExperimentalTvMaterial3Api
+import androidx.tv.material3.FilterChip
+import androidx.tv.material3.FilterChipDefaults
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.R
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeShapes
@@ -131,72 +129,72 @@ internal fun CatalogSectionHeading(title: String) {
 
 private val SELECTED_OUTLINE_WIDTH = 3.dp
 
+/**
+ * Uses the official [FilterChip] from `androidx.tv.material3` instead of a hand-rolled
+ * clickable box. Google's own [FilterChipDefaults] models "focused" and "selected" as
+ * independently combinable states (see `focusedSelectedContainerColor` etc.), which is the
+ * state a hand-rolled implementation kept losing across earlier iterations: selection must
+ * stay visible even while an item is focused, per DESIGN_TOKENS.md's "Focused, selected" row.
+ */
 @Composable
 private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> Unit) {
     val colors = HelloBeTheme.colors
     val focus = HelloBeTheme.focus
-    val motion = HelloBeTheme.motion
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
-    val showSelectedOutline = selected && !isFocused
+    val checkmarkColor = if (isFocused) colors.onPrimary else colors.accentGrowth
 
-    val background =
-        when {
-            isFocused -> colors.actionPrimaryFocused
-            selected -> colors.surfaceSoft
-            else -> colors.actionSecondary
-        }
-    val content =
-        when {
-            isFocused -> colors.onPrimary
-            selected -> colors.textPrimary
-            else -> colors.onSecondary
-        }
-    val scale by
-        animateFloatAsState(
-            targetValue = if (isFocused) focus.scaleButton else 1f,
-            animationSpec = tween(durationMillis = motion.focusTransitionMillis),
-            label = "catalogChipFocusScale"
-        )
-
-    Box(
-        modifier =
-            Modifier
-                .scale(scale)
-                .widthIn(min = 96.dp)
-                .clip(HelloBeShapes.large)
-                .background(background)
-                .then(
-                    if (showSelectedOutline) {
-                        Modifier.border(
-                            SELECTED_OUTLINE_WIDTH,
-                            colors.accentGrowth,
-                            HelloBeShapes.large
-                        )
-                    } else {
-                        Modifier
-                    }
-                )
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = onClick
-                )
-                .padding(horizontal = HelloBeSpacing.space5, vertical = HelloBeSpacing.space3),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.space2),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (showSelectedOutline) {
-                Text(
-                    text = "✓",
-                    style = HelloBeTheme.typography.labelMedium,
-                    color = colors.accentGrowth
-                )
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        interactionSource = interactionSource,
+        shape = FilterChipDefaults.shape(shape = HelloBeShapes.large),
+        colors =
+            FilterChipDefaults.colors(
+                containerColor = colors.actionSecondary,
+                contentColor = colors.onSecondary,
+                focusedContainerColor = colors.actionPrimaryFocused,
+                focusedContentColor = colors.onPrimary,
+                pressedContainerColor = colors.actionPrimaryPressed,
+                pressedContentColor = colors.onPrimary,
+                selectedContainerColor = colors.surfaceSoft,
+                selectedContentColor = colors.textPrimary,
+                disabledContainerColor = colors.surfaceMuted,
+                disabledContentColor = colors.textTertiary,
+                focusedSelectedContainerColor = colors.actionPrimaryFocused,
+                focusedSelectedContentColor = colors.onPrimary,
+                pressedSelectedContainerColor = colors.actionPrimaryPressed,
+                pressedSelectedContentColor = colors.onPrimary
+            ),
+        scale =
+            FilterChipDefaults.scale(
+                focusedScale = focus.scaleButton,
+                focusedSelectedScale = focus.scaleButton
+            ),
+        border =
+            FilterChipDefaults.border(
+                border = Border.None,
+                focusedBorder = Border.None,
+                selectedBorder =
+                    Border(
+                        border = BorderStroke(SELECTED_OUTLINE_WIDTH, colors.accentGrowth),
+                        shape = HelloBeShapes.large
+                    ),
+                focusedSelectedBorder = Border.None
+            ),
+        leadingIcon =
+            if (selected) {
+                {
+                    Text(
+                        text = "✓",
+                        style = HelloBeTheme.typography.labelMedium,
+                        color = checkmarkColor
+                    )
+                }
+            } else {
+                null
             }
-            Text(text = label, style = HelloBeTheme.typography.labelMedium, color = content)
-        }
+    ) {
+        Text(text = label, style = HelloBeTheme.typography.labelMedium)
     }
 }
