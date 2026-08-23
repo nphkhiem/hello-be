@@ -1,6 +1,8 @@
-# English for Your Children
+# Hello Bé
 
-An offline-first Android TV application for Vietnamese children aged 3–5 who are beginning English. The product is free, account-free, advertising-free, and designed for optional caregiver participation.
+Little words, big adventures.
+
+Hello Bé is an offline-first Android TV application for Vietnamese children aged 3–5 who are beginning English. The product is free, account-free, advertising-free, and designed for optional caregiver participation.
 
 ## Current state
 

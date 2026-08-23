@@ -15,7 +15,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "english-for-your-children"
+rootProject.name = "hello-be"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
