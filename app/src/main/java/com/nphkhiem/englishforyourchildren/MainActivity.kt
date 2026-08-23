@@ -23,6 +23,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -36,15 +37,16 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            EnglishForYourChildrenApp()
+            HelloBeApp()
         }
     }
 }
 
 @Composable
-private fun EnglishForYourChildrenApp() {
+private fun HelloBeApp() {
     MaterialTheme {
         val focusRequester = remember { FocusRequester() }
+        val homeContentDescription = stringResource(R.string.home_content_description)
         var isFocused by remember { mutableStateOf(false) }
 
         LaunchedEffect(focusRequester) {
@@ -66,7 +68,7 @@ private fun EnglishForYourChildrenApp() {
                         .onFocusChanged { isFocused = it.isFocused }
                         .focusable()
                         .semantics {
-                            contentDescription = "English for Your Children home"
+                            contentDescription = homeContentDescription
                         }.background(
                             color = Color(0xFF082A4A),
                             shape = RoundedCornerShape(28.dp)
@@ -78,7 +80,7 @@ private fun EnglishForYourChildrenApp() {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "English for Your Children",
+                    text = stringResource(R.string.app_name),
                     color = Color.White,
                     fontSize = 36.sp
                 )
