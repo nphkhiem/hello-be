@@ -4,18 +4,30 @@ plugins {
 
 spotless {
     kotlin {
-        target("**/*.kt")
-        targetExclude("**/build/**", "**/.gradle/**")
+        target(
+            fileTree(".") {
+                include("**/*.kt")
+                exclude("**/build/**", "**/.gradle/**")
+            }
+        )
         ktlint(libs.versions.ktlint.get())
     }
     kotlinGradle {
-        target("**/*.gradle.kts")
-        targetExclude("**/build/**", "**/.gradle/**")
+        target(
+            fileTree(".") {
+                include("**/*.gradle.kts")
+                exclude("**/build/**", "**/.gradle/**")
+            }
+        )
         ktlint(libs.versions.ktlint.get())
     }
     format("projectFiles") {
-        target("**/*.md", "**/*.xml", "**/*.properties", "**/*.toml", "**/.gitignore")
-        targetExclude("**/build/**", "**/.gradle/**")
+        target(
+            fileTree(".") {
+                include("**/*.md", "**/*.xml", "**/*.properties", "**/*.toml", "**/.gitignore")
+                exclude("**/build/**", "**/.gradle/**")
+            }
+        )
         trimTrailingWhitespace()
         endWithNewline()
     }
