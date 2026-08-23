@@ -1,7 +1,12 @@
 package com.nphkhiem.englishforyourchildren.debugcatalog
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
@@ -126,16 +132,53 @@ internal fun CatalogSectionHeading(title: String) {
 @Composable
 private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> Unit) {
     val colors = HelloBeTheme.colors
-    val background = if (selected) colors.actionPrimary else colors.actionSecondary
-    val content = if (selected) colors.onPrimary else colors.onSecondary
+    val focus = HelloBeTheme.focus
+    val motion = HelloBeTheme.motion
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
+
+    val background =
+        when {
+            isFocused -> colors.actionPrimaryFocused
+            selected -> colors.actionPrimary
+            else -> colors.actionSecondary
+        }
+    val content = if (isFocused || selected) colors.onPrimary else colors.onSecondary
+    val scale by
+        animateFloatAsState(
+            targetValue = if (isFocused) focus.scaleButton else 1f,
+            animationSpec = tween(durationMillis = motion.focusTransitionMillis),
+            label = "catalogChipFocusScale"
+        )
 
     Box(
         modifier =
             Modifier
+                .scale(scale)
+                .then(
+                    if (isFocused) {
+                        Modifier.border(focus.ringWidth, colors.focusRing, HelloBeShapes.large)
+                    } else {
+                        Modifier
+                    }
+                )
+                .padding(focus.ringWidth)
+                .then(
+                    if (isFocused) {
+                        Modifier.border(focus.guardWidth, colors.focusGuard, HelloBeShapes.large)
+                    } else {
+                        Modifier
+                    }
+                )
+                .padding(focus.guardWidth)
                 .widthIn(min = 96.dp)
                 .clip(HelloBeShapes.large)
                 .background(background)
-                .clickable(onClick = onClick)
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onClick
+                )
                 .padding(horizontal = HelloBeSpacing.space5, vertical = HelloBeSpacing.space3),
         contentAlignment = Alignment.Center
     ) {
