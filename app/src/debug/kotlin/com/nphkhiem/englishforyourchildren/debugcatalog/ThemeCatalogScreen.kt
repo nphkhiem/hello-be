@@ -3,6 +3,7 @@ package com.nphkhiem.englishforyourchildren.debugcatalog
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -128,6 +129,8 @@ internal fun CatalogSectionHeading(title: String) {
     )
 }
 
+private val SELECTED_OUTLINE_WIDTH = 3.dp
+
 @Composable
 private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> Unit) {
     val colors = HelloBeTheme.colors
@@ -135,14 +138,20 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
     val motion = HelloBeTheme.motion
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
+    val showSelectedOutline = selected && !isFocused
 
     val background =
         when {
             isFocused -> colors.actionPrimaryFocused
-            selected -> colors.actionPrimary
+            selected -> colors.surfaceSoft
             else -> colors.actionSecondary
         }
-    val content = if (isFocused || selected) colors.onPrimary else colors.onSecondary
+    val content =
+        when {
+            isFocused -> colors.onPrimary
+            selected -> colors.textPrimary
+            else -> colors.onSecondary
+        }
     val scale by
         animateFloatAsState(
             targetValue = if (isFocused) focus.scaleButton else 1f,
@@ -157,6 +166,17 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
                 .widthIn(min = 96.dp)
                 .clip(HelloBeShapes.large)
                 .background(background)
+                .then(
+                    if (showSelectedOutline) {
+                        Modifier.border(
+                            SELECTED_OUTLINE_WIDTH,
+                            colors.accentGrowth,
+                            HelloBeShapes.large
+                        )
+                    } else {
+                        Modifier
+                    }
+                )
                 .clickable(
                     interactionSource = interactionSource,
                     indication = null,
@@ -165,6 +185,18 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
                 .padding(horizontal = HelloBeSpacing.space5, vertical = HelloBeSpacing.space3),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = label, style = HelloBeTheme.typography.labelMedium, color = content)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.space2),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (showSelectedOutline) {
+                Text(
+                    text = "✓",
+                    style = HelloBeTheme.typography.labelMedium,
+                    color = colors.accentGrowth
+                )
+            }
+            Text(text = label, style = HelloBeTheme.typography.labelMedium, color = content)
+        }
     }
 }
