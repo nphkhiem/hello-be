@@ -14,10 +14,21 @@
     <string name="theme_catalog_elevation_heading">Elevation</string>
     <string name="theme_catalog_motion_heading">Motion</string>
     <string name="theme_catalog_mode_summary">%1$s · highContrast=%2$s · reduceMotion=%3$s</string>
+    <string name="theme_catalog_pip_heading">Pip guide</string>
+    <string name="theme_catalog_pip_label">Placeholder silhouette; poses cross-fade unless reduced motion is on</string>
+    <string name="theme_catalog_pip_description">Pip the bird, %1$s</string>
+    <string name="theme_catalog_pip_next_pose">Next pose</string>
+    <string name="theme_catalog_pip_current">Showing: %1$s</string>
+    <string name="theme_catalog_pip_pose_resting">resting</string>
+    <string name="theme_catalog_pip_pose_greeting">greeting</string>
+    <string name="theme_catalog_pip_pose_pointing">pointing</string>
+    <string name="theme_catalog_pip_pose_modeling">modelling</string>
+    <string name="theme_catalog_pip_pose_celebrating">celebrating</string>
     <string name="theme_catalog_stage_heading">Storybook stage</string>
     <string name="theme_catalog_stage_label">Scenery bleeds; everything else stays inside the safe area</string>
     <string name="theme_catalog_stage_header">My Home</string>
     <string name="theme_catalog_stage_content">Focal object area</string>
+    <string name="theme_catalog_stage_pip">Pip the bird, resting in the support strip</string>
     <string name="theme_catalog_stage_support">Support strip: Pip and caption live here</string>
     <string name="theme_catalog_focus_lab_heading">Focus lab</string>
     <string name="theme_catalog_focus_actions_label">Actions: primary, secondary, destructive, unavailable, disabled</string>

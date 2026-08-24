@@ -7,12 +7,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.R
+import com.nphkhiem.englishforyourchildren.ui.tv.component.PipGuide
+import com.nphkhiem.englishforyourchildren.ui.tv.component.PipPose
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StorybookScaffold
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeShapes
@@ -65,9 +68,16 @@ internal fun StageSection() {
                     )
                 },
                 support = {
+                    // Pip sits in the support strip, which is what keeps it structurally unable to
+                    // cover the focal object above.
+                    PipGuide(
+                        pose = PipPose.RESTING,
+                        contentDescription = stringResource(R.string.theme_catalog_stage_pip),
+                        modifier = Modifier.size(HelloBeLayout.pipMinSize)
+                    )
                     StageRegion(
                         label = stringResource(R.string.theme_catalog_stage_support),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.weight(1f)
                     )
                 }
             ) {

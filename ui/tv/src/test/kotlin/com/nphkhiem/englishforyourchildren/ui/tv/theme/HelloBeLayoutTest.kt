@@ -28,4 +28,9 @@ class HelloBeLayoutTest {
         assertThat(HelloBeLayout.columnWidth).isEqualTo(52.dp)
         assertThat(HelloBeLayout.gutter).isEqualTo(20.dp)
     }
+
+    @Test
+    fun givenLayoutTokens_whenPipMinSizeIsRead_thenPipStaysRecognisableAcrossProfiles() {
+        assertThat(HelloBeLayout.pipMinSize).isEqualTo(96.dp)
+    }
 }

@@ -23,4 +23,7 @@ object HelloBeLayout {
     val caregiverControlMinHeight = 56.dp
     val dialogMaxWidth = 690.dp
     val caregiverRailWidth = 196.dp
+
+    /** Smallest Pip may be drawn and stay a recognisable silhouette across TV profiles. */
+    val pipMinSize = 96.dp
 }
