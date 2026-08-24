@@ -17,7 +17,7 @@ data class HelloBeFocus(
 )
 
 fun helloBeFocus(highContrast: Boolean): HelloBeFocus = HelloBeFocus(
-    ringWidth = if (highContrast) 8.dp else 6.dp,
+    ringWidth = if (highContrast) 6.dp else 4.dp,
     guardWidth = 2.dp,
     ringGap = 0.dp,
     scaleButton = 1.04f,

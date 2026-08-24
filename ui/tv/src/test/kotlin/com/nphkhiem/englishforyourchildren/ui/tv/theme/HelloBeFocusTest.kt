@@ -6,19 +6,19 @@ import org.junit.jupiter.api.Test
 
 class HelloBeFocusTest {
     @Test
-    fun givenStandardContrast_whenFocusTokensAreRead_thenRingWidthIsSixDp() {
+    fun givenStandardContrast_whenFocusTokensAreRead_thenRingWidthIsFourDp() {
         val focus = helloBeFocus(highContrast = false)
 
-        assertThat(focus.ringWidth).isEqualTo(6.dp)
+        assertThat(focus.ringWidth).isEqualTo(4.dp)
         assertThat(focus.guardWidth).isEqualTo(2.dp)
         assertThat(focus.clearance).isEqualTo(12.dp)
     }
 
     @Test
-    fun givenHighContrast_whenFocusTokensAreRead_thenRingWidthIsEightDp() {
+    fun givenHighContrast_whenFocusTokensAreRead_thenRingWidthIsSixDp() {
         val focus = helloBeFocus(highContrast = true)
 
-        assertThat(focus.ringWidth).isEqualTo(8.dp)
+        assertThat(focus.ringWidth).isEqualTo(6.dp)
     }
 
     @Test

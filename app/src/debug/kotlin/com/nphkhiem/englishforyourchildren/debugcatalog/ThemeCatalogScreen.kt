@@ -174,7 +174,7 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
             FilterChipDefaults.border(
                 border = Border.None,
                 focusedBorder = goldRing,
-                selectedBorder = goldRing,
+                selectedBorder = Border.None,
                 focusedSelectedBorder = goldRing
             )
     ) {
