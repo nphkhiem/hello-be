@@ -131,6 +131,11 @@ internal fun CatalogSectionHeading(title: String) {
  * independently combinable states (see `focusedSelectedContainerColor` etc.), which is the
  * state a hand-rolled implementation kept losing across earlier iterations. The gold focus
  * ring (`colors.focusRing`) marks both focused and selected so the state is never lost.
+ *
+ * Selection uses the dedicated `action.selected` family rather than `accent.growth`: green is
+ * reserved for confirmed success, so borrowing it made "this chip is on" look like "this answer
+ * is correct". The selected chip also keeps its own outline, so selection survives on fill alone
+ * only when the fill is unambiguous.
  */
 @Composable
 private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> Unit) {
@@ -140,6 +145,11 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
     val goldRing =
         Border(
             border = BorderStroke(focus.ringWidth, colors.focusRing),
+            shape = HelloBeShapes.large
+        )
+    val selectionOutline =
+        Border(
+            border = BorderStroke(focus.selectionWidth, colors.actionSelectedBorder),
             shape = HelloBeShapes.large
         )
 
@@ -156,8 +166,8 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
                 focusedContentColor = colors.onPrimary,
                 pressedContainerColor = colors.actionPrimaryPressed,
                 pressedContentColor = colors.onPrimary,
-                selectedContainerColor = colors.accentGrowth,
-                selectedContentColor = colors.textInverse,
+                selectedContainerColor = colors.actionSelected,
+                selectedContentColor = colors.onSelected,
                 disabledContainerColor = colors.surfaceMuted,
                 disabledContentColor = colors.textTertiary,
                 focusedSelectedContainerColor = colors.actionPrimaryFocused,
@@ -174,7 +184,7 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
             FilterChipDefaults.border(
                 border = Border.None,
                 focusedBorder = goldRing,
-                selectedBorder = Border.None,
+                selectedBorder = selectionOutline,
                 focusedSelectedBorder = goldRing
             )
     ) {

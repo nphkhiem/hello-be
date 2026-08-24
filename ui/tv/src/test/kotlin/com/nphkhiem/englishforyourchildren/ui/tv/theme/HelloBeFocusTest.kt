@@ -11,6 +11,7 @@ class HelloBeFocusTest {
 
         assertThat(focus.ringWidth).isEqualTo(4.dp)
         assertThat(focus.guardWidth).isEqualTo(2.dp)
+        assertThat(focus.selectionWidth).isEqualTo(3.dp)
         assertThat(focus.clearance).isEqualTo(12.dp)
     }
 
@@ -19,6 +20,7 @@ class HelloBeFocusTest {
         val focus = helloBeFocus(highContrast = true)
 
         assertThat(focus.ringWidth).isEqualTo(6.dp)
+        assertThat(focus.selectionWidth).isEqualTo(5.dp)
     }
 
     @Test

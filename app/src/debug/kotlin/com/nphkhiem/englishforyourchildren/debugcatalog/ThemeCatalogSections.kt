@@ -43,6 +43,7 @@ internal fun ColorSwatchSection() {
             "surface.raised" to colors.surfaceRaised,
             "action.primary" to colors.actionPrimary,
             "action.secondary" to colors.actionSecondary,
+            "action.selected" to colors.actionSelected,
             "focus.ring" to colors.focusRing,
             "accent.pip" to colors.accentPip,
             "accent.warm" to colors.accentWarm,
