@@ -14,6 +14,15 @@
     <string name="theme_catalog_elevation_heading">Elevation</string>
     <string name="theme_catalog_motion_heading">Motion</string>
     <string name="theme_catalog_mode_summary">%1$s · highContrast=%2$s · reduceMotion=%3$s</string>
+    <string name="theme_catalog_chrome_heading">Stage chrome</string>
+    <string name="theme_catalog_chrome_label">Header, progress trail and caption; the trail draws no number</string>
+    <string name="theme_catalog_chrome_title">Listen and choose</string>
+    <string name="theme_catalog_chrome_unit">My Home</string>
+    <string name="theme_catalog_chrome_replay">Replay</string>
+    <string name="theme_catalog_chrome_caption">Where is the chair?</string>
+    <string name="theme_catalog_chrome_next_step">Next step</string>
+    <string name="theme_catalog_chrome_toggle_caption">Toggle caption</string>
+    <string name="theme_catalog_chrome_position">Activity %1$d of %2$d</string>
     <string name="theme_catalog_pip_heading">Pip guide</string>
     <string name="theme_catalog_pip_label">Placeholder silhouette; poses cross-fade unless reduced motion is on</string>
     <string name="theme_catalog_pip_description">Pip the bird, %1$s</string>

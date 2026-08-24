@@ -71,6 +71,9 @@ fun ThemeCatalogScreen() {
             CatalogSectionHeading(stringResource(R.string.theme_catalog_pip_heading))
             PipSection()
 
+            CatalogSectionHeading(stringResource(R.string.theme_catalog_chrome_heading))
+            StageChromeSection()
+
             CatalogSectionHeading(stringResource(R.string.theme_catalog_focus_lab_heading))
             FocusLabSection()
 

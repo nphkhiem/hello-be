@@ -33,4 +33,18 @@ class HelloBeLayoutTest {
     fun givenLayoutTokens_whenPipMinSizeIsRead_thenPipStaysRecognisableAcrossProfiles() {
         assertThat(HelloBeLayout.pipMinSize).isEqualTo(96.dp)
     }
+
+    @Test
+    fun givenLayoutTokens_whenChromeSizesAreRead_thenTheyAreReservedSizesNotSpacingSteps() {
+        assertThat(HelloBeLayout.captionReservedHeight).isEqualTo(76.dp)
+        assertThat(HelloBeLayout.trailSegmentWidth).isEqualTo(12.dp)
+        assertThat(HelloBeLayout.trailSegmentCurrentWidth).isEqualTo(24.dp)
+        assertThat(HelloBeLayout.trailSegmentHeight).isEqualTo(8.dp)
+    }
+
+    @Test
+    fun givenTrailTokens_whenCompared_thenTheCurrentStepIsWiderThanTheRest() {
+        assertThat(HelloBeLayout.trailSegmentCurrentWidth.value)
+            .isGreaterThan(HelloBeLayout.trailSegmentWidth.value)
+    }
 }

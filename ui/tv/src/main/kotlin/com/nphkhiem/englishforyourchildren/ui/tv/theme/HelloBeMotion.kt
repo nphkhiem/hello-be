@@ -32,6 +32,7 @@ data class HelloBeMotion(
     val navigationTransitionMillis: Int,
     val pageTurnTransitionMillis: Int,
     val progressTrailTransitionMillis: Int,
+    val captionTransitionMillis: Int,
     val reduceMotion: Boolean
 )
 
@@ -50,6 +51,7 @@ fun helloBeMotion(reduceMotion: Boolean): HelloBeMotion {
         pageTurnTransitionMillis =
             if (reduceMotion) REDUCED_CROSSFADE_MILLIS else durations.pageTurn,
         progressTrailTransitionMillis = if (reduceMotion) 0 else durations.normal,
+        captionTransitionMillis = if (reduceMotion) 0 else durations.fast,
         reduceMotion = reduceMotion
     )
 }
