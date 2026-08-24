@@ -37,4 +37,7 @@ object HelloBeLayout {
     val trailSegmentWidth = 12.dp
     val trailSegmentCurrentWidth = 24.dp
     val trailSegmentHeight = 8.dp
+
+    /** One resting placeholder block in the loading treatment. */
+    val loadingPlaceholderHeight = 20.dp
 }

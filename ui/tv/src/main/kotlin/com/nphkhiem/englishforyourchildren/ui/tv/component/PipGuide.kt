@@ -55,11 +55,15 @@ enum class PipPose(internal val headTurn: Float, internal val headLift: Float) {
  * Pip is a guide rather than decoration, so `scenery.contrastMaximum` deliberately does not cap
  * Pip: that ceiling exists to hold decorative scenery below the interactive hierarchy, and Pip
  * must stay clearly visible.
+ *
+ * [contentDescription] may be null, following the same contract as Compose's own `Icon`: null
+ * means Pip is decorative here because the surrounding panel already announces the whole
+ * thing. Without that, a panel containing Pip announces its message twice.
  */
 @Composable
 fun PipGuide(
     pose: PipPose,
-    contentDescription: String,
+    contentDescription: String?,
     modifier: Modifier = Modifier,
     illustration: @Composable (PipPose) -> Unit = { PipPlaceholder(it) }
 ) {
@@ -71,9 +75,15 @@ fun PipGuide(
                 minWidth = HelloBeLayout.pipMinSize,
                 minHeight = HelloBeLayout.pipMinSize
             )
-            .semantics(mergeDescendants = true) {
-                this.contentDescription = contentDescription
-            }
+            .then(
+                if (contentDescription == null) {
+                    Modifier
+                } else {
+                    Modifier.semantics(mergeDescendants = true) {
+                        this.contentDescription = contentDescription
+                    }
+                }
+            )
     ) {
         if (motion.reduceMotion) {
             illustration(pose)

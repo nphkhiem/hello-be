@@ -14,6 +14,16 @@
     <string name="theme_catalog_elevation_heading">Elevation</string>
     <string name="theme_catalog_motion_heading">Motion</string>
     <string name="theme_catalog_mode_summary">%1$s · highContrast=%2$s · reduceMotion=%3$s</string>
+    <string name="theme_catalog_feedback_heading">Feedback and loading</string>
+    <string name="theme_catalog_feedback_label">Every tone shares one neutral surface; Pip and the words carry the difference</string>
+    <string name="theme_catalog_feedback_correct">You found the chair</string>
+    <string name="theme_catalog_feedback_retry">Let us try that one together</string>
+    <string name="theme_catalog_feedback_information">Press Select to hear it again</string>
+    <string name="theme_catalog_feedback_pip_celebrating">Pip is celebrating with you</string>
+    <string name="theme_catalog_feedback_pip_modelling">Pip is showing you again</string>
+    <string name="theme_catalog_feedback_pip_pointing">Pip is pointing at the control</string>
+    <string name="theme_catalog_loading_label">Loading is completely still, so it needs no reduced-motion version</string>
+    <string name="theme_catalog_loading_message">Getting your adventure ready</string>
     <string name="theme_catalog_chrome_heading">Stage chrome</string>
     <string name="theme_catalog_chrome_label">Header, progress trail and caption; the trail draws no number</string>
     <string name="theme_catalog_chrome_title">Listen and choose</string>

@@ -47,4 +47,9 @@ class HelloBeLayoutTest {
         assertThat(HelloBeLayout.trailSegmentCurrentWidth.value)
             .isGreaterThan(HelloBeLayout.trailSegmentWidth.value)
     }
+
+    @Test
+    fun givenLayoutTokens_whenLoadingPlaceholderIsRead_thenItIsAReservedSize() {
+        assertThat(HelloBeLayout.loadingPlaceholderHeight).isEqualTo(20.dp)
+    }
 }
