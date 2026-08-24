@@ -13,6 +13,12 @@
     <string name="theme_catalog_shapes_heading">Shape</string>
     <string name="theme_catalog_elevation_heading">Elevation</string>
     <string name="theme_catalog_motion_heading">Motion</string>
+    <string name="theme_catalog_mode_summary">%1$s · highContrast=%2$s · reduceMotion=%3$s</string>
+    <string name="theme_catalog_stage_heading">Storybook stage</string>
+    <string name="theme_catalog_stage_label">Scenery bleeds; everything else stays inside the safe area</string>
+    <string name="theme_catalog_stage_header">My Home</string>
+    <string name="theme_catalog_stage_content">Focal object area</string>
+    <string name="theme_catalog_stage_support">Support strip: Pip and caption live here</string>
     <string name="theme_catalog_focus_lab_heading">Focus lab</string>
     <string name="theme_catalog_focus_actions_label">Actions: primary, secondary, destructive, unavailable, disabled</string>
     <string name="theme_catalog_focus_cards_label">Story cards: default, selected, unavailable</string>

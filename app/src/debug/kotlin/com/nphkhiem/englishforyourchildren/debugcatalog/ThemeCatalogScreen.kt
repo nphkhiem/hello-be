@@ -30,12 +30,22 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeSpacing
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeThemeMode
 
+/** The three display settings the catalog can toggle, kept together so they travel as one. */
+private data class CatalogModeState(
+    val themeMode: HelloBeThemeMode = HelloBeThemeMode.DAY,
+    val highContrast: Boolean = false,
+    val reduceMotion: Boolean = false
+)
+
 @Composable
 fun ThemeCatalogScreen() {
-    var themeMode by remember { mutableStateOf(HelloBeThemeMode.DAY) }
-    var highContrast by remember { mutableStateOf(false) }
+    var mode by remember { mutableStateOf(CatalogModeState()) }
 
-    HelloBeTheme(themeMode = themeMode, highContrast = highContrast) {
+    HelloBeTheme(
+        themeMode = mode.themeMode,
+        highContrast = mode.highContrast,
+        reduceMotion = mode.reduceMotion
+    ) {
         val colors = HelloBeTheme.colors
 
         Column(
@@ -53,12 +63,10 @@ fun ThemeCatalogScreen() {
                 color = colors.textPrimary
             )
 
-            CatalogModeControls(
-                themeMode = themeMode,
-                onThemeModeChange = { themeMode = it },
-                highContrast = highContrast,
-                onHighContrastChange = { highContrast = it }
-            )
+            CatalogModeControls(mode = mode, onModeChange = { mode = it })
+
+            CatalogSectionHeading(stringResource(R.string.theme_catalog_stage_heading))
+            StageSection()
 
             CatalogSectionHeading(stringResource(R.string.theme_catalog_focus_lab_heading))
             FocusLabSection()
@@ -85,34 +93,39 @@ fun ThemeCatalogScreen() {
 }
 
 @Composable
-private fun CatalogModeControls(
-    themeMode: HelloBeThemeMode,
-    onThemeModeChange: (HelloBeThemeMode) -> Unit,
-    highContrast: Boolean,
-    onHighContrastChange: (Boolean) -> Unit
-) {
+private fun CatalogModeControls(mode: CatalogModeState, onModeChange: (CatalogModeState) -> Unit) {
     val colors = HelloBeTheme.colors
 
     Row(horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)) {
         CatalogToggleChip(
             label = stringResource(R.string.theme_catalog_mode_day),
-            selected = themeMode == HelloBeThemeMode.DAY,
-            onClick = { onThemeModeChange(HelloBeThemeMode.DAY) }
+            selected = mode.themeMode == HelloBeThemeMode.DAY,
+            onClick = { onModeChange(mode.copy(themeMode = HelloBeThemeMode.DAY)) }
         )
         CatalogToggleChip(
             label = stringResource(R.string.theme_catalog_mode_night),
-            selected = themeMode == HelloBeThemeMode.NIGHT,
-            onClick = { onThemeModeChange(HelloBeThemeMode.NIGHT) }
+            selected = mode.themeMode == HelloBeThemeMode.NIGHT,
+            onClick = { onModeChange(mode.copy(themeMode = HelloBeThemeMode.NIGHT)) }
         )
         CatalogToggleChip(
             label = stringResource(R.string.theme_catalog_high_contrast),
-            selected = highContrast,
-            onClick = { onHighContrastChange(!highContrast) }
+            selected = mode.highContrast,
+            onClick = { onModeChange(mode.copy(highContrast = !mode.highContrast)) }
+        )
+        CatalogToggleChip(
+            label = stringResource(R.string.theme_catalog_reduced_motion_label),
+            selected = mode.reduceMotion,
+            onClick = { onModeChange(mode.copy(reduceMotion = !mode.reduceMotion)) }
         )
     }
     Row {
         Text(
-            text = "${themeMode.name} · highContrast=$highContrast",
+            text = stringResource(
+                R.string.theme_catalog_mode_summary,
+                mode.themeMode.name,
+                mode.highContrast.toString(),
+                mode.reduceMotion.toString()
+            ),
             style = HelloBeTheme.typography.labelSmall,
             color = colors.textTertiary
         )
