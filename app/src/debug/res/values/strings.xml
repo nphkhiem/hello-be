@@ -13,6 +13,26 @@
     <string name="theme_catalog_shapes_heading">Shape</string>
     <string name="theme_catalog_elevation_heading">Elevation</string>
     <string name="theme_catalog_motion_heading">Motion</string>
+    <string name="theme_catalog_focus_lab_heading">Focus lab</string>
+    <string name="theme_catalog_focus_actions_label">Actions: primary, secondary, destructive, unavailable, disabled</string>
+    <string name="theme_catalog_focus_cards_label">Story cards: default, selected, unavailable</string>
+    <string name="theme_catalog_focus_choices_label">Choice cards: neutral, correct, supportive retry</string>
+    <string name="theme_catalog_action_continue">Continue adventure</string>
+    <string name="theme_catalog_action_free_play">Free play</string>
+    <string name="theme_catalog_action_delete">Delete profile</string>
+    <string name="theme_catalog_action_later">Later</string>
+    <string name="theme_catalog_action_disabled">Not yet</string>
+    <string name="theme_catalog_card_current">Unit one</string>
+    <string name="theme_catalog_card_next">Unit two</string>
+    <string name="theme_catalog_card_locked">Unit three</string>
+    <string name="theme_catalog_card_supporting">Five lessons</string>
+    <string name="theme_catalog_choice_apple">Apple</string>
+    <string name="theme_catalog_choice_ball">Ball</string>
+    <string name="theme_catalog_choice_cat">Cat</string>
+    <string name="theme_catalog_state_selected">Selected</string>
+    <string name="theme_catalog_state_later">Available later</string>
+    <string name="theme_catalog_state_correct">Correct</string>
+    <string name="theme_catalog_state_retry">Let us try again together</string>
     <string name="theme_catalog_sample_en">Hello Bé, little words, big adventures</string>
     <string name="theme_catalog_sample_vi">Bé yêu học bảng chữ cái mỗi ngày</string>
 </resources>

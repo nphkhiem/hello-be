@@ -60,6 +60,9 @@ fun ThemeCatalogScreen() {
                 onHighContrastChange = { highContrast = it }
             )
 
+            CatalogSectionHeading(stringResource(R.string.theme_catalog_focus_lab_heading))
+            FocusLabSection()
+
             CatalogSectionHeading(stringResource(R.string.theme_catalog_colors_heading))
             ColorSwatchSection()
 
