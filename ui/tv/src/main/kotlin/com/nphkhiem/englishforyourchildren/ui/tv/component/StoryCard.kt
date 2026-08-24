@@ -1,0 +1,135 @@
+@file:OptIn(ExperimentalTvMaterial3Api::class)
+
+package com.nphkhiem.englishforyourchildren.ui.tv.component
+
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.unit.Dp
+import androidx.tv.material3.Border
+import androidx.tv.material3.ExperimentalTvMaterial3Api
+import androidx.tv.material3.SelectableSurfaceDefaults
+import androidx.tv.material3.Surface
+import androidx.tv.material3.Text
+import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeShapes
+import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
+
+/**
+ * One topic per card - unit, lesson, profile, word, or free-play - sharing a single focus
+ * grammar so a child learns the interaction once and it holds everywhere.
+ *
+ * Uses the selectable `Surface` overload rather than the clickable one because a story card
+ * can be both current (selected) and focused at the same time; that combination is its own
+ * state in the token matrix, not a case of one overriding the other.
+ *
+ * The card sizes to its content. Callers set width from the 12-column grid tokens (for
+ * example `layout.cardThreeColumnSet`) rather than the card filling its parent, so a row of
+ * cards divides the grid instead of the first card consuming it.
+ */
+@Composable
+fun StoryCard(
+    title: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
+    availability: HelloBeAvailability = HelloBeAvailability.ENABLED,
+    supportingText: String? = null,
+    stateDescription: String? = null,
+    minHeight: Dp = HelloBeTheme.layout.childChoiceMinHeight,
+    illustration: (@Composable () -> Unit)? = null
+) {
+    val colors = HelloBeTheme.colors
+    val focus = HelloBeTheme.focus
+    val shape = HelloBeShapes.extraLarge
+    val interactionSource = remember { MutableInteractionSource() }
+
+    Surface(
+        selected = selected,
+        onClick = { if (availability.isClickable) onClick() },
+        modifier =
+            modifier
+                .defaultMinSize(minHeight = minHeight)
+                .helloBeFocusClearance()
+                .focusProperties { canFocus = availability.isFocusable }
+                .semantics {
+                    if (availability == HelloBeAvailability.DISABLED) disabled()
+                    stateDescription?.let { this.stateDescription = it }
+                },
+        enabled = availability.isFocusable,
+        interactionSource = interactionSource,
+        shape = SelectableSurfaceDefaults.shape(shape = shape),
+        colors =
+            SelectableSurfaceDefaults.colors(
+                containerColor =
+                    if (availability == HelloBeAvailability.UNAVAILABLE) {
+                        colors.surfaceMuted
+                    } else {
+                        colors.surfacePrimary
+                    },
+                contentColor =
+                    if (availability == HelloBeAvailability.UNAVAILABLE) {
+                        colors.textSecondary
+                    } else {
+                        colors.textPrimary
+                    },
+                focusedContainerColor = colors.actionPrimaryFocused,
+                focusedContentColor = colors.onPrimary,
+                pressedContainerColor = colors.actionPrimaryPressed,
+                pressedContentColor = colors.onPrimary,
+                selectedContainerColor = colors.actionSelected,
+                selectedContentColor = colors.onSelected,
+                focusedSelectedContainerColor = colors.actionPrimaryFocused,
+                focusedSelectedContentColor = colors.onPrimary,
+                pressedSelectedContainerColor = colors.actionPrimaryPressed,
+                pressedSelectedContentColor = colors.onPrimary,
+                disabledContainerColor = colors.surfaceMuted,
+                disabledContentColor = colors.textTertiary
+            ),
+        scale =
+            SelectableSurfaceDefaults.scale(
+                focusedScale = focus.scaleCard,
+                pressedScale = focus.scaleCard * focus.pressScale,
+                focusedSelectedScale = focus.scaleCard,
+                pressedSelectedScale = focus.scaleCard * focus.pressScale
+            ),
+        border =
+            SelectableSurfaceDefaults.border(
+                border =
+                    if (availability == HelloBeAvailability.UNAVAILABLE) {
+                        HelloBeFocusFrame.unavailable(shape)
+                    } else {
+                        Border.None
+                    },
+                focusedBorder = HelloBeFocusFrame.ring(shape),
+                pressedBorder = HelloBeFocusFrame.ring(shape),
+                selectedBorder = HelloBeFocusFrame.selection(shape),
+                focusedSelectedBorder = HelloBeFocusFrame.ring(shape),
+                pressedSelectedBorder = HelloBeFocusFrame.ring(shape)
+            )
+    ) {
+        Column(
+            modifier = Modifier.padding(HelloBeTheme.spacing.cardInternal),
+            verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space3)
+        ) {
+            illustration?.invoke()
+            Text(
+                text = title,
+                style = HelloBeTheme.typography.titleMedium,
+                modifier = Modifier.semantics { heading() }
+            )
+            if (supportingText != null) {
+                Text(text = supportingText, style = HelloBeTheme.typography.bodyMedium)
+            }
+        }
+    }
+}

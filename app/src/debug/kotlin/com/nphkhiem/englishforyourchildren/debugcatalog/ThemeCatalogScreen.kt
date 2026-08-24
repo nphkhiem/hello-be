@@ -1,14 +1,15 @@
+@file:OptIn(ExperimentalTvMaterial3Api::class)
+
 package com.nphkhiem.englishforyourchildren.debugcatalog
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -16,10 +17,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.tv.material3.Border
+import androidx.tv.material3.ExperimentalTvMaterial3Api
+import androidx.tv.material3.FilterChip
+import androidx.tv.material3.FilterChipDefaults
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.R
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeShapes
@@ -56,6 +59,9 @@ fun ThemeCatalogScreen() {
                 highContrast = highContrast,
                 onHighContrastChange = { highContrast = it }
             )
+
+            CatalogSectionHeading(stringResource(R.string.theme_catalog_focus_lab_heading))
+            FocusLabSection()
 
             CatalogSectionHeading(stringResource(R.string.theme_catalog_colors_heading))
             ColorSwatchSection()
@@ -122,21 +128,69 @@ internal fun CatalogSectionHeading(title: String) {
     )
 }
 
+/**
+ * Uses the official [FilterChip] from `androidx.tv.material3` instead of a hand-rolled
+ * clickable box. Google's own [FilterChipDefaults] models "focused" and "selected" as
+ * independently combinable states (see `focusedSelectedContainerColor` etc.), which is the
+ * state a hand-rolled implementation kept losing across earlier iterations. The gold focus
+ * ring (`colors.focusRing`) marks both focused and selected so the state is never lost.
+ *
+ * Selection uses the dedicated `action.selected` family rather than `accent.growth`: green is
+ * reserved for confirmed success, so borrowing it made "this chip is on" look like "this answer
+ * is correct". The selected chip also keeps its own outline, so selection survives on fill alone
+ * only when the fill is unambiguous.
+ */
 @Composable
 private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> Unit) {
     val colors = HelloBeTheme.colors
-    val background = if (selected) colors.actionPrimary else colors.actionSecondary
-    val content = if (selected) colors.onPrimary else colors.onSecondary
+    val focus = HelloBeTheme.focus
+    val interactionSource = remember { MutableInteractionSource() }
+    val goldRing =
+        Border(
+            border = BorderStroke(focus.ringWidth, colors.focusRing),
+            shape = HelloBeShapes.large
+        )
+    val selectionOutline =
+        Border(
+            border = BorderStroke(focus.selectionWidth, colors.actionSelectedBorder),
+            shape = HelloBeShapes.large
+        )
 
-    Box(
-        modifier =
-            Modifier
-                .widthIn(min = 96.dp)
-                .clickable(onClick = onClick)
-                .background(background, HelloBeShapes.large)
-                .padding(horizontal = HelloBeSpacing.space5, vertical = HelloBeSpacing.space3),
-        contentAlignment = Alignment.Center
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        interactionSource = interactionSource,
+        shape = FilterChipDefaults.shape(shape = HelloBeShapes.large),
+        colors =
+            FilterChipDefaults.colors(
+                containerColor = colors.actionSecondary,
+                contentColor = colors.onSecondary,
+                focusedContainerColor = colors.actionPrimaryFocused,
+                focusedContentColor = colors.onPrimary,
+                pressedContainerColor = colors.actionPrimaryPressed,
+                pressedContentColor = colors.onPrimary,
+                selectedContainerColor = colors.actionSelected,
+                selectedContentColor = colors.onSelected,
+                disabledContainerColor = colors.surfaceMuted,
+                disabledContentColor = colors.textTertiary,
+                focusedSelectedContainerColor = colors.actionPrimaryFocused,
+                focusedSelectedContentColor = colors.onPrimary,
+                pressedSelectedContainerColor = colors.actionPrimaryPressed,
+                pressedSelectedContentColor = colors.onPrimary
+            ),
+        scale =
+            FilterChipDefaults.scale(
+                focusedScale = focus.scaleButton,
+                focusedSelectedScale = focus.scaleButton
+            ),
+        border =
+            FilterChipDefaults.border(
+                border = Border.None,
+                focusedBorder = goldRing,
+                selectedBorder = selectionOutline,
+                focusedSelectedBorder = goldRing
+            )
     ) {
-        Text(text = label, style = HelloBeTheme.typography.labelMedium, color = content)
+        Text(text = label, style = HelloBeTheme.typography.labelMedium)
     }
 }
