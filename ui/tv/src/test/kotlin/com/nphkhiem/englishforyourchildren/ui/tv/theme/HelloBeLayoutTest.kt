@@ -28,4 +28,28 @@ class HelloBeLayoutTest {
         assertThat(HelloBeLayout.columnWidth).isEqualTo(52.dp)
         assertThat(HelloBeLayout.gutter).isEqualTo(20.dp)
     }
+
+    @Test
+    fun givenLayoutTokens_whenPipMinSizeIsRead_thenPipStaysRecognisableAcrossProfiles() {
+        assertThat(HelloBeLayout.pipMinSize).isEqualTo(96.dp)
+    }
+
+    @Test
+    fun givenLayoutTokens_whenChromeSizesAreRead_thenTheyAreReservedSizesNotSpacingSteps() {
+        assertThat(HelloBeLayout.captionReservedHeight).isEqualTo(76.dp)
+        assertThat(HelloBeLayout.trailSegmentWidth).isEqualTo(12.dp)
+        assertThat(HelloBeLayout.trailSegmentCurrentWidth).isEqualTo(24.dp)
+        assertThat(HelloBeLayout.trailSegmentHeight).isEqualTo(8.dp)
+    }
+
+    @Test
+    fun givenTrailTokens_whenCompared_thenTheCurrentStepIsWiderThanTheRest() {
+        assertThat(HelloBeLayout.trailSegmentCurrentWidth.value)
+            .isGreaterThan(HelloBeLayout.trailSegmentWidth.value)
+    }
+
+    @Test
+    fun givenLayoutTokens_whenLoadingPlaceholderIsRead_thenItIsAReservedSize() {
+        assertThat(HelloBeLayout.loadingPlaceholderHeight).isEqualTo(20.dp)
+    }
 }

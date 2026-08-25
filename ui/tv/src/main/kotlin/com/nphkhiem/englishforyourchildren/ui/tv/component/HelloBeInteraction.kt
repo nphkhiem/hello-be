@@ -29,7 +29,20 @@ enum class HelloBeAvailability {
 enum class HelloBeActionTone {
     PRIMARY,
     SECONDARY,
-    DESTRUCTIVE
+    DESTRUCTIVE,
+
+    /**
+     * The affirmative choice in a dialog. Unlike [PRIMARY], focus changes its fill outright rather
+     * than only adding a ring, so on a television across the room it is obvious which choice a
+     * press would take.
+     */
+    POSITIVE,
+
+    /**
+     * The quiet alternative in a dialog. Carries no background at rest, so the affirmative choice
+     * is visibly the heavier of the two and a child is drawn to the safe path first.
+     */
+    QUIET
 }
 
 /**

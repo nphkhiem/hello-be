@@ -3,10 +3,12 @@
 package com.nphkhiem.englishforyourchildren.ui.tv.component
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRestorer
 import androidx.compose.ui.graphics.Shape
 import androidx.tv.material3.Border
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -88,3 +90,14 @@ object HelloBeFocusFrame {
  */
 @Composable
 fun Modifier.helloBeFocusClearance(): Modifier = padding(HelloBeTheme.focus.clearance)
+
+/**
+ * Marks a row or grid of controls as one focus group that remembers its place.
+ *
+ * Without this, leaving a group and coming back drops focus on whichever child is nearest rather
+ * than the one the child left from, so moving down and back up silently loses their position. On
+ * a remote that means hunting for the thing they were about to choose.
+ *
+ * Apply to the container. The children keep their own `helloBeFocusClearance`.
+ */
+fun Modifier.helloBeFocusGroup(): Modifier = this.focusRestorer().focusGroup()

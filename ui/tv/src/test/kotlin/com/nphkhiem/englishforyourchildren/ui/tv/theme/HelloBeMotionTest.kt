@@ -54,4 +54,10 @@ class HelloBeMotionTest {
         assertThat(HelloBeMotionEasing.decelerate.transform(0f)).isEqualTo(0f)
         assertThat(HelloBeMotionEasing.accelerate.transform(1f)).isEqualTo(1f)
     }
+
+    @Test
+    fun givenReducedMotion_whenCaptionDurationIsRead_thenTheCaptionChangesInstantly() {
+        assertThat(helloBeMotion(reduceMotion = true).captionTransitionMillis).isEqualTo(0)
+        assertThat(helloBeMotion(reduceMotion = false).captionTransitionMillis).isEqualTo(120)
+    }
 }

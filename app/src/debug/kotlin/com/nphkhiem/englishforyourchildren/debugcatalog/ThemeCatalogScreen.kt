@@ -2,10 +2,10 @@
 
 package com.nphkhiem.englishforyourchildren.debugcatalog
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,94 +25,141 @@ import androidx.tv.material3.FilterChip
 import androidx.tv.material3.FilterChipDefaults
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.R
+import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeFocusFrame
+import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
+import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeShapes
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeSpacing
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeThemeMode
 
+/** The three display settings the catalog can toggle, kept together so they travel as one. */
+private data class CatalogModeState(
+    val themeMode: HelloBeThemeMode = HelloBeThemeMode.DAY,
+    val highContrast: Boolean = false,
+    val reduceMotion: Boolean = false
+)
+
 @Composable
 fun ThemeCatalogScreen() {
-    var themeMode by remember { mutableStateOf(HelloBeThemeMode.DAY) }
-    var highContrast by remember { mutableStateOf(false) }
+    var mode by remember { mutableStateOf(CatalogModeState()) }
+    var dialogOpen by remember { mutableStateOf(false) }
 
-    HelloBeTheme(themeMode = themeMode, highContrast = highContrast) {
+    HelloBeTheme(
+        themeMode = mode.themeMode,
+        highContrast = mode.highContrast,
+        reduceMotion = mode.reduceMotion
+    ) {
         val colors = HelloBeTheme.colors
+        val dialogRestorer = rememberHelloBeFocusRestorer()
 
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(colors.canvas)
-                    .verticalScroll(rememberScrollState())
-                    .padding(HelloBeSpacing.sectionGap),
-            verticalArrangement = Arrangement.spacedBy(HelloBeSpacing.sectionGap)
-        ) {
-            Text(
-                text = stringResource(R.string.theme_catalog_title),
-                style = HelloBeTheme.typography.headlineLarge,
-                color = colors.textPrimary
-            )
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(colors.canvas)
+                        .verticalScroll(rememberScrollState())
+                        .padding(HelloBeSpacing.sectionGap),
+                verticalArrangement = Arrangement.spacedBy(HelloBeSpacing.sectionGap)
+            ) {
+                Text(
+                    text = stringResource(R.string.theme_catalog_title),
+                    style = HelloBeTheme.typography.headlineLarge,
+                    color = colors.textPrimary
+                )
 
-            CatalogModeControls(
-                themeMode = themeMode,
-                onThemeModeChange = { themeMode = it },
-                highContrast = highContrast,
-                onHighContrastChange = { highContrast = it }
-            )
+                CatalogModeControls(mode = mode, onModeChange = { mode = it })
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_focus_lab_heading))
-            FocusLabSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_stage_heading))
+                StageSection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_colors_heading))
-            ColorSwatchSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_pip_heading))
+                PipSection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_typography_heading))
-            TypographySampleSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_chrome_heading))
+                StageChromeSection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_spacing_heading))
-            SpacingScaleSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_feedback_heading))
+                FeedbackAndLoadingSection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_shapes_heading))
-            ShapeGallerySection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_dialog_heading))
+                DialogSection(
+                    focusRestorer = dialogRestorer,
+                    onOpen = { dialogOpen = true }
+                )
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_elevation_heading))
-            ElevationSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_focus_lab_heading))
+                FocusLabSection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_motion_heading))
-            MotionSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_colors_heading))
+                ColorSwatchSection()
+
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_typography_heading))
+                TypographySampleSection()
+
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_spacing_heading))
+                SpacingScaleSection()
+
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_shapes_heading))
+                ShapeGallerySection()
+
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_elevation_heading))
+                ElevationSection()
+
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_motion_heading))
+                MotionSection()
+            }
+
+            // Hosted at the root rather than inside the scrolling column, so the scrim covers the
+            // whole screen exactly as it would on a real stage.
+            if (dialogOpen) {
+                CatalogDialog(
+                    focusRestorer = dialogRestorer,
+                    onClose = { dialogOpen = false }
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun CatalogModeControls(
-    themeMode: HelloBeThemeMode,
-    onThemeModeChange: (HelloBeThemeMode) -> Unit,
-    highContrast: Boolean,
-    onHighContrastChange: (Boolean) -> Unit
-) {
+private fun CatalogModeControls(mode: CatalogModeState, onModeChange: (CatalogModeState) -> Unit) {
     val colors = HelloBeTheme.colors
 
-    Row(horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)) {
+    Row(
+        modifier = Modifier.helloBeFocusGroup(),
+        horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)
+    ) {
         CatalogToggleChip(
             label = stringResource(R.string.theme_catalog_mode_day),
-            selected = themeMode == HelloBeThemeMode.DAY,
-            onClick = { onThemeModeChange(HelloBeThemeMode.DAY) }
+            selected = mode.themeMode == HelloBeThemeMode.DAY,
+            onClick = { onModeChange(mode.copy(themeMode = HelloBeThemeMode.DAY)) }
         )
         CatalogToggleChip(
             label = stringResource(R.string.theme_catalog_mode_night),
-            selected = themeMode == HelloBeThemeMode.NIGHT,
-            onClick = { onThemeModeChange(HelloBeThemeMode.NIGHT) }
+            selected = mode.themeMode == HelloBeThemeMode.NIGHT,
+            onClick = { onModeChange(mode.copy(themeMode = HelloBeThemeMode.NIGHT)) }
         )
         CatalogToggleChip(
             label = stringResource(R.string.theme_catalog_high_contrast),
-            selected = highContrast,
-            onClick = { onHighContrastChange(!highContrast) }
+            selected = mode.highContrast,
+            onClick = { onModeChange(mode.copy(highContrast = !mode.highContrast)) }
+        )
+        CatalogToggleChip(
+            label = stringResource(R.string.theme_catalog_reduced_motion_label),
+            selected = mode.reduceMotion,
+            onClick = { onModeChange(mode.copy(reduceMotion = !mode.reduceMotion)) }
         )
     }
     Row {
         Text(
-            text = "${themeMode.name} · highContrast=$highContrast",
+            text = stringResource(
+                R.string.theme_catalog_mode_summary,
+                mode.themeMode.name,
+                mode.highContrast.toString(),
+                mode.reduceMotion.toString()
+            ),
             style = HelloBeTheme.typography.labelSmall,
             color = colors.textTertiary
         )
@@ -132,8 +179,8 @@ internal fun CatalogSectionHeading(title: String) {
  * Uses the official [FilterChip] from `androidx.tv.material3` instead of a hand-rolled
  * clickable box. Google's own [FilterChipDefaults] models "focused" and "selected" as
  * independently combinable states (see `focusedSelectedContainerColor` etc.), which is the
- * state a hand-rolled implementation kept losing across earlier iterations. The gold focus
- * ring (`colors.focusRing`) marks both focused and selected so the state is never lost.
+ * state a hand-rolled implementation kept losing across earlier iterations. The focus ring
+ * marks both focused and selected so the state is never lost.
  *
  * Selection uses the dedicated `action.selected` family rather than `accent.growth`: green is
  * reserved for confirmed success, so borrowing it made "this chip is on" look like "this answer
@@ -145,16 +192,10 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
     val colors = HelloBeTheme.colors
     val focus = HelloBeTheme.focus
     val interactionSource = remember { MutableInteractionSource() }
-    val goldRing =
-        Border(
-            border = BorderStroke(focus.ringWidth, colors.focusRing),
-            shape = HelloBeShapes.large
-        )
-    val selectionOutline =
-        Border(
-            border = BorderStroke(focus.selectionWidth, colors.actionSelectedBorder),
-            shape = HelloBeShapes.large
-        )
+    // Borders come from HelloBeFocusFrame rather than being rebuilt here, so the chip picks up
+    // the same ring width, colour and offset as every other focusable control.
+    val focusRing = HelloBeFocusFrame.ring(HelloBeShapes.large)
+    val selectionOutline = HelloBeFocusFrame.selection(HelloBeShapes.large)
 
     FilterChip(
         selected = selected,
@@ -165,16 +206,16 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
             FilterChipDefaults.colors(
                 containerColor = colors.actionSecondary,
                 contentColor = colors.onSecondary,
-                focusedContainerColor = colors.actionPrimaryFocused,
-                focusedContentColor = colors.onPrimary,
+                focusedContainerColor = colors.focusFill,
+                focusedContentColor = colors.onFocusFill,
                 pressedContainerColor = colors.actionPrimaryPressed,
                 pressedContentColor = colors.onPrimary,
                 selectedContainerColor = colors.actionSelected,
                 selectedContentColor = colors.onSelected,
                 disabledContainerColor = colors.surfaceMuted,
                 disabledContentColor = colors.textTertiary,
-                focusedSelectedContainerColor = colors.actionPrimaryFocused,
-                focusedSelectedContentColor = colors.onPrimary,
+                focusedSelectedContainerColor = colors.focusFill,
+                focusedSelectedContentColor = colors.onFocusFill,
                 pressedSelectedContainerColor = colors.actionPrimaryPressed,
                 pressedSelectedContentColor = colors.onPrimary
             ),
@@ -186,9 +227,9 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
         border =
             FilterChipDefaults.border(
                 border = Border.None,
-                focusedBorder = goldRing,
+                focusedBorder = focusRing,
                 selectedBorder = selectionOutline,
-                focusedSelectedBorder = goldRing
+                focusedSelectedBorder = focusRing
             )
     ) {
         Text(text = label, style = HelloBeTheme.typography.labelMedium)

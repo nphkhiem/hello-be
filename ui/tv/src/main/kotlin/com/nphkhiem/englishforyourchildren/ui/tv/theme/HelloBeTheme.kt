@@ -89,4 +89,7 @@ object HelloBeTheme {
 
     val layout: HelloBeLayout
         get() = HelloBeLayout
+
+    val illustration: HelloBeIllustration
+        get() = HelloBeIllustration
 }

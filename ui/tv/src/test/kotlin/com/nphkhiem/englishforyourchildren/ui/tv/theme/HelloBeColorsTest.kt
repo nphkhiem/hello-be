@@ -15,7 +15,7 @@ class HelloBeColorsTest {
         assertThat(colors.canvas).isEqualTo(Color(0xFFF8F1E7))
         assertThat(colors.textPrimary).isEqualTo(Color(0xFF102F4C))
         assertThat(colors.actionPrimary).isEqualTo(Color(0xFF123A5A))
-        assertThat(colors.focusRing).isEqualTo(Color(0xFFFFC247))
+        assertThat(colors.focusRing).isEqualTo(Color(0xFF000000))
         assertThat(colors.accentGrowth).isEqualTo(Color(0xFF3F7A60))
     }
 
@@ -26,7 +26,7 @@ class HelloBeColorsTest {
         assertThat(colors.canvas).isEqualTo(Color(0xFF0A2136))
         assertThat(colors.textPrimary).isEqualTo(Color(0xFFFFF5E7))
         assertThat(colors.actionPrimary).isEqualTo(Color(0xFF173F5A))
-        assertThat(colors.focusRing).isEqualTo(Color(0xFFFFD56A))
+        assertThat(colors.focusRing).isEqualTo(Color(0xFF000000))
         assertThat(colors.accentGrowth).isEqualTo(Color(0xFF72B68F))
     }
 
@@ -103,5 +103,32 @@ class HelloBeColorsTest {
         val a = relativeLuminance(first)
         val b = relativeLuminance(second)
         return (max(a, b) + 0.05) / (min(a, b) + 0.05)
+    }
+
+    @Test
+    fun givenEitherTheme_whenFocusIsRendered_thenTheStrokeDefinesTheFillAndTheLabelStaysReadable() {
+        for (mode in HelloBeThemeMode.entries) {
+            val colors = helloBeColors(mode = mode)
+
+            // The stroke has to carve the fill out from its surroundings...
+            assertThat(contrastRatio(colors.focusRing, colors.focusFill)).isGreaterThan(3.0)
+            // ...and the label on that fill is text, so it takes the text bar.
+            assertThat(contrastRatio(colors.focusFill, colors.onFocusFill)).isGreaterThan(4.5)
+        }
+    }
+
+    @Test
+    fun givenEitherTheme_whenFocusSitsOnTheCanvas_thenAtLeastOneHalfOfItCarriesTheContrast() {
+        // Neither half clears 3:1 on both canvases alone: the yellow fill is only 1.43 against
+        // Day's cream, and the black stroke is only 1.28 against Night's navy. The treatment
+        // works because on each theme the other half carries it, so assert exactly that.
+        for (mode in HelloBeThemeMode.entries) {
+            val colors = helloBeColors(mode = mode)
+
+            val fillAgainstCanvas = contrastRatio(colors.focusFill, colors.canvas)
+            val strokeAgainstCanvas = contrastRatio(colors.focusRing, colors.canvas)
+
+            assertThat(maxOf(fillAgainstCanvas, strokeAgainstCanvas)).isGreaterThan(3.0)
+        }
     }
 }

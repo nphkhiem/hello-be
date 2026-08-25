@@ -23,4 +23,21 @@ object HelloBeLayout {
     val caregiverControlMinHeight = 56.dp
     val dialogMaxWidth = 690.dp
     val caregiverRailWidth = 196.dp
+
+    /** Smallest Pip may be drawn and stay a recognisable silhouette across TV profiles. */
+    val pipMinSize = 96.dp
+
+    /**
+     * Fixed height the caption panel holds while captions are on: two lines of body text plus
+     * padding. Fixed rather than minimum, so a wrapping line cannot move the focal object.
+     */
+    val captionReservedHeight = 76.dp
+
+    /** One step of the progress trail. The current step is wider so position is not colour-only. */
+    val trailSegmentWidth = 12.dp
+    val trailSegmentCurrentWidth = 24.dp
+    val trailSegmentHeight = 8.dp
+
+    /** One resting placeholder block in the loading treatment. */
+    val loadingPlaceholderHeight = 20.dp
 }

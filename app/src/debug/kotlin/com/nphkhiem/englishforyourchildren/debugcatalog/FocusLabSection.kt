@@ -15,6 +15,7 @@ import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAvailability
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeChoiceFeedback
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StoryCard
+import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeSpacing
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 
@@ -27,7 +28,10 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 internal fun FocusLabSection() {
     Column(verticalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)) {
         FocusLabRowLabel(stringResource(R.string.theme_catalog_focus_actions_label))
-        Row(horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)) {
+        Row(
+            modifier = Modifier.helloBeFocusGroup(),
+            horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)
+        ) {
             HelloBeAction(
                 label = stringResource(R.string.theme_catalog_action_continue),
                 onClick = {}
@@ -56,7 +60,10 @@ internal fun FocusLabSection() {
         }
 
         FocusLabRowLabel(stringResource(R.string.theme_catalog_focus_cards_label))
-        Row(horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)) {
+        Row(
+            modifier = Modifier.helloBeFocusGroup(),
+            horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)
+        ) {
             StoryCard(
                 title = stringResource(R.string.theme_catalog_card_current),
                 supportingText = stringResource(R.string.theme_catalog_card_supporting),
@@ -81,7 +88,10 @@ internal fun FocusLabSection() {
         }
 
         FocusLabRowLabel(stringResource(R.string.theme_catalog_focus_choices_label))
-        Row(horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)) {
+        Row(
+            modifier = Modifier.helloBeFocusGroup(),
+            horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)
+        ) {
             ChoiceCard(
                 label = stringResource(R.string.theme_catalog_choice_apple),
                 onClick = {},
