@@ -6,6 +6,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +26,7 @@ import androidx.tv.material3.FilterChip
 import androidx.tv.material3.FilterChipDefaults
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.R
+import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeShapes
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeSpacing
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
@@ -40,6 +42,7 @@ private data class CatalogModeState(
 @Composable
 fun ThemeCatalogScreen() {
     var mode by remember { mutableStateOf(CatalogModeState()) }
+    var dialogOpen by remember { mutableStateOf(false) }
 
     HelloBeTheme(
         themeMode = mode.themeMode,
@@ -47,56 +50,74 @@ fun ThemeCatalogScreen() {
         reduceMotion = mode.reduceMotion
     ) {
         val colors = HelloBeTheme.colors
+        val dialogRestorer = rememberHelloBeFocusRestorer()
 
-        Column(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(colors.canvas)
-                    .verticalScroll(rememberScrollState())
-                    .padding(HelloBeSpacing.sectionGap),
-            verticalArrangement = Arrangement.spacedBy(HelloBeSpacing.sectionGap)
-        ) {
-            Text(
-                text = stringResource(R.string.theme_catalog_title),
-                style = HelloBeTheme.typography.headlineLarge,
-                color = colors.textPrimary
-            )
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(colors.canvas)
+                        .verticalScroll(rememberScrollState())
+                        .padding(HelloBeSpacing.sectionGap),
+                verticalArrangement = Arrangement.spacedBy(HelloBeSpacing.sectionGap)
+            ) {
+                Text(
+                    text = stringResource(R.string.theme_catalog_title),
+                    style = HelloBeTheme.typography.headlineLarge,
+                    color = colors.textPrimary
+                )
 
-            CatalogModeControls(mode = mode, onModeChange = { mode = it })
+                CatalogModeControls(mode = mode, onModeChange = { mode = it })
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_stage_heading))
-            StageSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_stage_heading))
+                StageSection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_pip_heading))
-            PipSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_pip_heading))
+                PipSection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_chrome_heading))
-            StageChromeSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_chrome_heading))
+                StageChromeSection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_feedback_heading))
-            FeedbackAndLoadingSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_feedback_heading))
+                FeedbackAndLoadingSection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_focus_lab_heading))
-            FocusLabSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_dialog_heading))
+                DialogSection(
+                    focusRestorer = dialogRestorer,
+                    onOpen = { dialogOpen = true }
+                )
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_colors_heading))
-            ColorSwatchSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_focus_lab_heading))
+                FocusLabSection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_typography_heading))
-            TypographySampleSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_colors_heading))
+                ColorSwatchSection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_spacing_heading))
-            SpacingScaleSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_typography_heading))
+                TypographySampleSection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_shapes_heading))
-            ShapeGallerySection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_spacing_heading))
+                SpacingScaleSection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_elevation_heading))
-            ElevationSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_shapes_heading))
+                ShapeGallerySection()
 
-            CatalogSectionHeading(stringResource(R.string.theme_catalog_motion_heading))
-            MotionSection()
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_elevation_heading))
+                ElevationSection()
+
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_motion_heading))
+                MotionSection()
+            }
+
+            // Hosted at the root rather than inside the scrolling column, so the scrim covers the
+            // whole screen exactly as it would on a real stage.
+            if (dialogOpen) {
+                CatalogDialog(
+                    focusRestorer = dialogRestorer,
+                    onClose = { dialogOpen = false }
+                )
+            }
         }
     }
 }
