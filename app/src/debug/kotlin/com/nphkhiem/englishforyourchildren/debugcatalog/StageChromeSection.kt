@@ -19,6 +19,7 @@ import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
 import com.nphkhiem.englishforyourchildren.ui.tv.component.ProgressTrail
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StoryHeader
+import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeSpacing
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import java.util.Locale
@@ -80,7 +81,10 @@ internal fun StageChromeSection() {
             modifier = Modifier.fillMaxWidth()
         )
 
-        Row(horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)) {
+        Row(
+            modifier = Modifier.helloBeFocusGroup(),
+            horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)
+        ) {
             HelloBeAction(
                 label = stringResource(R.string.theme_catalog_chrome_next_step),
                 onClick = { step = if (step >= TOTAL_STEPS) 1 else step + 1 },

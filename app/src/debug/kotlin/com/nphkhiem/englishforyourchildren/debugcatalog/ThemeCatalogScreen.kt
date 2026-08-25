@@ -2,7 +2,6 @@
 
 package com.nphkhiem.englishforyourchildren.debugcatalog
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +25,8 @@ import androidx.tv.material3.FilterChip
 import androidx.tv.material3.FilterChipDefaults
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.R
+import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeFocusFrame
+import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
 import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeShapes
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeSpacing
@@ -126,7 +127,10 @@ fun ThemeCatalogScreen() {
 private fun CatalogModeControls(mode: CatalogModeState, onModeChange: (CatalogModeState) -> Unit) {
     val colors = HelloBeTheme.colors
 
-    Row(horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)) {
+    Row(
+        modifier = Modifier.helloBeFocusGroup(),
+        horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)
+    ) {
         CatalogToggleChip(
             label = stringResource(R.string.theme_catalog_mode_day),
             selected = mode.themeMode == HelloBeThemeMode.DAY,
@@ -175,8 +179,8 @@ internal fun CatalogSectionHeading(title: String) {
  * Uses the official [FilterChip] from `androidx.tv.material3` instead of a hand-rolled
  * clickable box. Google's own [FilterChipDefaults] models "focused" and "selected" as
  * independently combinable states (see `focusedSelectedContainerColor` etc.), which is the
- * state a hand-rolled implementation kept losing across earlier iterations. The gold focus
- * ring (`colors.focusRing`) marks both focused and selected so the state is never lost.
+ * state a hand-rolled implementation kept losing across earlier iterations. The focus ring
+ * marks both focused and selected so the state is never lost.
  *
  * Selection uses the dedicated `action.selected` family rather than `accent.growth`: green is
  * reserved for confirmed success, so borrowing it made "this chip is on" look like "this answer
@@ -188,16 +192,10 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
     val colors = HelloBeTheme.colors
     val focus = HelloBeTheme.focus
     val interactionSource = remember { MutableInteractionSource() }
-    val goldRing =
-        Border(
-            border = BorderStroke(focus.ringWidth, colors.focusRing),
-            shape = HelloBeShapes.large
-        )
-    val selectionOutline =
-        Border(
-            border = BorderStroke(focus.selectionWidth, colors.actionSelectedBorder),
-            shape = HelloBeShapes.large
-        )
+    // Borders come from HelloBeFocusFrame rather than being rebuilt here, so the chip picks up
+    // the same ring width, colour and offset as every other focusable control.
+    val focusRing = HelloBeFocusFrame.ring(HelloBeShapes.large)
+    val selectionOutline = HelloBeFocusFrame.selection(HelloBeShapes.large)
 
     FilterChip(
         selected = selected,
@@ -208,16 +206,16 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
             FilterChipDefaults.colors(
                 containerColor = colors.actionSecondary,
                 contentColor = colors.onSecondary,
-                focusedContainerColor = colors.actionPrimaryFocused,
-                focusedContentColor = colors.onPrimary,
+                focusedContainerColor = colors.focusFill,
+                focusedContentColor = colors.onFocusFill,
                 pressedContainerColor = colors.actionPrimaryPressed,
                 pressedContentColor = colors.onPrimary,
                 selectedContainerColor = colors.actionSelected,
                 selectedContentColor = colors.onSelected,
                 disabledContainerColor = colors.surfaceMuted,
                 disabledContentColor = colors.textTertiary,
-                focusedSelectedContainerColor = colors.actionPrimaryFocused,
-                focusedSelectedContentColor = colors.onPrimary,
+                focusedSelectedContainerColor = colors.focusFill,
+                focusedSelectedContentColor = colors.onFocusFill,
                 pressedSelectedContainerColor = colors.actionPrimaryPressed,
                 pressedSelectedContentColor = colors.onPrimary
             ),
@@ -229,9 +227,9 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
         border =
             FilterChipDefaults.border(
                 border = Border.None,
-                focusedBorder = goldRing,
+                focusedBorder = focusRing,
                 selectedBorder = selectionOutline,
-                focusedSelectedBorder = goldRing
+                focusedSelectedBorder = focusRing
             )
     ) {
         Text(text = label, style = HelloBeTheme.typography.labelMedium)

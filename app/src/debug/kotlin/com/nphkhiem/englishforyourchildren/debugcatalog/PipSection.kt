@@ -18,6 +18,7 @@ import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
 import com.nphkhiem.englishforyourchildren.ui.tv.component.PipGuide
 import com.nphkhiem.englishforyourchildren.ui.tv.component.PipPose
+import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeSpacing
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
@@ -54,6 +55,7 @@ internal fun PipSection() {
         )
 
         Row(
+            modifier = Modifier.helloBeFocusGroup(),
             horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap),
             verticalAlignment = Alignment.CenterVertically
         ) {
