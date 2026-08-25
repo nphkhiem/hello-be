@@ -89,9 +89,21 @@ class StoryDialogTest {
                         focusRestorer = rememberHelloBeFocusRestorer(),
                         modifier = Modifier.testTag(DIALOG),
                         safeAction = { modifier ->
-                            HelloBeAction(label = KEEP_LEARNING, onClick = {}, modifier = modifier)
+                            HelloBeAction(
+                                label = KEEP_LEARNING,
+                                onClick = {},
+                                tone = HelloBeActionTone.POSITIVE,
+                                modifier = modifier
+                            )
                         },
-                        secondaryAction = { HelloBeAction(label = STOP_FOR_NOW, onClick = {}) }
+                        secondaryAction = { modifier ->
+                            HelloBeAction(
+                                label = STOP_FOR_NOW,
+                                onClick = {},
+                                tone = HelloBeActionTone.QUIET,
+                                modifier = modifier
+                            )
+                        }
                     )
                 }
             }
@@ -150,11 +162,17 @@ class StoryDialogTest {
                                 HelloBeAction(
                                     label = KEEP_LEARNING,
                                     onClick = {},
+                                    tone = HelloBeActionTone.POSITIVE,
                                     modifier = modifier
                                 )
                             },
-                            secondaryAction = {
-                                HelloBeAction(label = STOP_FOR_NOW, onClick = {})
+                            secondaryAction = { modifier ->
+                                HelloBeAction(
+                                    label = STOP_FOR_NOW,
+                                    onClick = {},
+                                    tone = HelloBeActionTone.QUIET,
+                                    modifier = modifier
+                                )
                             }
                         )
                     }
@@ -196,11 +214,17 @@ class StoryDialogTest {
                                 HelloBeAction(
                                     label = KEEP_LEARNING,
                                     onClick = {},
+                                    tone = HelloBeActionTone.POSITIVE,
                                     modifier = modifier
                                 )
                             },
-                            secondaryAction = {
-                                HelloBeAction(label = STOP_FOR_NOW, onClick = {})
+                            secondaryAction = { modifier ->
+                                HelloBeAction(
+                                    label = STOP_FOR_NOW,
+                                    onClick = {},
+                                    tone = HelloBeActionTone.QUIET,
+                                    modifier = modifier
+                                )
                             }
                         )
                     }

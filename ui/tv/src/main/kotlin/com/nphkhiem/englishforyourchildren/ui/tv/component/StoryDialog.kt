@@ -7,8 +7,8 @@ import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -40,7 +40,8 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
  * The safe choice is focused the moment the dialog appears, so pressing Select immediately cannot
  * take the destructive path. [safeAction] receives the modifier carrying that focus rather than
  * arranging it itself, because a caller who forgot would ship a dialog where the first press ends
- * the lesson.
+ * the lesson. Both actions are stacked full width, so the pair reads as one vertical list with
+ * the safe choice at the top of it.
  *
  * Focus cannot leave the dialog while it is open. The scrim says the stage behind is unreachable,
  * so D-pad movement has to agree with it: without containment a child could walk focus onto a
@@ -64,7 +65,7 @@ fun StoryDialog(
     pipDescription: String,
     focusRestorer: HelloBeFocusRestorer,
     safeAction: @Composable (Modifier) -> Unit,
-    secondaryAction: @Composable () -> Unit,
+    secondaryAction: @Composable (Modifier) -> Unit,
     modifier: Modifier = Modifier,
     pip: @Composable () -> Unit = {
         PipGuide(
@@ -131,12 +132,15 @@ fun StoryDialog(
                 textAlign = TextAlign.Center
             )
 
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.dialogActionGap),
-                verticalAlignment = Alignment.CenterVertically
+            // Stacked rather than side by side: two full-width choices give a child one clear
+            // vertical list to move through, and the safe choice sits first in that order.
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.dialogActionGap),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                safeAction(Modifier.focusRequester(safeActionFocus))
-                secondaryAction()
+                safeAction(Modifier.fillMaxWidth().focusRequester(safeActionFocus))
+                secondaryAction(Modifier.fillMaxWidth())
             }
         }
     }

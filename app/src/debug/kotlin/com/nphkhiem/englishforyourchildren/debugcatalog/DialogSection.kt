@@ -49,14 +49,16 @@ internal fun CatalogDialog(focusRestorer: HelloBeFocusRestorer, onClose: () -> U
             HelloBeAction(
                 label = stringResource(R.string.theme_catalog_dialog_keep),
                 onClick = onClose,
+                tone = HelloBeActionTone.POSITIVE,
                 modifier = modifier
             )
         },
-        secondaryAction = {
+        secondaryAction = { modifier ->
             HelloBeAction(
                 label = stringResource(R.string.theme_catalog_dialog_stop),
                 onClick = onClose,
-                tone = HelloBeActionTone.SECONDARY
+                tone = HelloBeActionTone.QUIET,
+                modifier = modifier
             )
         }
     )
