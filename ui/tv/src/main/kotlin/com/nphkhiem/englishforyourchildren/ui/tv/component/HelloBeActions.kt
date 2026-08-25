@@ -65,14 +65,18 @@ fun HelloBeAction(
         when {
             unavailable -> colors.surfaceMuted
             tone == HelloBeActionTone.PRIMARY -> colors.actionPrimary
+            tone == HelloBeActionTone.POSITIVE -> colors.actionPrimary
             tone == HelloBeActionTone.SECONDARY -> colors.actionSecondary
+            tone == HelloBeActionTone.QUIET -> Color.Transparent
             else -> colors.errorContainer
         }
     val content =
         when {
             unavailable -> colors.textSecondary
             tone == HelloBeActionTone.PRIMARY -> colors.onPrimary
+            tone == HelloBeActionTone.POSITIVE -> colors.onPrimary
             tone == HelloBeActionTone.SECONDARY -> colors.onSecondary
+            tone == HelloBeActionTone.QUIET -> colors.textPrimary
             else -> colors.errorContent
         }
 
@@ -94,8 +98,8 @@ fun HelloBeAction(
             ClickableSurfaceDefaults.colors(
                 containerColor = container,
                 contentColor = content,
-                focusedContainerColor = colors.actionPrimaryFocused,
-                focusedContentColor = colors.onPrimary,
+                focusedContainerColor = colors.focusFill,
+                focusedContentColor = colors.onFocusFill,
                 pressedContainerColor = colors.actionPrimaryPressed,
                 pressedContentColor = colors.onPrimary,
                 disabledContainerColor = colors.surfaceMuted,
@@ -193,8 +197,8 @@ fun HelloBeIconAction(
                     } else {
                         colors.onSecondary
                     },
-                focusedContainerColor = colors.actionPrimaryFocused,
-                focusedContentColor = colors.onPrimary,
+                focusedContainerColor = colors.focusFill,
+                focusedContentColor = colors.onFocusFill,
                 pressedContainerColor = colors.actionPrimaryPressed,
                 pressedContentColor = colors.onPrimary,
                 disabledContainerColor = colors.surfaceMuted,

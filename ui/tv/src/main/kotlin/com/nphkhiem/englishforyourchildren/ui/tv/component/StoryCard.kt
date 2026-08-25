@@ -82,14 +82,14 @@ fun StoryCard(
                     } else {
                         colors.textPrimary
                     },
-                focusedContainerColor = colors.actionPrimaryFocused,
-                focusedContentColor = colors.onPrimary,
+                focusedContainerColor = colors.focusFill,
+                focusedContentColor = colors.onFocusFill,
                 pressedContainerColor = colors.actionPrimaryPressed,
                 pressedContentColor = colors.onPrimary,
                 selectedContainerColor = colors.actionSelected,
                 selectedContentColor = colors.onSelected,
-                focusedSelectedContainerColor = colors.actionPrimaryFocused,
-                focusedSelectedContentColor = colors.onPrimary,
+                focusedSelectedContainerColor = colors.focusFill,
+                focusedSelectedContentColor = colors.onFocusFill,
                 pressedSelectedContainerColor = colors.actionPrimaryPressed,
                 pressedSelectedContentColor = colors.onPrimary,
                 disabledContainerColor = colors.surfaceMuted,
