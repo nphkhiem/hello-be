@@ -5,9 +5,11 @@ import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeChoiceFeedback
 /**
  * Review states for previews, the debug catalog and tests.
  *
- * Kept in main sources on purpose so previews and the catalog share exactly the states the tests
- * assert against. They are fixtures, not content: no production code path reads them, and real
- * activities arrive from packaged curriculum later.
+ * Debug sources only, because the execution contract forbids production placeholder data. The
+ * debug catalog and the instrumented tests both compile against the debug variant, so they share
+ * exactly the states each other exercises, and a release build cannot reach any of it.
+ *
+ * These are fixtures, not content: real activities arrive from packaged curriculum later.
  */
 object LessonFixtures {
 
