@@ -29,6 +29,7 @@ object LessonFixtures {
         activityCount = 4,
         phase = LessonPhase.ANSWERING,
         support = SupportLevel.NONE,
+        learningObject = null,
         answers = listOf(
             AnswerOption(id = CHAIR, label = "chair"),
             AnswerOption(id = LAMP, label = "lamp"),

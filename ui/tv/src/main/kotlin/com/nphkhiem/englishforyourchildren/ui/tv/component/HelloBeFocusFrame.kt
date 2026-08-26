@@ -71,6 +71,25 @@ object HelloBeFocusFrame {
         shape = shape
     )
 
+    /**
+     * The secondary border a surface carries at rest, per the Default row of the component state
+     * matrix.
+     *
+     * Draws the same thing as [unavailable] today and is deliberately a separate function anyway.
+     * "This is the object of the lesson" and "this is not for you right now" are different
+     * statements, and collapsing them into one call would let a later change to either meaning
+     * silently alter the other.
+     */
+    @Composable
+    @ReadOnlyComposable
+    fun resting(shape: Shape): Border = Border(
+        border = BorderStroke(
+            HelloBeTheme.focus.guardWidth,
+            HelloBeTheme.colors.borderSecondary
+        ),
+        shape = shape
+    )
+
     /** The quiet border that marks an unavailable "later" surface without a lock metaphor. */
     @Composable
     @ReadOnlyComposable

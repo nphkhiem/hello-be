@@ -61,6 +61,16 @@ data class AnswerOption(
 )
 
 /**
+ * The single thing a lesson is currently about: picture matching's fixed source, the letter pair,
+ * the say-with-Pip target.
+ *
+ * It carries no feedback and no availability because it is never right, never wrong and never
+ * reachable. Modelling those would describe states that cannot occur.
+ */
+@Immutable
+data class LearningObject(val id: String, val label: String)
+
+/**
  * Everything a lesson screen needs in order to draw itself, and nothing it needs to think with.
  *
  * A phase plus independent dimensions rather than one enum, because a lesson can be answering,
@@ -78,6 +88,8 @@ data class LessonUiState(
     val activityCount: Int,
     val phase: LessonPhase,
     val support: SupportLevel,
+    /** Null for the families that have no focal object, such as listen and choose. See ADR 0005. */
+    val learningObject: LearningObject?,
     val answers: List<AnswerOption>,
     val audioAvailable: Boolean,
     val pendingSave: Boolean

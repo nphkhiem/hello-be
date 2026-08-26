@@ -122,6 +122,10 @@ fun LessonScaffold(
     }
 }
 
+// The Modifier here is not this composable's own decoration but the scaffold's entry-focus
+// requester, routed to one specific child. Naming it `modifier` would claim it decorates this
+// composable's root, which is exactly what it must not do.
+@Suppress("ModifierParameter")
 @Composable
 private fun LessonHeaderActions(
     state: LessonUiState,

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
@@ -126,6 +127,54 @@ class StoryAndChoiceCardTest {
         composeTestRule.waitForIdle()
 
         assertThat(clicks).isEqualTo(0)
+    }
+
+    @Test
+    fun givenAHiddenLabel_whenTheChoiceIsRead_thenTheWordIsAnnouncedButNotDrawn() {
+        // An activity whose prompt already names the target in text cannot also caption the
+        // answers, or the question is solvable by reading instead of by looking. The word still
+        // has to reach a screen reader, for whom the picture is not available at all.
+        composeTestRule.setContent {
+            HelloBeTheme {
+                ChoiceCard(label = APPLE, onClick = {}, labelVisible = false)
+            }
+        }
+
+        composeTestRule.onNodeWithText(APPLE).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(APPLE).assertExists()
+    }
+
+    @Test
+    fun givenAHiddenLabel_whenSelectIsPressed_thenItStillBehavesLikeAChoice() {
+        var clicks = 0
+
+        composeTestRule.setContent {
+            HelloBeTheme {
+                ChoiceCard(label = APPLE, onClick = { clicks++ }, labelVisible = false)
+            }
+        }
+
+        composeTestRule.onNodeWithContentDescription(APPLE).requestFocus()
+        composeTestRule.onNodeWithContentDescription(APPLE).assertIsFocused()
+        composeTestRule.onNodeWithContentDescription(APPLE)
+            .performKeyInput { pressKey(Key.DirectionCenter) }
+        composeTestRule.waitForIdle()
+
+        assertThat(clicks).isEqualTo(1)
+    }
+
+    @Test
+    fun givenAVisibleLabel_whenTheChoiceIsRead_thenItAnnouncesItselfExactlyOnce() {
+        // The drawn text is already the accessible name. Adding a content description alongside it
+        // would make a screen reader say the word twice.
+        composeTestRule.setContent {
+            HelloBeTheme {
+                ChoiceCard(label = APPLE, onClick = {})
+            }
+        }
+
+        composeTestRule.onNodeWithText(APPLE).assertExists()
+        composeTestRule.onNodeWithContentDescription(APPLE).assertDoesNotExist()
     }
 
     private companion object {
