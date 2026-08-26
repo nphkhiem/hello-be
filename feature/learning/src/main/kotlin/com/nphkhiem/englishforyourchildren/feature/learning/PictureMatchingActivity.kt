@@ -2,7 +2,6 @@ package com.nphkhiem.englishforyourchildren.feature.learning
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -60,11 +59,18 @@ fun PictureMatchingActivity(
 }
 
 /**
- * Source, relationship and destinations, in the proportions of the approved draft.
+ * Source, relationship and destinations, in one row.
  *
- * Sized by weight rather than by fixed widths so the board holds its shape at every canvas size,
- * and by intrinsic height so the source rises to meet the destination grid without a dimension
- * token standing in for a number that is already derivable.
+ * The approved draft shows four destinations as a 2x2 grid, and that does not fit. At the 540dp
+ * reference canvas the stage leaves 280dp for content, while two rows of cards at
+ * `childChoiceMinHeight` plus their focus clearance need 312dp before the prompt is drawn at all.
+ * The draft assumes Pip sits beside the prompt; this shell gives Pip a 96dp strip along the
+ * bottom, and that is where the height went.
+ *
+ * So the destinations stay in a single row and the source gives up width instead of the cards
+ * giving up height. A child's target may not shrink below the minimum; the source's share of the
+ * board may. At four destinations this is the widest the source can be and still leave each card
+ * a `cardFiveColumnSet` slot.
  */
 @Composable
 private fun MatchBoard(
@@ -72,10 +78,12 @@ private fun MatchBoard(
     onAction: (LessonAction) -> Unit,
     entryModifier: Modifier
 ) {
-    val rows = destinationRows(state.answers)
+    // Derived from the tokens rather than measured intrinsically, so the cards cannot be squeezed
+    // below the minimum by whatever height the stage happens to have left.
+    val boardHeight = HelloBeTheme.layout.childChoiceMinHeight + HelloBeTheme.focus.clearance * 2
 
     Row(
-        modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+        modifier = Modifier.fillMaxWidth().height(boardHeight),
         horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -97,56 +105,49 @@ private fun MatchBoard(
             )
         }
 
-        if (rows.isNotEmpty()) {
-            DestinationGrid(
-                rows = rows,
-                state = state,
-                onAction = onAction,
-                entryModifier = entryModifier
-            )
+        if (state.answers.isNotEmpty()) {
+            DestinationRow(state = state, onAction = onAction, entryModifier = entryModifier)
         }
     }
 }
 
 @Composable
-private fun RowScope.DestinationGrid(
-    rows: List<List<AnswerOption>>,
+private fun RowScope.DestinationRow(
     state: LessonUiState,
     onAction: (LessonAction) -> Unit,
     entryModifier: Modifier
 ) {
     val availability = answerAvailability(state.phase)
 
-    Column(
-        // One focus group across every row, so leaving the board and coming back returns the child
-        // to the picture they were about to choose rather than the nearest one.
+    Row(
+        // One focus group, so leaving the board and coming back returns the child to the picture
+        // they were about to choose rather than the nearest one.
         modifier = Modifier.weight(DESTINATIONS_WEIGHT).helloBeFocusGroup(),
-        verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap)
+        horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap)
     ) {
-        rows.forEachIndexed { rowIndex, row ->
-            Row(horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap)) {
-                row.forEachIndexed { columnIndex, answer ->
-                    val isEntry = rowIndex == 0 && columnIndex == 0
-
-                    ChoiceCard(
-                        label = answer.label,
-                        onClick = { onAction(LessonAction.AnswerChosen(answer.id)) },
-                        feedback = answer.feedback,
-                        availability = availability,
-                        // The prompt already names the target, so a captioned answer would make
-                        // the question solvable by reading instead of by looking.
-                        labelVisible = false,
-                        // Entry focus goes to the first destination by position, never by which
-                        // one is correct, because this screen is not told which one that is.
-                        modifier = (if (isEntry) entryModifier else Modifier).weight(1f)
-                    )
-                }
-            }
+        state.answers.forEachIndexed { index, answer ->
+            ChoiceCard(
+                label = answer.label,
+                onClick = { onAction(LessonAction.AnswerChosen(answer.id)) },
+                feedback = answer.feedback,
+                availability = availability,
+                // The prompt already names the target, so a captioned answer would make the
+                // question solvable by reading instead of by looking.
+                labelVisible = false,
+                // Entry focus goes to the first destination by position, never by which one is
+                // correct, because this screen is not told which one that is.
+                modifier = (if (index == 0) entryModifier else Modifier)
+                    .weight(1f)
+                    .fillMaxHeight()
+            )
         }
     }
 }
 
-/** Board proportions from the approved S05-B draft: source, relationship, destinations. */
-private const val SOURCE_WEIGHT = 31f
+/**
+ * Board proportions. The draft's 31% source is narrowed so four destinations each keep a
+ * `cardFiveColumnSet` slot; anything wider starves them.
+ */
+private const val SOURCE_WEIGHT = 20f
 private const val ARROW_WEIGHT = 8f
-private const val DESTINATIONS_WEIGHT = 61f
+private const val DESTINATIONS_WEIGHT = 72f

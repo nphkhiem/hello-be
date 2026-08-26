@@ -66,6 +66,32 @@ object PictureMatchingFixtures {
         )
     }
 
+    fun preparing(): LessonUiState = answering().copy(
+        phase = LessonPhase.PREPARING,
+        answers = emptyList()
+    )
+
+    fun captioned(): LessonUiState = answering().copy(caption = "Match the bed")
+
+    fun audioUnavailable(): LessonUiState = answering().copy(audioAvailable = false)
+
+    /** Every approved matching state, in the order a reviewer would walk them. */
+    fun reviewStates(): List<Pair<String, LessonUiState>> = listOf(
+        "preparing" to preparing(),
+        "prompting" to prompting(),
+        "answering, four destinations" to answering(),
+        "answering, two destinations" to twoDestinations(),
+        "captioned" to captioned(),
+        "retry one, calm repeat" to supportiveRetry(SupportLevel.REPEAT),
+        "retry two, slower" to supportiveRetry(SupportLevel.SLOWER),
+        "Vietnamese support" to supportiveRetry(SupportLevel.VIETNAMESE),
+        "correct" to correct(),
+        "audio unavailable" to audioUnavailable(),
+        "pending save" to answering().copy(pendingSave = true),
+        "no source" to answering().copy(learningObject = null),
+        "no destinations" to answering().copy(answers = emptyList())
+    )
+
     const val BED = "bed"
     const val CHAIR = "chair"
     const val DOOR = "door"

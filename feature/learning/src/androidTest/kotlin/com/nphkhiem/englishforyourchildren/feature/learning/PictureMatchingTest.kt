@@ -14,6 +14,7 @@ import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import org.junit.Rule
 import org.junit.Test
@@ -37,7 +38,7 @@ class PictureMatchingTest {
         // Stated spatially rather than as "the source is never focused". The source carries no
         // focus semantics at all, so asserting a property on it would pass without proving
         // anything. What is worth proving is that pressing toward it does not move focus, from
-        // either row of the grid. Up is deliberately not asserted: leaving the board upward to
+        // both ends of the row. Up is deliberately not asserted: leaving the board upward to
         // reach Replay is correct, and listen and choose does the same.
         setActivity(PictureMatchingFixtures.answering())
 
@@ -46,13 +47,19 @@ class PictureMatchingTest {
         composeTestRule.waitForIdle()
         composeTestRule.onNodeWithContentDescription(CHAIR).assertIsFocused()
 
-        composeTestRule.onRoot().performKeyInput { pressKey(Key.DirectionDown) }
+        composeTestRule.onRoot().performKeyInput { pressKey(Key.DirectionRight) }
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithContentDescription(DOOR).assertIsFocused()
+        composeTestRule.onNodeWithContentDescription(BED).assertIsFocused()
+
+        // And back left along the row, stopping at the first card rather than stepping onto the
+        // source that sits beside it.
+        composeTestRule.onRoot().performKeyInput { pressKey(Key.DirectionLeft) }
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithContentDescription(CHAIR).assertIsFocused()
 
         composeTestRule.onRoot().performKeyInput { pressKey(Key.DirectionLeft) }
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithContentDescription(DOOR).assertIsFocused()
+        composeTestRule.onNodeWithContentDescription(CHAIR).assertIsFocused()
     }
 
     @Test
@@ -108,20 +115,35 @@ class PictureMatchingTest {
     }
 
     @Test
-    fun givenFourDestinations_whenTheBoardIsDrawn_thenTheyFormTwoRowsOfTwo() {
+    fun givenFourDestinations_whenTheBoardIsDrawn_thenTheyShareOneRow() {
         setActivity(PictureMatchingFixtures.answering())
 
-        val first = composeTestRule.onNodeWithContentDescription(CHAIR).getUnclippedBoundsInRoot()
-        val second = composeTestRule.onNodeWithContentDescription(BED)
-            .getUnclippedBoundsInRoot()
-        val third = composeTestRule.onNodeWithContentDescription(DOOR).getUnclippedBoundsInRoot()
+        val bounds = listOf(CHAIR, BED, DOOR, LAMP).map {
+            composeTestRule.onNodeWithContentDescription(it).getUnclippedBoundsInRoot()
+        }
 
-        // First two share a row, the third starts the next one. Asserted in pixels because the
-        // claim is about where they are, not how many there are.
-        assertThat(second.top).isEqualTo(first.top)
-        assertThat(second.left.value).isGreaterThan(first.left.value)
-        assertThat(third.top.value).isGreaterThan(first.top.value)
-        assertThat(third.left).isEqualTo(first.left)
+        // One row, left to right. Asserted in pixels because the claim is about where they are,
+        // not how many there are.
+        bounds.zipWithNext().forEach { (left, right) ->
+            assertThat(right.top).isEqualTo(left.top)
+            assertThat(right.left.value).isGreaterThan(left.left.value)
+        }
+    }
+
+    @Test
+    fun givenFourDestinations_whenTheBoardIsDrawn_thenNoneIsBelowTheChildMinimum() {
+        // The 2x2 grid the draft shows does not fit this shell, and the way it failed was by
+        // silently shrinking the cards to roughly half of childChoiceMinHeight. Height is the one
+        // dimension that gives way to nothing, so it is asserted rather than assumed.
+        setActivity(PictureMatchingFixtures.answering())
+
+        listOf(CHAIR, BED, DOOR, LAMP).forEach { description ->
+            val card = composeTestRule.onNodeWithContentDescription(description)
+                .getUnclippedBoundsInRoot()
+
+            assertThat((card.bottom - card.top).value)
+                .isAtLeast(HelloBeLayout.childChoiceMinHeight.value)
+        }
     }
 
     @Test
