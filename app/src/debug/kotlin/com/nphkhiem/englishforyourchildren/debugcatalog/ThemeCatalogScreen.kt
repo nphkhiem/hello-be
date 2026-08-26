@@ -83,6 +83,9 @@ fun ThemeCatalogScreen() {
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_feedback_heading))
                 FeedbackAndLoadingSection()
 
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_lesson_heading))
+                LessonSection()
+
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_dialog_heading))
                 DialogSection(
                     focusRestorer = dialogRestorer,

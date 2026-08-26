@@ -14,6 +14,11 @@
     <string name="theme_catalog_elevation_heading">Elevation</string>
     <string name="theme_catalog_motion_heading">Motion</string>
     <string name="theme_catalog_mode_summary">%1$s · highContrast=%2$s · reduceMotion=%3$s</string>
+    <string name="theme_catalog_lesson_heading">Lesson: listen and choose</string>
+    <string name="theme_catalog_lesson_label">Every lesson state, stepped with the remote. No ViewModel, audio or curriculum behind it.</string>
+    <string name="theme_catalog_lesson_next_state">Next state</string>
+    <string name="theme_catalog_lesson_showing">Showing %1$d of %2$d: %3$s</string>
+    <string name="theme_catalog_lesson_last_action">Last action: %1$s</string>
     <string name="theme_catalog_dialog_heading">Dialog shell</string>
     <string name="theme_catalog_dialog_label">Open it: the safe choice is focused, and closing returns focus to the opener</string>
     <string name="theme_catalog_dialog_open">Open dialog</string>

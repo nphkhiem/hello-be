@@ -64,6 +64,22 @@ object LessonFixtures {
 
     fun captioned(): LessonUiState = answering().copy(caption = "Where is the chair?")
 
+    /** Every approved lesson state, in the order a reviewer would walk them. */
+    fun reviewStates(): List<Pair<String, LessonUiState>> = listOf(
+        "preparing" to preparing(),
+        "prompting" to prompting(),
+        "answering" to answering(),
+        "captioned" to captioned(),
+        "retry one, calm repeat" to supportiveRetry(SupportLevel.REPEAT),
+        "retry two, slower" to supportiveRetry(SupportLevel.SLOWER),
+        "Vietnamese support" to supportiveRetry(SupportLevel.VIETNAMESE),
+        "correct" to correct(),
+        "audio unavailable" to audioUnavailable(),
+        "pending save" to answering().copy(pendingSave = true),
+        "answering, no sound, not saved" to audioUnavailable().copy(pendingSave = true),
+        "no answers" to answering().copy(answers = emptyList())
+    )
+
     private const val CHAIR = "chair"
     private const val LAMP = "lamp"
     private const val BED = "bed"
