@@ -101,6 +101,7 @@ class LessonRulesTest {
         activityCount = 4,
         phase = phase,
         support = SupportLevel.NONE,
+        learningObject = null,
         answers = answers,
         audioAvailable = audioAvailable,
         pendingSave = false
