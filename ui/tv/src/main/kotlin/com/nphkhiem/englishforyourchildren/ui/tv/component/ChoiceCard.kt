@@ -35,6 +35,11 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
  *
  * [stateDescription] carries the spoken meaning so feedback never depends on color alone.
  *
+ * [availability] and [feedback] are independent in the same way, and where they meet the feedback
+ * is what shows: a correct answer keeps its success container and growth outline once the answers
+ * stop accepting presses, because that is the moment being confirmed. Availability keeps deciding
+ * what a press does and whether focus can land here. See ADR 0006.
+ *
  * [labelVisible] withholds the drawn word while keeping it as the card's accessible name, for
  * activities whose prompt already names the target in text: captioning the answers there would
  * make the question solvable by reading instead of by looking. A screen reader still receives the
@@ -61,30 +66,29 @@ fun ChoiceCard(
     val interactionSource = remember { MutableInteractionSource() }
 
     val unavailable = availability == HelloBeAvailability.UNAVAILABLE
+
+    // Null where the card has no outcome to report, which is the only case where reachability
+    // decides the surface on its own. See ADR 0006.
+    val outcomeContainer =
+        when (feedback) {
+            HelloBeChoiceFeedback.NEUTRAL -> null
+            HelloBeChoiceFeedback.CORRECT -> colors.successContainer
+            HelloBeChoiceFeedback.SUPPORTIVE_RETRY -> colors.supportiveRetryContainer
+        }
+    val outcomeContent =
+        when (feedback) {
+            HelloBeChoiceFeedback.NEUTRAL -> null
+            HelloBeChoiceFeedback.CORRECT -> colors.successContent
+            HelloBeChoiceFeedback.SUPPORTIVE_RETRY -> colors.supportiveRetryContent
+        }
     val restingContainer =
-        if (unavailable) {
-            colors.surfaceMuted
-        } else {
-            when (feedback) {
-                HelloBeChoiceFeedback.NEUTRAL -> colors.surfacePrimary
-                HelloBeChoiceFeedback.CORRECT -> colors.successContainer
-                HelloBeChoiceFeedback.SUPPORTIVE_RETRY -> colors.supportiveRetryContainer
-            }
-        }
+        outcomeContainer ?: if (unavailable) colors.surfaceMuted else colors.surfacePrimary
     val restingContent =
-        if (unavailable) {
-            colors.textSecondary
-        } else {
-            when (feedback) {
-                HelloBeChoiceFeedback.NEUTRAL -> colors.textPrimary
-                HelloBeChoiceFeedback.CORRECT -> colors.successContent
-                HelloBeChoiceFeedback.SUPPORTIVE_RETRY -> colors.supportiveRetryContent
-            }
-        }
+        outcomeContent ?: if (unavailable) colors.textSecondary else colors.textPrimary
     val restingBorder =
         when {
-            unavailable -> HelloBeFocusFrame.unavailable(shape)
             feedback == HelloBeChoiceFeedback.CORRECT -> HelloBeFocusFrame.correct(shape)
+            unavailable -> HelloBeFocusFrame.unavailable(shape)
             else -> Border.None
         }
 
@@ -120,8 +124,8 @@ fun ChoiceCard(
                 focusedSelectedContentColor = colors.onFocusFill,
                 pressedSelectedContainerColor = colors.actionPrimaryPressed,
                 pressedSelectedContentColor = colors.onPrimary,
-                disabledContainerColor = colors.surfaceMuted,
-                disabledContentColor = colors.textTertiary
+                disabledContainerColor = outcomeContainer ?: colors.surfaceMuted,
+                disabledContentColor = outcomeContent ?: colors.textTertiary
             ),
         scale =
             SelectableSurfaceDefaults.scale(
