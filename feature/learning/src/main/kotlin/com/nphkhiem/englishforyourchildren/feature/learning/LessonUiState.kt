@@ -92,7 +92,15 @@ data class LessonUiState(
     val learningObject: LearningObject?,
     val answers: List<AnswerOption>,
     val audioAvailable: Boolean,
-    val pendingSave: Boolean
+    val pendingSave: Boolean,
+    /**
+     * Whether the stop-for-now confirmation is showing.
+     *
+     * State rather than something the screen remembers for itself, so both copy variants can be
+     * driven by a fixture and reviewed on a television. The copy is the whole deliverable of
+     * HB-D09, so it has to be walkable.
+     */
+    val stopForNowVisible: Boolean
 )
 
 /** What a lesson screen reports upward. Typed, so no untyped escape hatch can grow here. */
@@ -106,5 +114,12 @@ sealed interface LessonAction {
 
     data object ContinueRequested : LessonAction
 
+    /** Back was pressed on an active lesson. Never leaves the lesson; asks first. */
     data object BackRequested : LessonAction
+
+    /** The child chose to stay, or pressed Back again while being asked. */
+    data object KeepLearningRequested : LessonAction
+
+    /** The child chose to stop. Emitted only; leaving the lesson is the host's job. */
+    data object StopForNowConfirmed : LessonAction
 }

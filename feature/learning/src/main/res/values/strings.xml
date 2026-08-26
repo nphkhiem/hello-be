@@ -13,4 +13,13 @@
     <string name="lesson_pip_demonstrating">Pip is showing you slowly</string>
     <string name="lesson_pip_helping">Pip is helping in Vietnamese</string>
     <string name="lesson_pip_celebrating">Pip is celebrating with you</string>
+
+    <!-- Transcribed verbatim from the approved centered stop-for-now draft. Do not paraphrase:
+         HB-D09 requires the exact approved copy for both save states. -->
+    <string name="stop_for_now_title">Stop for now?</string>
+    <string name="stop_for_now_saved">Pip will remember your last finished activity. You can come back anytime.</string>
+    <string name="stop_for_now_pending">Pip may not remember this part yet. Keep learning, or ask a grown-up before you stop.</string>
+    <string name="stop_for_now_keep">Keep learning</string>
+    <string name="stop_for_now_stop">Stop for now</string>
+    <string name="stop_for_now_pip">Pip is asking if you want to stop</string>
 </resources>
