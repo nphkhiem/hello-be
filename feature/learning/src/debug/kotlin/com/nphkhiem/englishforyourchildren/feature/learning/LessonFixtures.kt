@@ -36,7 +36,8 @@ object LessonFixtures {
             AnswerOption(id = BED, label = "bed")
         ),
         audioAvailable = true,
-        pendingSave = false
+        pendingSave = false,
+        stopForNowVisible = false
     )
 
     fun supportiveRetry(level: SupportLevel): LessonUiState = answering().copy(
@@ -63,6 +64,11 @@ object LessonFixtures {
         }
     )
 
+    fun stoppingForNow(): LessonUiState = answering().copy(stopForNowVisible = true)
+
+    fun stoppingForNowPendingSave(): LessonUiState =
+        answering().copy(stopForNowVisible = true, pendingSave = true)
+
     fun audioUnavailable(): LessonUiState = answering().copy(audioAvailable = false)
 
     fun captioned(): LessonUiState = answering().copy(caption = "Where is the chair?")
@@ -80,6 +86,8 @@ object LessonFixtures {
         "audio unavailable" to audioUnavailable(),
         "pending save" to answering().copy(pendingSave = true),
         "answering, no sound, not saved" to audioUnavailable().copy(pendingSave = true),
+        "stop for now, progress saved" to stoppingForNow(),
+        "stop for now, progress pending" to stoppingForNowPendingSave(),
         "no answers" to answering().copy(answers = emptyList())
     )
 

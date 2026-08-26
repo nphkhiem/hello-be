@@ -104,6 +104,7 @@ class LessonRulesTest {
         learningObject = null,
         answers = answers,
         audioAvailable = audioAvailable,
-        pendingSave = false
+        pendingSave = false,
+        stopForNowVisible = false
     )
 }

@@ -1,5 +1,7 @@
 package com.nphkhiem.englishforyourchildren.feature.learning
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +25,7 @@ import com.nphkhiem.englishforyourchildren.ui.tv.component.StoryHeader
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StoryLoading
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StorybookScaffold
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
+import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import java.util.Locale
@@ -52,71 +55,120 @@ fun LessonScaffold(
     val firstAnswerFocus = remember { FocusRequester() }
     val focusTarget = lessonFocusTarget(state)
     val positionFormat = stringResource(R.string.lesson_position)
+    val pipDescription = stringResource(pipDescriptionFor(state.phase, state.support))
+    val stopForNowRestorer = rememberHelloBeFocusRestorer()
 
-    StorybookScaffold(
-        modifier = modifier,
-        entryFocus = when (focusTarget) {
-            LessonFocusTarget.REPLAY -> replayFocus
-            LessonFocusTarget.FIRST_ANSWER -> firstAnswerFocus
-        },
-        header = {
-            StoryHeader(
-                modifier = Modifier.fillMaxWidth(),
-                title = state.activityTitle,
-                contextLabel = state.unitName,
-                progress = {
-                    ProgressTrail(
-                        totalSteps = state.activityCount,
-                        currentStep = state.activityNumber,
-                        describePosition = { current, total ->
-                            String.format(Locale.getDefault(), positionFormat, current, total)
+    // Back never exits an active lesson directly. It asks instead, and while it is asking, Back
+    // and the safe choice are the same press, so a second dialog cannot stack on the first.
+    BackHandler {
+        onAction(
+            if (state.stopForNowVisible) {
+                LessonAction.KeepLearningRequested
+            } else {
+                LessonAction.BackRequested
+            }
+        )
+    }
+
+    Box(modifier = modifier) {
+        StorybookScaffold(
+            entryFocus = when (focusTarget) {
+                LessonFocusTarget.REPLAY -> replayFocus
+                LessonFocusTarget.FIRST_ANSWER -> firstAnswerFocus
+            },
+            header = {
+                StoryHeader(
+                    modifier = Modifier.fillMaxWidth(),
+                    title = state.activityTitle,
+                    contextLabel = state.unitName,
+                    progress = {
+                        ProgressTrail(
+                            totalSteps = state.activityCount,
+                            currentStep = state.activityNumber,
+                            describePosition = { current, total ->
+                                String.format(Locale.getDefault(), positionFormat, current, total)
+                            }
+                        )
+                    },
+                    action = {
+                        LessonHeaderActions(
+                            state = state,
+                            onAction = onAction,
+                            replayModifier = Modifier
+                                .focusRequester(replayFocus)
+                                .then(
+                                    // Focus comes back here when the content has nothing to return
+                                    // to: preparing, while the prompt plays, or no answers at all.
+                                    if (focusTarget == LessonFocusTarget.REPLAY) {
+                                        Modifier.focusRequester(stopForNowRestorer.returnTarget)
+                                    } else {
+                                        Modifier
+                                    }
+                                )
+                        )
+                    }
+                )
+            },
+            support = {
+                PipGuide(
+                    pose = pipPoseFor(state.phase, state.support),
+                    contentDescription = pipDescription,
+                    modifier = Modifier.size(HelloBeLayout.pipMinSize)
+                )
+                CaptionPanel(
+                    text = state.caption,
+                    visible = state.caption != null,
+                    modifier = Modifier.weight(1f)
+                )
+                if (state.pendingSave) {
+                    Text(
+                        text = stringResource(R.string.lesson_pending_save),
+                        style = HelloBeTheme.typography.labelSmall,
+                        color = HelloBeTheme.colors.warningContent
+                    )
+                }
+            }
+        ) {
+            if (state.phase == LessonPhase.PREPARING) {
+                StoryLoading(
+                    contentDescription = stringResource(R.string.lesson_preparing),
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                // The requester is pushed into the slot rather than left for the activity to
+                // arrange, so an activity cannot forget it and leave entry focus on the header
+                // while a child is meant to be choosing.
+                // Wrapped in a focus group carrying the restorer's return target, so closing the
+                // dialog returns the child to the answer they were on rather than the first one.
+                // helloBeFocusGroup already applies focusRestorer, and the answer row inside carries
+                // its own, so the two chain: the outer restores the row, the row restores the card.
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .then(
+                            if (focusTarget == LessonFocusTarget.FIRST_ANSWER) {
+                                Modifier.focusRequester(stopForNowRestorer.returnTarget)
+                            } else {
+                                Modifier
+                            }
+                        ).helloBeFocusGroup()
+                ) {
+                    content(
+                        if (focusTarget == LessonFocusTarget.FIRST_ANSWER) {
+                            Modifier.focusRequester(firstAnswerFocus)
+                        } else {
+                            Modifier
                         }
                     )
-                },
-                action = {
-                    LessonHeaderActions(
-                        state = state,
-                        onAction = onAction,
-                        replayModifier = Modifier.focusRequester(replayFocus)
-                    )
                 }
-            )
-        },
-        support = {
-            PipGuide(
-                pose = pipPoseFor(state.phase, state.support),
-                contentDescription = stringResource(pipDescriptionFor(state.phase, state.support)),
-                modifier = Modifier.size(HelloBeLayout.pipMinSize)
-            )
-            CaptionPanel(
-                text = state.caption,
-                visible = state.caption != null,
-                modifier = Modifier.weight(1f)
-            )
-            if (state.pendingSave) {
-                Text(
-                    text = stringResource(R.string.lesson_pending_save),
-                    style = HelloBeTheme.typography.labelSmall,
-                    color = HelloBeTheme.colors.warningContent
-                )
             }
         }
-    ) {
-        if (state.phase == LessonPhase.PREPARING) {
-            StoryLoading(
-                contentDescription = stringResource(R.string.lesson_preparing),
-                modifier = Modifier.fillMaxSize()
-            )
-        } else {
-            // The requester is pushed into the slot rather than left for the activity to
-            // arrange, so an activity cannot forget it and leave entry focus on the header
-            // while a child is meant to be choosing.
-            content(
-                if (focusTarget == LessonFocusTarget.FIRST_ANSWER) {
-                    Modifier.focusRequester(firstAnswerFocus)
-                } else {
-                    Modifier
-                }
+
+        if (state.stopForNowVisible) {
+            StopForNowDialog(
+                pendingSave = state.pendingSave,
+                focusRestorer = stopForNowRestorer,
+                onAction = onAction
             )
         }
     }

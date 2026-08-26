@@ -44,7 +44,12 @@ internal fun LessonStateWalker(
 ) {
     var index by remember { mutableIntStateOf(0) }
     var lastAction by remember { mutableStateOf<LessonAction?>(null) }
-    val (stateName, state) = states[index]
+    // A dialog contains focus, which is correct on a television and would otherwise strand a
+    // reviewer: with the dialog open, Next state cannot be reached. So the dialog's own actions
+    // close it here, which is also the behaviour a real host would implement.
+    var dialogDismissed by remember(index) { mutableStateOf(false) }
+    val (stateName, rawState) = states[index]
+    val state = if (dialogDismissed) rawState.copy(stopForNowVisible = false) else rawState
 
     Column(verticalArrangement = Arrangement.spacedBy(HelloBeSpacing.space4)) {
         Text(
@@ -91,7 +96,14 @@ internal fun LessonStateWalker(
                 .fillMaxWidth()
                 .height(HelloBeLayout.referenceHeight)
         ) {
-            activity(state) { lastAction = it }
+            activity(state) { action ->
+                lastAction = action
+                if (action is LessonAction.KeepLearningRequested ||
+                    action is LessonAction.StopForNowConfirmed
+                ) {
+                    dialogDismissed = true
+                }
+            }
         }
     }
 }
