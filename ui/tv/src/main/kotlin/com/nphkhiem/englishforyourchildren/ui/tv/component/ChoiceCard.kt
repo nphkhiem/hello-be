@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
@@ -34,6 +35,11 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
  *
  * [stateDescription] carries the spoken meaning so feedback never depends on color alone.
  *
+ * [labelVisible] withholds the drawn word while keeping it as the card's accessible name, for
+ * activities whose prompt already names the target in text: captioning the answers there would
+ * make the question solvable by reading instead of by looking. A screen reader still receives the
+ * word, because for that child the picture is not available at all.
+ *
  * Like [StoryCard], the card sizes to its content and takes its width from the grid tokens.
  */
 @Composable
@@ -45,6 +51,7 @@ fun ChoiceCard(
     feedback: HelloBeChoiceFeedback = HelloBeChoiceFeedback.NEUTRAL,
     availability: HelloBeAvailability = HelloBeAvailability.ENABLED,
     stateDescription: String? = null,
+    labelVisible: Boolean = true,
     minHeight: Dp = HelloBeTheme.layout.childChoiceMinHeight,
     illustration: (@Composable () -> Unit)? = null
 ) {
@@ -92,6 +99,9 @@ fun ChoiceCard(
                 .semantics {
                     if (availability == HelloBeAvailability.DISABLED) disabled()
                     stateDescription?.let { this.stateDescription = it }
+                    // Only when the word is not drawn. The Text below is already the accessible
+                    // name, so setting both would announce the answer twice.
+                    if (!labelVisible) contentDescription = label
                 },
         enabled = availability.isFocusable,
         interactionSource = interactionSource,
@@ -136,7 +146,9 @@ fun ChoiceCard(
             verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space3)
         ) {
             illustration?.invoke()
-            Text(text = label, style = HelloBeTheme.typography.titleMedium)
+            if (labelVisible) {
+                Text(text = label, style = HelloBeTheme.typography.titleMedium)
+            }
         }
     }
 }
