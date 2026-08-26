@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lesson_replay">Replay</string>
+    <string name="lesson_replay_unavailable">Sound is not working</string>
+    <string name="lesson_skip">Skip this one</string>
+    <string name="lesson_pending_save">Not saved yet</string>
+    <string name="lesson_position">Activity %1$d of %2$d</string>
+    <string name="lesson_preparing">Getting your question ready</string>
+    <string name="lesson_pip_waiting">Pip is waiting with you</string>
+    <string name="lesson_pip_asking">Pip is asking the question</string>
+    <string name="lesson_pip_repeating">Pip is saying it again</string>
+    <string name="lesson_pip_demonstrating">Pip is showing you slowly</string>
+    <string name="lesson_pip_helping">Pip is helping in Vietnamese</string>
+    <string name="lesson_pip_celebrating">Pip is celebrating with you</string>
+</resources>
