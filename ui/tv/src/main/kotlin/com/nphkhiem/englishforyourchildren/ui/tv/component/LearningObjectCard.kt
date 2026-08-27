@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.TextStyle
 import androidx.tv.material3.Surface
 import androidx.tv.material3.SurfaceDefaults
 import androidx.tv.material3.Text
@@ -33,6 +34,10 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
  * [labelVisible] withholds the drawn word while keeping it as the accessible name, for activities
  * whose prompt already names the object in text.
  *
+ * [labelStyle] lets an activity give the object the weight its content needs. Letter and sound
+ * passes `learningGlyph`, so the letter carries the emphasis itself rather than the container
+ * acquiring a heavier treatment that would compete with the focus grammar.
+ *
  * The card sizes to its content and takes its width and height from its parent, so a board can
  * align it to a grid of choices without a dedicated dimension token.
  */
@@ -41,6 +46,7 @@ fun LearningObjectCard(
     label: String,
     modifier: Modifier = Modifier,
     labelVisible: Boolean = true,
+    labelStyle: TextStyle = HelloBeTheme.typography.titleMedium,
     illustration: (@Composable () -> Unit)? = null
 ) {
     val colors = HelloBeTheme.colors
@@ -68,7 +74,7 @@ fun LearningObjectCard(
         ) {
             illustration?.invoke()
             if (labelVisible) {
-                Text(text = label, style = HelloBeTheme.typography.titleMedium)
+                Text(text = label, style = labelStyle)
             }
         }
     }
