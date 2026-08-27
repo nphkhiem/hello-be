@@ -127,6 +127,27 @@ class ReviewTest {
     }
 
     @Test
+    fun givenTheRoom_whenTheAnswersAreDrawn_thenTheHorizonDoesNotCutAcrossThem() {
+        // Scenery sits behind the answers, so its top edge has to clear them. A horizon crossing
+        // the middle of the cards reads as a rendering fault rather than as a room.
+        composeTestRule.setContent {
+            HelloBeTheme {
+                Box(modifier = Modifier.fillMaxSize().testTag(STAGE)) {
+                    ReviewActivity(state = ReviewFixtures.answering(), onAction = {})
+                }
+            }
+        }
+
+        val room = composeTestRule.onNodeWithTag(STAGE).onChildren().onFirst()
+            .getUnclippedBoundsInRoot()
+        val answer = composeTestRule.onNodeWithContentDescription(CHAIR)
+            .getUnclippedBoundsInRoot()
+
+        assertThat(room.top.value).isLessThan(answer.top.value)
+        assertThat(room.bottom.value).isAtLeast(answer.bottom.value)
+    }
+
+    @Test
     fun givenThreeAnswers_whenTheRowIsDrawn_thenNoneIsBelowTheChildMinimum() {
         setActivity(ReviewFixtures.answering())
 

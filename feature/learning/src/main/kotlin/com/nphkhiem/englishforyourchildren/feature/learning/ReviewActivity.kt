@@ -157,9 +157,13 @@ private fun RowScope.RecallRow(
     }
 }
 
-/** Room proportions, after the approved S05-E draft. */
+/**
+ * Room proportions. The width follows the approved draft; the height is taller than its 53%
+ * because the answers sit in the shared centred row rather than low inside the room, and a horizon
+ * cutting across the cards reads as a mistake rather than as a room.
+ */
 private const val ROOM_WIDTH_FRACTION = 0.86f
-private const val ROOM_HEIGHT_FRACTION = 0.53f
+private const val ROOM_HEIGHT_FRACTION = 0.66f
 
 /** A recall item with an object beside it splits the board; without one the answers take it all. */
 private const val OBJECT_WEIGHT = 30f
