@@ -20,6 +20,8 @@
     <string name="theme_catalog_letter_label">Every letter-and-sound state. The letter carries its own emphasis; the card stays quiet.</string>
     <string name="theme_catalog_say_heading">Lesson: say with Pip</string>
     <string name="theme_catalog_say_label">Every say-with-Pip state. Nothing here listens, records or scores.</string>
+    <string name="theme_catalog_review_heading">Lesson: review</string>
+    <string name="theme_catalog_review_label">Every review state. Read it against the four sections above: it should look like them, not like a new game.</string>
     <string name="theme_catalog_matching_heading">Lesson: picture matching</string>
     <string name="theme_catalog_matching_label">Every matching state, stepped with the remote. The same shell as above, carrying a fixed source.</string>
     <string name="theme_catalog_lesson_next_state">Next state</string>

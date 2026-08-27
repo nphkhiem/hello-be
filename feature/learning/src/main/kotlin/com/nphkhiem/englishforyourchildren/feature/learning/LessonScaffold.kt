@@ -49,6 +49,12 @@ fun LessonScaffold(
     state: LessonUiState,
     onAction: (LessonAction) -> Unit,
     modifier: Modifier = Modifier,
+    /**
+     * Decoration behind the stage, forwarded to [StorybookScaffold]. Defaulted, so the families
+     * that have no scene are untouched. Whatever goes here must carry no meaning of its own: a
+     * room a child chooses in front of is scenery, a room they choose out of is not.
+     */
+    scenery: (@Composable BoxScope.() -> Unit)? = null,
     content: @Composable BoxScope.(Modifier) -> Unit
 ) {
     val replayFocus = remember { FocusRequester() }
@@ -72,6 +78,7 @@ fun LessonScaffold(
 
     Box(modifier = modifier) {
         StorybookScaffold(
+            scenery = scenery,
             entryFocus = when (focusTarget) {
                 LessonFocusTarget.REPLAY -> replayFocus
                 LessonFocusTarget.CONTENT -> firstAnswerFocus
