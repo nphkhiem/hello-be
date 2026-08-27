@@ -20,6 +20,15 @@ enum class LessonPhase {
     /** The child may choose. */
     ANSWERING,
 
+    /**
+     * The silence a child fills in say with Pip, while nothing is listening.
+     *
+     * Deliberately not [ANSWERING]: there is no answer, it is never correct, and it can never be
+     * wrong. Reusing that phase would make answer availability claim the choices are live for a
+     * family that has none.
+     */
+    RESPONDING,
+
     /** The child chose correctly and the answer is being confirmed. */
     CORRECT,
 
@@ -100,7 +109,14 @@ data class LessonUiState(
      * driven by a fixture and reviewed on a television. The copy is the whole deliverable of
      * HB-D09, so it has to be walkable.
      */
-    val stopForNowVisible: Boolean
+    val stopForNowVisible: Boolean,
+    /**
+     * How far through the speaking pause the child is, from 0 to 1, or null for the four families
+     * that have no pause.
+     *
+     * A value the state carries, not a clock this screen runs. See ADR 0003.
+     */
+    val pauseProgress: Float?
 )
 
 /** What a lesson screen reports upward. Typed, so no untyped escape hatch can grow here. */

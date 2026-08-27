@@ -4,10 +4,15 @@ import androidx.annotation.StringRes
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAvailability
 import com.nphkhiem.englishforyourchildren.ui.tv.component.PipPose
 
-/** Where a lesson puts focus when it becomes interactive. */
+/**
+ * Where a lesson puts focus when it becomes interactive.
+ *
+ * [CONTENT] was called FIRST_ANSWER while every family had answers. Say with Pip has controls and
+ * no answers, so the old name described something that is no longer always there.
+ */
 enum class LessonFocusTarget {
     REPLAY,
-    FIRST_ANSWER
+    CONTENT
 }
 
 /**
@@ -20,25 +25,35 @@ enum class LessonFocusTarget {
  */
 internal fun answerAvailability(phase: LessonPhase): HelloBeAvailability = when (phase) {
     LessonPhase.PREPARING, LessonPhase.PROMPTING -> HelloBeAvailability.DISABLED
+
     LessonPhase.ANSWERING -> HelloBeAvailability.ENABLED
+
+    // Say with Pip has no answers to enable. Any later family that reaches this phase carrying
+    // choices should have to think about it rather than inherit whatever this returns.
+    LessonPhase.RESPONDING -> HelloBeAvailability.DISABLED
+
     LessonPhase.CORRECT, LessonPhase.COMPLETED -> HelloBeAvailability.UNAVAILABLE
 }
 
 /**
  * Where focus belongs when the lesson becomes interactive.
  *
- * Replay until the question has been heard, then the first answer. An activity that arrives with
- * no answers still sends focus to replay, so a malformed activity never leaves a child on a screen
- * with nothing to focus.
+ * Replay until the question has been heard, then the activity's own entry control. An activity
+ * that arrives with no answers still sends focus to replay, so a malformed activity never leaves a
+ * child on a screen with nothing to focus.
+ *
+ * Say with Pip is the exception that needs naming: it reaches [LessonPhase.RESPONDING] with two
+ * controls and an empty answer list, so the answer count cannot decide it. That phase is reachable
+ * only in that family, which always has its controls by then, so the branch cannot strand focus.
  */
-internal fun lessonFocusTarget(state: LessonUiState): LessonFocusTarget =
-    if (answerAvailability(state.phase) == HelloBeAvailability.ENABLED &&
-        state.answers.isNotEmpty()
-    ) {
-        LessonFocusTarget.FIRST_ANSWER
-    } else {
-        LessonFocusTarget.REPLAY
-    }
+internal fun lessonFocusTarget(state: LessonUiState): LessonFocusTarget = when {
+    state.phase == LessonPhase.RESPONDING -> LessonFocusTarget.CONTENT
+
+    answerAvailability(state.phase) == HelloBeAvailability.ENABLED &&
+        state.answers.isNotEmpty() -> LessonFocusTarget.CONTENT
+
+    else -> LessonFocusTarget.REPLAY
+}
 
 /**
  * Whether the unscored skip is offered.

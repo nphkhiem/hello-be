@@ -29,7 +29,8 @@ object LetterAndSoundFixtures {
         ),
         audioAvailable = true,
         pendingSave = false,
-        stopForNowVisible = false
+        stopForNowVisible = false,
+        pauseProgress = null
     )
 
     fun preparing(): LessonUiState = answering().copy(

@@ -10,6 +10,8 @@ import com.nphkhiem.englishforyourchildren.feature.learning.LetterAndSoundFixtur
 import com.nphkhiem.englishforyourchildren.feature.learning.ListenAndChooseActivity
 import com.nphkhiem.englishforyourchildren.feature.learning.PictureMatchingActivity
 import com.nphkhiem.englishforyourchildren.feature.learning.PictureMatchingFixtures
+import com.nphkhiem.englishforyourchildren.feature.learning.SayWithPipActivity
+import com.nphkhiem.englishforyourchildren.feature.learning.SayWithPipFixtures
 
 /** A real listen-and-choose lesson, in every state it can be in. */
 @Composable
@@ -54,5 +56,21 @@ internal fun LetterAndSoundSection() {
         states = states
     ) { state, onAction ->
         LetterAndSoundActivity(state = state, onAction = onAction)
+    }
+}
+
+/**
+ * The fourth family. Worth walking with the sound off: nothing on this screen may suggest the app
+ * heard anything.
+ */
+@Composable
+internal fun SayWithPipSection() {
+    val states = remember { SayWithPipFixtures.reviewStates() }
+
+    LessonStateWalker(
+        label = stringResource(R.string.theme_catalog_say_label),
+        states = states
+    ) { state, onAction ->
+        SayWithPipActivity(state = state, onAction = onAction)
     }
 }

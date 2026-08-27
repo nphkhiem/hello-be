@@ -37,7 +37,8 @@ object LessonFixtures {
         ),
         audioAvailable = true,
         pendingSave = false,
-        stopForNowVisible = false
+        stopForNowVisible = false,
+        pauseProgress = null
     )
 
     fun supportiveRetry(level: SupportLevel): LessonUiState = answering().copy(

@@ -43,7 +43,24 @@ class LessonRulesTest {
     @Test
     fun givenAnsweringHasBegun_whenFocusTargetIsRead_thenItIsTheFirstAnswer() {
         assertThat(lessonFocusTarget(stateWith(phase = LessonPhase.ANSWERING)))
-            .isEqualTo(LessonFocusTarget.FIRST_ANSWER)
+            .isEqualTo(LessonFocusTarget.CONTENT)
+    }
+
+    @Test
+    fun givenTheSpeakingPause_whenAnswerAvailabilityIsRead_thenNothingClaimsChoicesAreLive() {
+        // Say with Pip has no answers. Returning ENABLED here would say the choices are ready for
+        // a family that has none, which is the overload this phase exists to avoid.
+        assertThat(answerAvailability(LessonPhase.RESPONDING))
+            .isEqualTo(HelloBeAvailability.DISABLED)
+    }
+
+    @Test
+    fun givenTheSpeakingPause_whenFocusTargetIsRead_thenItIsTheActivityNotReplay() {
+        // The answer count cannot decide this one: the family reaches the pause with two controls
+        // and an empty answer list.
+        val speaking = stateWith(phase = LessonPhase.RESPONDING, answers = emptyList())
+
+        assertThat(lessonFocusTarget(speaking)).isEqualTo(LessonFocusTarget.CONTENT)
     }
 
     @Test
@@ -105,6 +122,7 @@ class LessonRulesTest {
         answers = answers,
         audioAvailable = audioAvailable,
         pendingSave = false,
-        stopForNowVisible = false
+        stopForNowVisible = false,
+        pauseProgress = null
     )
 }
