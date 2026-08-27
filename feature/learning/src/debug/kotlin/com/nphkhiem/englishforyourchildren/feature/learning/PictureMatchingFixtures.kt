@@ -32,7 +32,8 @@ object PictureMatchingFixtures {
         ),
         audioAvailable = true,
         pendingSave = false,
-        stopForNowVisible = false
+        stopForNowVisible = false,
+        pauseProgress = null
     )
 
     fun prompting(): LessonUiState = answering().copy(phase = LessonPhase.PROMPTING)

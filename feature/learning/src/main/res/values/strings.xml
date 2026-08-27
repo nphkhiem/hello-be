@@ -22,4 +22,10 @@
     <string name="stop_for_now_keep">Keep learning</string>
     <string name="stop_for_now_stop">Stop for now</string>
     <string name="stop_for_now_pip">Pip is asking if you want to stop</string>
+
+    <!-- Fixed copy for the say-with-Pip family. The phrase itself varies and rides in state. -->
+    <string name="say_instruction">Listen, then say it with Pip.</string>
+    <string name="say_again">Again</string>
+    <string name="say_next">Next</string>
+    <string name="say_your_turn">Your turn</string>
 </resources>

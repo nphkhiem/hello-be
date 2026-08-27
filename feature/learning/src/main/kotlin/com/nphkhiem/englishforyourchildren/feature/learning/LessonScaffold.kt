@@ -74,7 +74,7 @@ fun LessonScaffold(
         StorybookScaffold(
             entryFocus = when (focusTarget) {
                 LessonFocusTarget.REPLAY -> replayFocus
-                LessonFocusTarget.FIRST_ANSWER -> firstAnswerFocus
+                LessonFocusTarget.CONTENT -> firstAnswerFocus
             },
             header = {
                 StoryHeader(
@@ -146,7 +146,7 @@ fun LessonScaffold(
                     modifier = Modifier
                         .fillMaxSize()
                         .then(
-                            if (focusTarget == LessonFocusTarget.FIRST_ANSWER) {
+                            if (focusTarget == LessonFocusTarget.CONTENT) {
                                 Modifier.focusRequester(stopForNowRestorer.returnTarget)
                             } else {
                                 Modifier
@@ -154,7 +154,7 @@ fun LessonScaffold(
                         ).helloBeFocusGroup()
                 ) {
                     content(
-                        if (focusTarget == LessonFocusTarget.FIRST_ANSWER) {
+                        if (focusTarget == LessonFocusTarget.CONTENT) {
                             Modifier.focusRequester(firstAnswerFocus)
                         } else {
                             Modifier
