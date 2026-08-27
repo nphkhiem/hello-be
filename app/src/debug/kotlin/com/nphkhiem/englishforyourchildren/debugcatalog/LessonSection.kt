@@ -10,6 +10,8 @@ import com.nphkhiem.englishforyourchildren.feature.learning.LetterAndSoundFixtur
 import com.nphkhiem.englishforyourchildren.feature.learning.ListenAndChooseActivity
 import com.nphkhiem.englishforyourchildren.feature.learning.PictureMatchingActivity
 import com.nphkhiem.englishforyourchildren.feature.learning.PictureMatchingFixtures
+import com.nphkhiem.englishforyourchildren.feature.learning.ReviewActivity
+import com.nphkhiem.englishforyourchildren.feature.learning.ReviewFixtures
 import com.nphkhiem.englishforyourchildren.feature.learning.SayWithPipActivity
 import com.nphkhiem.englishforyourchildren.feature.learning.SayWithPipFixtures
 
@@ -72,5 +74,21 @@ internal fun SayWithPipSection() {
         states = states
     ) { state, onAction ->
         SayWithPipActivity(state = state, onAction = onAction)
+    }
+}
+
+/**
+ * The fifth and last family. Its whole requirement is a feeling, so it is the one section that
+ * only means anything read against the four above it.
+ */
+@Composable
+internal fun ReviewSection() {
+    val states = remember { ReviewFixtures.reviewStates() }
+
+    LessonStateWalker(
+        label = stringResource(R.string.theme_catalog_review_label),
+        states = states
+    ) { state, onAction ->
+        ReviewActivity(state = state, onAction = onAction)
     }
 }
