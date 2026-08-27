@@ -145,9 +145,21 @@ fun ChoiceCard(
             )
     ) {
         Column(
-            modifier = Modifier.padding(HelloBeTheme.spacing.cardInternal),
+            // Aligned rather than filled, and the difference matters. An interactive Surface hosts
+            // content in a nested Box that does not propagate minimum constraints, so this column
+            // wraps its content while the box around it is already the full card height. Aligning
+            // the column centres it in that box; filling it would take the box's maximum instead,
+            // which on a wrap-content card is the whole stage.
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(HelloBeTheme.spacing.cardInternal),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space3)
+            // Without an alignment the label rides high in any card taller than its content, which
+            // is every card once a row shares one height.
+            verticalArrangement = Arrangement.spacedBy(
+                space = HelloBeTheme.spacing.space3,
+                alignment = Alignment.CenterVertically
+            )
         ) {
             illustration?.invoke()
             if (labelVisible) {
