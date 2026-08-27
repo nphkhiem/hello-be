@@ -66,11 +66,15 @@ fun LearningObjectCard(
         border = HelloBeFocusFrame.resting(shape)
     ) {
         Column(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(HelloBeTheme.spacing.cardInternal),
+            modifier = Modifier.padding(HelloBeTheme.spacing.cardInternal),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space3)
+            // Centred on the column's own arrangement rather than by aligning it in the surface.
+            // Surface propagates its minimum constraints, so the column is already stretched to
+            // the full card height and there is nothing left for align to position.
+            verticalArrangement = Arrangement.spacedBy(
+                space = HelloBeTheme.spacing.space3,
+                alignment = Alignment.CenterVertically
+            )
         ) {
             illustration?.invoke()
             if (labelVisible) {
