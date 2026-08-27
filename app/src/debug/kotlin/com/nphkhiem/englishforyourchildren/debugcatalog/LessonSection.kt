@@ -5,6 +5,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.res.stringResource
 import com.nphkhiem.englishforyourchildren.R
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonFixtures
+import com.nphkhiem.englishforyourchildren.feature.learning.LetterAndSoundActivity
+import com.nphkhiem.englishforyourchildren.feature.learning.LetterAndSoundFixtures
 import com.nphkhiem.englishforyourchildren.feature.learning.ListenAndChooseActivity
 import com.nphkhiem.englishforyourchildren.feature.learning.PictureMatchingActivity
 import com.nphkhiem.englishforyourchildren.feature.learning.PictureMatchingFixtures
@@ -36,5 +38,21 @@ internal fun MatchingSection() {
         states = states
     ) { state, onAction ->
         PictureMatchingActivity(state = state, onAction = onAction)
+    }
+}
+
+/**
+ * The same shell again, carrying the letter pair. Three families in one scroll: if any of them
+ * stops looking like the others, this is where it shows.
+ */
+@Composable
+internal fun LetterAndSoundSection() {
+    val states = remember { LetterAndSoundFixtures.reviewStates() }
+
+    LessonStateWalker(
+        label = stringResource(R.string.theme_catalog_letter_label),
+        states = states
+    ) { state, onAction ->
+        LetterAndSoundActivity(state = state, onAction = onAction)
     }
 }
