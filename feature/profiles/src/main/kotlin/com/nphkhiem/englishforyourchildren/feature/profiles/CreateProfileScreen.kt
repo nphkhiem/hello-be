@@ -188,6 +188,8 @@ private fun Setup(
                     title = age.toString(),
                     onClick = { onAction(CreateProfileAction.AgeChosen(age)) },
                     selected = state.draft.age == age,
+                    // One digit, not a block of text.
+                    centerContent = true,
                     modifier = Modifier
                         .width(HelloBeTheme.layout.cardFiveColumnSet)
                         .then(
@@ -258,6 +260,7 @@ private fun AvatarChooser(
                     title = avatar,
                     onClick = { onAction(CreateProfileAction.AvatarChosen(avatar)) },
                     selected = state.draft.avatarId == avatar,
+                    centerContent = true,
                     modifier = Modifier
                         .width(HelloBeTheme.layout.cardFiveColumnSet)
                         .then(

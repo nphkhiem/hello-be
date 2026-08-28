@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.semantics.disabled
@@ -35,6 +36,11 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
  * The card sizes to its content. Callers set width from the 12-column grid tokens (for
  * example `layout.cardThreeColumnSet`) rather than the card filling its parent, so a row of
  * cards divides the grid instead of the first card consuming it.
+ *
+ * [centerContent] is for a card holding a single mark rather than a block. The default reads as a
+ * block, an optional picture then a title then a supporting line, and top left is right for that:
+ * it is what a profile card and a unit card want. One glyph sitting in the corner of a large card
+ * is not, which is what an age choice looked like before this existed.
  */
 @Composable
 fun StoryCard(
@@ -45,6 +51,7 @@ fun StoryCard(
     availability: HelloBeAvailability = HelloBeAvailability.ENABLED,
     supportingText: String? = null,
     stateDescription: String? = null,
+    centerContent: Boolean = false,
     minHeight: Dp = HelloBeTheme.layout.childChoiceMinHeight,
     illustration: (@Composable () -> Unit)? = null
 ) {
@@ -118,7 +125,17 @@ fun StoryCard(
             )
     ) {
         Column(
-            modifier = Modifier.padding(HelloBeTheme.spacing.cardInternal),
+            // Aligned rather than filled: an interactive Surface hosts its content in a nested box
+            // that does not propagate minimum constraints, so this column wraps while the box
+            // around it is already the full card.
+            modifier = Modifier
+                .then(if (centerContent) Modifier.align(Alignment.Center) else Modifier)
+                .padding(HelloBeTheme.spacing.cardInternal),
+            horizontalAlignment = if (centerContent) {
+                Alignment.CenterHorizontally
+            } else {
+                Alignment.Start
+            },
             verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space3)
         ) {
             illustration?.invoke()
