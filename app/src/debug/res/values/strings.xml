@@ -18,6 +18,8 @@
     <string name="theme_catalog_picker_label">Every picker state. The first screen anyone sees, and the only one here that is not a lesson.</string>
     <string name="theme_catalog_create_heading">Screen: quick create profile</string>
     <string name="theme_catalog_create_label">Every create state. The default path is two Select presses; each state here departs from it.</string>
+    <string name="theme_catalog_home_heading">Screen: child home</string>
+    <string name="theme_catalog_home_label">Every home state. From across a room, is it obvious what to press?</string>
     <string name="theme_catalog_lesson_heading">Lesson: listen and choose</string>
     <string name="theme_catalog_lesson_label">Every lesson state, stepped with the remote. No ViewModel, audio or curriculum behind it.</string>
     <string name="theme_catalog_letter_heading">Lesson: letter and sound</string>
