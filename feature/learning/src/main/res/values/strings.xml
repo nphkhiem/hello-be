@@ -28,4 +28,16 @@
     <string name="say_again">Again</string>
     <string name="say_next">Next</string>
     <string name="say_your_turn">Your turn</string>
+
+    <string name="picker_brand_home">Hello Bé</string>
+    <string name="home_continue">Continue</string>
+    <string name="home_start">Start an adventure</string>
+    <string name="home_learning_path">Learning path</string>
+    <string name="home_learning_path_hint">See adventures</string>
+    <string name="home_free_play">Free play</string>
+    <string name="home_free_play_hint">Practice words</string>
+    <string name="home_grown_ups">Grown-ups</string>
+    <!-- Said out loud rather than hiding a control that will not work. -->
+    <string name="home_continue_unavailable">That one is not ready yet</string>
+    <string name="home_course_complete">You found all the words</string>
 </resources>
