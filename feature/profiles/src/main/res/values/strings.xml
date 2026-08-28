@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="picker_brand">Hello Bé</string>
+    <string name="picker_welcome">Who is learning today?</string>
+    <string name="picker_welcome_hint">Choose your picture and press Select.</string>
+    <string name="picker_add_child">Add child</string>
+    <!-- States the fact and names the way out, rather than leaving a caregiver at a dead end. -->
+    <string name="picker_add_child_full">Four children already. A grown-up can remove one.</string>
+    <string name="picker_profile_unavailable">This one is not ready yet</string>
+    <string name="picker_caregiver">Grown-ups</string>
+    <string name="picker_pip">Pip is welcoming you</string>
+    <string name="picker_loading">Getting everyone ready</string>
+</resources>
