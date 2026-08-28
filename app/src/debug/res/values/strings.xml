@@ -20,6 +20,10 @@
     <string name="theme_catalog_create_label">Every create state. The default path is two Select presses; each state here departs from it.</string>
     <string name="theme_catalog_path_heading">Screen: learning path</string>
     <string name="theme_catalog_path_label">Every path state. Does Pip stand over the lesson a child should open next?</string>
+    <string name="theme_catalog_gate_heading">Screen: adult gate</string>
+    <string name="theme_catalog_gate_label">Every gate state. Press Select without moving: it must never be the correct answer.</string>
+    <string name="theme_catalog_shell_heading">Shell: caregiver area</string>
+    <string name="theme_catalog_shell_label">The stable rail. Nothing here may ask the gate question again.</string>
     <string name="theme_catalog_home_heading">Screen: child home</string>
     <string name="theme_catalog_home_label">Every home state. From across a room, is it obvious what to press?</string>
     <string name="theme_catalog_lesson_heading">Lesson: listen and choose</string>

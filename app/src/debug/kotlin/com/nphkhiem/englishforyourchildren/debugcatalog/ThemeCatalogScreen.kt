@@ -71,6 +71,12 @@ fun ThemeCatalogScreen() {
 
                 CatalogModeControls(mode = mode, onModeChange = { mode = it })
 
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_gate_heading))
+                AdultGateCatalogSection()
+
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_shell_heading))
+                CaregiverShellCatalogSection()
+
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_stage_heading))
                 StageSection()
 
