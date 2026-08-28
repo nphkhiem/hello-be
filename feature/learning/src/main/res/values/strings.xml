@@ -43,4 +43,17 @@
     <!-- The greeting hint has to change with the greeting, or it promises an adventure that is
          no longer waiting. -->
     <string name="home_course_complete_hint">The words are all still here to play with.</string>
+    <string name="path_unit_kicker">Unit %1$d of %2$d</string>
+    <string name="path_lesson_finished">Finished</string>
+    <string name="path_lesson_continue">Continue</string>
+    <string name="path_lesson_start">Start</string>
+    <string name="path_lesson_later">Later</string>
+    <string name="path_complete_mark">\u2713</string>
+    <string name="path_review_mark">\u2605</string>
+    <string name="path_previous_unit">\u25C0 Unit %1$d</string>
+    <string name="path_next_unit">Unit %1$d \u25B6</string>
+    <string name="path_pip_recommended">Pip is pointing at your next lesson</string>
+    <string name="path_recovery_title">This adventure is not ready</string>
+    <string name="path_recovery_hint">Let us go back and pick another one.</string>
+    <string name="path_recovery_action">Go home</string>
 </resources>
