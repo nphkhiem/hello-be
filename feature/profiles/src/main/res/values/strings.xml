@@ -10,4 +10,17 @@
     <string name="picker_caregiver">Grown-ups</string>
     <string name="picker_pip">Pip is welcoming you</string>
     <string name="picker_loading">Getting everyone ready</string>
+
+    <string name="create_privacy">Stored only on this TV</string>
+    <string name="create_question">How old is your child?</string>
+    <string name="create_question_hint">Choose an age, then the profile is ready.</string>
+    <string name="create_age_label">Age</string>
+    <string name="create_ready">Ready to use</string>
+    <string name="create_change_picture">Change picture</string>
+    <string name="create_change_name">Change name</string>
+    <string name="create_submit">Create profile</string>
+    <!-- The hint that makes the age requirement plain before anyone presses Create. -->
+    <string name="create_needs_age">Select age, then create</string>
+    <string name="create_choose_picture">Choose a picture</string>
+    <string name="create_save_failed">That did not save. Your choices are still here.</string>
 </resources>
