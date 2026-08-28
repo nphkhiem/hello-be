@@ -2,6 +2,16 @@ package com.nphkhiem.englishforyourchildren.feature.learning
 
 import androidx.compose.runtime.Immutable
 
+/**
+ * The one off-screen activity offered after the celebration.
+ *
+ * A value rather than a flag beside some copy. `stopForNowVisible` on the lesson is a boolean
+ * because its wording is fixed; this wording is not, and a boolean with separate strings would
+ * permit a prompt that is showing with nothing to say.
+ */
+@Immutable
+data class PlayTogetherActivity(val title: String, val instruction: String)
+
 /** One word a child met in the lesson that just finished. */
 @Immutable
 data class LearnedWord(val id: String, val label: String)
@@ -34,16 +44,30 @@ data class CelebrationUiState(
     /** Three to five, per the design brief. The row is built for its maximum. */
     val words: List<LearnedWord>,
     val revealed: Boolean,
-    val saveConfirmed: Boolean
+    val saveConfirmed: Boolean,
+    /**
+     * The activity being offered, or null when none is.
+     *
+     * Null also carries the brief's "repeatedly declined suppression" without this screen knowing
+     * anything about counting declines: a suppressed prompt is simply an activity that was never
+     * offered.
+     */
+    val playTogether: PlayTogetherActivity? = null
 )
 
 /**
  * What the celebration reports upward.
  *
- * One action, because Back and Done mean the same thing here. Two actions that must always be
- * handled identically is the trap HB-D07 avoided for Again and Replay, and HB-D09 avoided again
- * when Back reused the safe choice.
+ * Back reuses whichever of these already means "the safe way out of what is on screen", so no
+ * action exists solely to describe a Back press. That is the same reason HB-D07 kept Again and
+ * Replay as one action and HB-D09 had Back reuse the safe choice.
  */
 sealed interface CelebrationAction {
     data object DoneRequested : CelebrationAction
+
+    /** The caregiver took the activity. Kept apart from declining, which the host counts. */
+    data object PlayTogetherAccepted : CelebrationAction
+
+    /** The activity was declined, or Back was pressed while it was being offered. */
+    data object MaybeLaterRequested : CelebrationAction
 }

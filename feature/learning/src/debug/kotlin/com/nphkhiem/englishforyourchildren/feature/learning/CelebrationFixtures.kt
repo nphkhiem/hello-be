@@ -34,16 +34,27 @@ object CelebrationFixtures {
         words = settled().words + LearnedWord(id = "rug", label = RUG)
     )
 
+    /** The activity being offered over the settled page. */
+    fun playTogether(): CelebrationUiState = settled().copy(
+        playTogether = PlayTogetherActivity(
+            title = ACTIVITY_TITLE,
+            instruction = ACTIVITY_INSTRUCTION
+        )
+    )
+
     /** Every approved celebration state, in the order a reviewer would walk them. */
     fun reviewStates(): List<Pair<String, CelebrationUiState>> = listOf(
         "revealing" to revealing(),
         "settled" to settled(),
         "progress pending" to pendingSave(),
         "three words" to threeWords(),
-        "five words" to fiveWords()
+        "five words" to fiveWords(),
+        "play together offered" to playTogether()
     )
 
     const val UNIT_WORD = "home"
+    const val ACTIVITY_TITLE = "Can you find a chair together?"
+    const val ACTIVITY_INSTRUCTION = "Point to it and say chair. That is all you need."
     const val CHAIR = "chair"
     const val BED = "bed"
     const val DOOR = "door"
