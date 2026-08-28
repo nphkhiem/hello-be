@@ -40,4 +40,7 @@
     <!-- Said out loud rather than hiding a control that will not work. -->
     <string name="home_continue_unavailable">That one is not ready yet</string>
     <string name="home_course_complete">You found all the words</string>
+    <!-- The greeting hint has to change with the greeting, or it promises an adventure that is
+         no longer waiting. -->
+    <string name="home_course_complete_hint">The words are all still here to play with.</string>
 </resources>

@@ -11,7 +11,7 @@ object ChildHomeFixtures {
         profileName = "Minh",
         profileAvatar = "M",
         greeting = GREETING,
-        greetingHint = HINT,
+        greetingHint = WAITING_HINT,
         primary = HomePrimary.Resume(context = CONTEXT),
         pendingSave = false
     )
@@ -36,5 +36,5 @@ object ChildHomeFixtures {
 
     const val CONTEXT = "My Home, Lesson 3"
     private const val GREETING = "Let us find words at home"
-    private const val HINT = "Pip has a little adventure ready for you."
+    const val WAITING_HINT = "Pip has a little adventure ready for you."
 }

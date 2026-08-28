@@ -54,6 +54,16 @@ class ChildHomeTest {
     }
 
     @Test
+    fun givenEveryAdventureIsFinished_whenHomeIsRead_thenNothingStillPromisesOneIsWaiting() {
+        // Found by looking at it: the greeting swapped and the line under it did not, so the
+        // screen said an adventure was ready when there was none left.
+        setHome(ChildHomeFixtures.courseComplete())
+
+        composeTestRule.onNodeWithText(completeHint()).assertIsDisplayed()
+        composeTestRule.onNodeWithText(ChildHomeFixtures.WAITING_HINT).assertDoesNotExist()
+    }
+
+    @Test
     fun givenTheCheckpointWillNotOpen_whenHomeOpens_thenItSaysSoAndFocusGoesSomewhereUseful() {
         val actions = mutableListOf<ChildHomeAction>()
         setHome(ChildHomeFixtures.checkpointUnavailable(), onAction = { actions += it })
@@ -157,6 +167,8 @@ class ChildHomeTest {
     private fun grownUps() = resources.getString(R.string.home_grown_ups)
 
     private fun courseComplete() = resources.getString(R.string.home_course_complete)
+
+    private fun completeHint() = resources.getString(R.string.home_course_complete_hint)
 
     private fun pendingSave() = resources.getString(R.string.lesson_pending_save)
 

@@ -125,7 +125,13 @@ private fun Greeting(state: ChildHomeUiState) {
                 color = HelloBeTheme.colors.textPrimary
             )
             Text(
-                text = state.greetingHint,
+                // Swapped alongside the greeting. Leaving the state's hint would promise a little
+                // adventure that is no longer waiting, which is the one thing this app does not do.
+                text = if (state.primary is HomePrimary.CourseComplete) {
+                    stringResource(R.string.home_course_complete_hint)
+                } else {
+                    state.greetingHint
+                },
                 style = HelloBeTheme.typography.bodyLarge,
                 color = HelloBeTheme.colors.textSecondary
             )
