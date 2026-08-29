@@ -18,7 +18,6 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
@@ -64,6 +63,12 @@ class LearningPathTest {
         // Asserted by walking, not by reading semantics: a disabled TV Surface still defines the
         // Focused key, so an absent-key assertion here passed while proving nothing.
         //
+        // A companion test used to press these cards with performClick and assert nothing was
+        // emitted. It was removed rather than repaired: a touch click is a no-op on a television
+        // surface, and a disabled card cannot take focus to receive a key press, so the claim was
+        // unprovable either way. What can be proved is here and below: focus never reaches them,
+        // and they report themselves as not enabled.
+        //
         // The claim is only that focus never enters a lesson still ahead. Pressing on from the
         // last reachable lesson leaves the row for the stepper above it, which is the ordinary
         // focus search and is fine; what must not happen is landing on "Later".
@@ -77,17 +82,6 @@ class LearningPathTest {
         composeTestRule.onNodeWithText(LearningPathFixtures.REVIEW).assertIsNotFocused()
         composeTestRule.onNodeWithText(LearningPathFixtures.MOVE).assertIsNotEnabled()
         composeTestRule.onNodeWithText(LearningPathFixtures.REVIEW).assertIsNotEnabled()
-    }
-
-    @Test
-    fun givenALessonStillAhead_whenItIsPressedAnyway_thenNothingIsAsked() {
-        val actions = mutableListOf<LearningPathAction>()
-        setPath(LearningPathFixtures.midUnit(), onAction = { actions += it })
-
-        composeTestRule.onNodeWithText(LearningPathFixtures.MOVE).performClick()
-        composeTestRule.waitForIdle()
-
-        assertThat(actions).isEmpty()
     }
 
     @Test

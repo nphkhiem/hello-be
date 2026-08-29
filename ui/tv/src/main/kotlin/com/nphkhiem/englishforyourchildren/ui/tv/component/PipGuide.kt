@@ -85,15 +85,21 @@ fun PipGuide(
                 }
             )
     ) {
-        if (motion.reduceMotion) {
-            illustration(pose)
-        } else {
-            Crossfade(
-                targetState = pose,
-                animationSpec = tween(durationMillis = motion.durations.normal),
-                label = "pipPose"
-            ) { current ->
-                illustration(current)
+        // Wrapped so the artwork fills Pip without sizing him. The placeholder draws on a canvas
+        // that fills what it is given, and given a column's whole height it took the lot: Pip grew
+        // to fill the stage and every sibling was left with nothing. matchParentSize fills the box
+        // without taking part in measuring it, so the minimum above is what decides Pip's size.
+        Box(modifier = Modifier.matchParentSize()) {
+            if (motion.reduceMotion) {
+                illustration(pose)
+            } else {
+                Crossfade(
+                    targetState = pose,
+                    animationSpec = tween(durationMillis = motion.durations.normal),
+                    label = "pipPose"
+                ) { current ->
+                    illustration(current)
+                }
             }
         }
     }
