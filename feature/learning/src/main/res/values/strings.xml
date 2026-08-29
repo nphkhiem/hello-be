@@ -68,4 +68,19 @@
     <string name="play_together_accept">Play together</string>
     <string name="play_together_decline">Maybe later</string>
     <string name="play_together_pip">Pip has an idea for you both</string>
+    <string name="free_play_brand">Free play</string>
+    <string name="free_play_kicker">Your story shelves</string>
+    <string name="free_play_title">What shall we play with?</string>
+    <string name="free_play_subtitle">Only words %1$s has already met appear here.</string>
+    <string name="free_play_shelf_hint">Look, listen, and say</string>
+    <string name="free_play_shelf_last">Last played</string>
+    <string name="free_play_word_count">%1$d words</string>
+    <string name="free_play_previous_shelf">\u25C0 %1$s</string>
+    <string name="free_play_next_shelf">%1$s \u25B6</string>
+    <string name="free_play_speaking">Saying %1$s</string>
+    <string name="free_play_no_sound">Sound is not working</string>
+    <string name="free_play_pip">Pip is waiting to play</string>
+    <string name="free_play_empty_title">No words here yet</string>
+    <string name="free_play_empty_hint">Play a little adventure first, and Pip will keep the words here for you.</string>
+    <string name="free_play_empty_action">Go home</string>
 </resources>
