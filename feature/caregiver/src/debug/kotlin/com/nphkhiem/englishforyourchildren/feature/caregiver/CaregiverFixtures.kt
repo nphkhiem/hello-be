@@ -280,6 +280,8 @@ object CaregiverFixtures {
         "reset, failed" to resetFailed()
     )
 
+    fun databaseRecovery(): CaregiverRecoveryState = CaregiverRecoveryState(code = RECOVERY_CODE)
+
     fun gateStates(): List<Pair<String, AdultGateUiState>> = listOf(
         "initial" to gate(),
         "correct answer first" to gateCorrectFirst(),
@@ -294,6 +296,7 @@ object CaregiverFixtures {
     )
 
     const val PROFILE = "Minh"
+    const val RECOVERY_CODE = "DB-OPEN-01"
     const val SECOND_PROFILE = "Lan"
     const val MINH_DETAIL = "Age 3 · 6 adventures finished"
     const val LAN_DETAIL = "Age 5 · 2 adventures finished"

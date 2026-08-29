@@ -88,6 +88,8 @@
     <string name="theme_catalog_pip_pose_pointing">pointing</string>
     <string name="theme_catalog_pip_pose_modeling">modelling</string>
     <string name="theme_catalog_pip_pose_celebrating">celebrating</string>
+    <string name="theme_catalog_recovery_heading">Family: recovery</string>
+    <string name="theme_catalog_recovery_label">All five. Does each one say what happened, what is still safe, and where the focused action goes?</string>
     <string name="theme_catalog_stage_heading">Storybook stage</string>
     <string name="theme_catalog_stage_label">Scenery bleeds; everything else stays inside the safe area</string>
     <string name="theme_catalog_stage_header">My Home</string>

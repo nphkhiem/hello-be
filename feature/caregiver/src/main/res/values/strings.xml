@@ -68,4 +68,12 @@
     <string name="confirm_reset_failed">%1$s\u2019s progress was not reset. Nothing has changed.</string>
     <string name="confirm_retry">Try again</string>
     <string name="confirm_reset_mark">\u21BB</string>
+    <string name="recovery_db_kicker">Local data needs attention</string>
+    <string name="recovery_db_title">Hello Bé needs a grown-up</string>
+    <string name="recovery_db_body">Try opening the local learning data again. Reset is available only if retry and restart cannot recover it.</string>
+    <string name="recovery_db_retry">Try again</string>
+    <string name="recovery_db_review_reset">Review reset</string>
+    <!-- A code with no child data in it, shown only on a caregiver surface. The trailing clause is
+         part of the approved copy and is what tells a caregiver the code is safe to read out. -->
+    <string name="recovery_db_code">Recovery code: %1$s · contains no child data</string>
 </resources>
