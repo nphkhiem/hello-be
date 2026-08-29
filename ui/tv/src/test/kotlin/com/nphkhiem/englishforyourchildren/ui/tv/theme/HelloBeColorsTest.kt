@@ -88,6 +88,44 @@ class HelloBeColorsTest {
         assertThat(colors.scrim.alpha).isLessThan(1f)
     }
 
+    @Test
+    fun givenAnyPalette_whenQuietTextSitsOnAnySurface_thenItPassesAaText() {
+        // The recorded ratios only ever measured tertiary text on the primary surface, so the
+        // pairing that actually ships, a 14sp bold label on the canvas, went unmeasured and sat
+        // at 4.30. Fourteen bold is not WCAG large text, so every quiet role is checked here
+        // against every surface it can be drawn on.
+        for (mode in HelloBeThemeMode.entries) {
+            for (highContrast in listOf(false, true)) {
+                val colors = helloBeColors(mode = mode, highContrast = highContrast)
+
+                for (surface in colors.surfaces()) {
+                    assertThat(contrastRatio(colors.textSecondary, surface)).isGreaterThan(4.5)
+                    assertThat(contrastRatio(colors.textTertiary, surface)).isGreaterThan(4.5)
+                }
+            }
+        }
+    }
+
+    @Test
+    fun givenHighContrast_whenQuietTextIsRead_thenItIsStrongerAndTheThreeLevelsRemain() {
+        for (mode in HelloBeThemeMode.entries) {
+            val standard = helloBeColors(mode = mode)
+            val strengthened = helloBeColors(mode = mode, highContrast = true)
+
+            assertThat(contrastRatio(strengthened.textSecondary, strengthened.canvas))
+                .isGreaterThan(contrastRatio(standard.textSecondary, standard.canvas))
+            assertThat(contrastRatio(strengthened.textTertiary, strengthened.canvas))
+                .isGreaterThan(contrastRatio(standard.textTertiary, standard.canvas))
+
+            assertThat(strengthened.textPrimary).isNotEqualTo(strengthened.textSecondary)
+            assertThat(strengthened.textSecondary).isNotEqualTo(strengthened.textTertiary)
+        }
+    }
+
+    /** Every surface a label can be drawn on, decorative scenery included. */
+    private fun HelloBeColors.surfaces(): List<Color> =
+        listOf(canvas, scenery, surfacePrimary, surfaceRaised, surfaceSoft, surfaceMuted)
+
     /** WCAG 2.1 relative luminance, used to keep the palette's contrast claims executable. */
     private fun relativeLuminance(color: Color): Double {
         fun channel(value: Float): Double {

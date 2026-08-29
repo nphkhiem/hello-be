@@ -63,7 +63,7 @@ private val dayColors =
         surfaceMuted = Color(0xFFEAE6DD),
         textPrimary = Color(0xFF102F4C),
         textSecondary = Color(0xFF4C6472),
-        textTertiary = Color(0xFF66747C),
+        textTertiary = Color(0xFF5A676F),
         textInverse = Color(0xFFFFF9F0),
         actionPrimary = Color(0xFF123A5A),
         actionPrimaryFocused = Color(0xFF102F4C),
@@ -146,11 +146,20 @@ private val nightColors =
 /**
  * High contrast is a semantic override layer applied on top of the active Day or Night
  * palette: it strengthens the quiet secondary border to the same weight as the primary
- * structural border and removes scrim transparency, per DESIGN_TOKENS.md "High contrast".
+ * structural border, removes scrim transparency, and lifts the quiet text roles, per
+ * DESIGN_TOKENS.md "High contrast" and its requirement of zero low-contrast text.
+ *
+ * The quiet roles are lifted a step each rather than collapsed into the primary ink, so a
+ * caregiver who turns the mode on keeps the three levels of emphasis they were reading before.
  */
-private fun HelloBeColors.asHighContrast(): HelloBeColors = copy(
+private fun HelloBeColors.asHighContrast(
+    strongSecondaryText: Color,
+    strongTertiaryText: Color
+): HelloBeColors = copy(
     borderSecondary = borderPrimary,
-    scrim = scrim.copy(alpha = 1f)
+    scrim = scrim.copy(alpha = 1f),
+    textSecondary = strongSecondaryText,
+    textTertiary = strongTertiaryText
 )
 
 fun helloBeColors(mode: HelloBeThemeMode, highContrast: Boolean = false): HelloBeColors {
@@ -159,5 +168,18 @@ fun helloBeColors(mode: HelloBeThemeMode, highContrast: Boolean = false): HelloB
             HelloBeThemeMode.DAY -> dayColors
             HelloBeThemeMode.NIGHT -> nightColors
         }
-    return if (highContrast) base.asHighContrast() else base
+    if (!highContrast) return base
+    return when (mode) {
+        HelloBeThemeMode.DAY ->
+            base.asHighContrast(
+                strongSecondaryText = Color(0xFF2B3F4E),
+                strongTertiaryText = Color(0xFF394F5C)
+            )
+
+        HelloBeThemeMode.NIGHT ->
+            base.asHighContrast(
+                strongSecondaryText = Color(0xFFEAF2F4),
+                strongTertiaryText = Color(0xFFD6E2E5)
+            )
+    }
 }
