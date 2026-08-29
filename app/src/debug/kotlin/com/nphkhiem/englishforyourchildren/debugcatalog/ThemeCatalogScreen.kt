@@ -116,6 +116,9 @@ fun ThemeCatalogScreen() {
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_review_heading))
                 ReviewSection()
 
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_celebration_heading))
+                CelebrationSection()
+
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_dialog_heading))
                 DialogSection(
                     focusRestorer = dialogRestorer,

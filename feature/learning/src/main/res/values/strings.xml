@@ -56,4 +56,13 @@
     <string name="path_recovery_title">This adventure is not ready</string>
     <string name="path_recovery_hint">Let us go back and pick another one.</string>
     <string name="path_recovery_action">Go home</string>
+    <!-- The count is formatted from the words actually on the page, never written by a caller,
+         so the headline cannot claim a different number from the one a child can see. -->
+    <string name="celebration_headline">You found %1$d %2$s words!</string>
+    <string name="celebration_done">Done</string>
+    <!-- Present tense on purpose. The stored phrase below may not be true yet, and the design
+         brief forbids claiming progress is saved before Room confirms the checkpoint. -->
+    <string name="celebration_saving">Pip is putting them in your storybook.</string>
+    <string name="celebration_saved">They are in your storybook now.</string>
+    <string name="celebration_pip">Pip is happy with you</string>
 </resources>
