@@ -13,11 +13,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.R
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateAction
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateScreen
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverConfirmation
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverConfirmationAction
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverFixtures
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverOverviewScreen
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverScaffold
@@ -30,6 +33,7 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementSc
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
+import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeSpacing
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
@@ -350,6 +354,86 @@ internal fun ProfileManagementCatalogSection() {
                 onAction = {}
             ) {
                 ProfileManagementScreen(state = state, onAction = { lastAction = it })
+            }
+        }
+    }
+}
+
+/**
+ * The two confirmations that stand in front of anything destructive.
+ *
+ * Walk every state pressing Select without moving first: the safe choice holds focus, so nothing
+ * may ever be destroyed by it. Then move and press twice on a working state, which must ask once.
+ *
+ * Read the two side by side as well. Delete removes a child from this television; reset keeps the
+ * child and restarts their learning, and no word may be shared between them.
+ */
+@Composable
+internal fun CaregiverConfirmationCatalogSection() {
+    val states = remember { CaregiverFixtures.confirmationStates() }
+    var index by remember { mutableIntStateOf(0) }
+    var lastAction by remember { mutableStateOf<CaregiverConfirmationAction?>(null) }
+    var dismissed by remember(index) { mutableStateOf(false) }
+    val (stateName, state) = states[index]
+    val restorer = rememberHelloBeFocusRestorer()
+
+    Column(verticalArrangement = Arrangement.spacedBy(HelloBeSpacing.space4)) {
+        Text(
+            text = stringResource(R.string.theme_catalog_confirm_label),
+            style = HelloBeTheme.typography.labelSmall,
+            color = HelloBeTheme.colors.textTertiary
+        )
+
+        Row(
+            modifier = Modifier.helloBeFocusGroup(),
+            horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)
+        ) {
+            HelloBeAction(
+                label = stringResource(R.string.theme_catalog_lesson_next_state),
+                onClick = { index = (index + 1) % states.size },
+                tone = HelloBeActionTone.SECONDARY,
+                modifier = Modifier.focusRequester(restorer.returnTarget)
+            )
+            Text(
+                text = stringResource(
+                    R.string.theme_catalog_lesson_showing,
+                    index + 1,
+                    states.size,
+                    stateName
+                ),
+                style = HelloBeTheme.typography.labelSmall,
+                color = HelloBeTheme.colors.textSecondary
+            )
+            lastAction?.let { action ->
+                Text(
+                    text = stringResource(
+                        R.string.theme_catalog_lesson_last_action,
+                        action.toString()
+                    ),
+                    style = HelloBeTheme.typography.labelSmall,
+                    color = HelloBeTheme.colors.textTertiary
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HelloBeLayout.referenceHeight)
+        ) {
+            // A dialog contains focus, which is correct on a television and would otherwise strand
+            // a reviewer on the state they stepped into, so its own choices close it here.
+            if (!dismissed) {
+                CaregiverConfirmation(
+                    state = state,
+                    focusRestorer = restorer,
+                    onAction = { action ->
+                        lastAction = action
+                        if (action != CaregiverConfirmationAction.RetryRequested) {
+                            dismissed = true
+                        }
+                    }
+                )
             }
         }
     }

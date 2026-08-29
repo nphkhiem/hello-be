@@ -249,6 +249,37 @@ object CaregiverFixtures {
         "changes are not saving" to profilesPersistenceFailed()
     )
 
+    fun deleteConfirmation(): CaregiverConfirmationState = CaregiverConfirmationState(
+        kind = CaregiverConfirmationKind.DELETE_PROFILE,
+        profileName = PROFILE,
+        profileAvatar = "M",
+        phase = CaregiverConfirmationPhase.READY
+    )
+
+    fun resetConfirmation(): CaregiverConfirmationState =
+        deleteConfirmation().copy(kind = CaregiverConfirmationKind.RESET_PROGRESS)
+
+    fun deleteWorking(): CaregiverConfirmationState =
+        deleteConfirmation().copy(phase = CaregiverConfirmationPhase.WORKING)
+
+    fun deleteFailed(): CaregiverConfirmationState =
+        deleteConfirmation().copy(phase = CaregiverConfirmationPhase.FAILED)
+
+    fun resetWorking(): CaregiverConfirmationState =
+        resetConfirmation().copy(phase = CaregiverConfirmationPhase.WORKING)
+
+    fun resetFailed(): CaregiverConfirmationState =
+        resetConfirmation().copy(phase = CaregiverConfirmationPhase.FAILED)
+
+    fun confirmationStates(): List<Pair<String, CaregiverConfirmationState>> = listOf(
+        "delete, ready" to deleteConfirmation(),
+        "delete, working" to deleteWorking(),
+        "delete, failed" to deleteFailed(),
+        "reset, ready" to resetConfirmation(),
+        "reset, working" to resetWorking(),
+        "reset, failed" to resetFailed()
+    )
+
     fun gateStates(): List<Pair<String, AdultGateUiState>> = listOf(
         "initial" to gate(),
         "correct answer first" to gateCorrectFirst(),
