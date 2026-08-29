@@ -20,6 +20,9 @@
     <string name="theme_catalog_create_label">Every create state. The default path is two Select presses; each state here departs from it.</string>
     <string name="theme_catalog_path_heading">Screen: learning path</string>
     <string name="theme_catalog_path_label">Every path state. Does Pip stand over the lesson a child should open next?</string>
+    <string name="theme_catalog_walk_heading">Walk the app</string>
+    <string name="theme_catalog_walk_label">The real navigation, on fixture content. Every route from launch, with real Back.</string>
+    <string name="theme_catalog_walk_reset">Start again</string>
     <string name="theme_catalog_gate_heading">Screen: adult gate</string>
     <string name="theme_catalog_gate_label">Every gate state. Press Select without moving: it must never be the correct answer.</string>
     <string name="theme_catalog_overview_heading">Screen: caregiver overview</string>

@@ -71,6 +71,9 @@ fun ThemeCatalogScreen() {
 
                 CatalogModeControls(mode = mode, onModeChange = { mode = it })
 
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_walk_heading))
+                WalkTheAppSection()
+
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_gate_heading))
                 AdultGateCatalogSection()
 

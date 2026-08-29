@@ -1,6 +1,8 @@
 package com.nphkhiem.englishforyourchildren.ui.tv.component
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -11,8 +13,12 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.tv.material3.Text
+import com.google.common.truth.Truth.assertThat
+import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import org.junit.Rule
 import org.junit.Test
@@ -103,6 +109,43 @@ class PipGuideTest {
         composeTestRule.mainClock.advanceTimeByFrame()
     }
 
+    @Test
+    fun givenNoSizeFromTheCaller_whenPipIsDrawn_thenItHonoursItsOwnMinimum() {
+        // PipGuide declares a minimum through defaultMinSize, which reads as a promise that it has
+        // a sensible size on its own. Every caller in this app passes an explicit size, so the
+        // promise had never been tested.
+        composeTestRule.setContent {
+            HelloBeTheme {
+                PipGuide(pose = PipPose.GREETING, contentDescription = UNSIZED_PIP)
+            }
+        }
+
+        val pip = composeTestRule.onNodeWithContentDescription(UNSIZED_PIP).fetchSemanticsNode()
+        val minimum = with(composeTestRule.density) { HelloBeLayout.pipMinSize.toPx() }
+
+        assertThat(pip.size.height.toFloat()).isAtLeast(minimum)
+        assertThat(pip.size.width.toFloat()).isAtLeast(minimum)
+    }
+
+    @Test
+    fun givenNoSizeFromTheCaller_whenPipSitsBesideOtherContent_thenThatContentKeepsItsHeight() {
+        // The failure as it actually appeared, in HB-D22's recovery panel: not Pip measuring
+        // small, but everything around it losing its height. The placeholder draws on a canvas
+        // that fills what it is given, and given a column's whole height it took the lot.
+        composeTestRule.setContent {
+            HelloBeTheme {
+                Column(verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space3)) {
+                    PipGuide(pose = PipPose.GREETING, contentDescription = UNSIZED_PIP)
+                    Text(text = NEIGHBOUR, style = HelloBeTheme.typography.bodyLarge)
+                }
+            }
+        }
+
+        val neighbour = composeTestRule.onNodeWithText(NEIGHBOUR).fetchSemanticsNode()
+
+        assertThat(neighbour.size.height).isGreaterThan(0)
+    }
+
     private companion object {
         const val PIP_GREETING = "Pip is waving hello"
         const val PIP_POINTING = "Pip is pointing at the picture"
@@ -111,5 +154,7 @@ class PipGuideTest {
         val CELEBRATING = PipPose.CELEBRATING.name
         val POSE_SIZE = 48.dp
         val SWITCHER_SIZE = 120.dp
+        const val UNSIZED_PIP = "Pip with no size"
+        const val NEIGHBOUR = "Still here"
     }
 }

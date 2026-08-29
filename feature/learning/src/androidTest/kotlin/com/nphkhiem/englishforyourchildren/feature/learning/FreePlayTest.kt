@@ -16,7 +16,6 @@ import androidx.compose.ui.test.hasStateDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
@@ -160,8 +159,12 @@ class FreePlayTest {
         val actions = mutableListOf<FreePlayAction>()
         setFreePlay(FreePlayFixtures.noSound(), onAction = { actions += it })
 
+        // Focus then a key press, not performClick: a television surface answers key events, and
+        // a touch click is a no-op on it, so asserting emptiness after one proved nothing. Found
+        // by mutation in HB-D20, where making the control clickable did not fail this test.
         composeTestRule.onNodeWithText("chair").assertIsFocused()
-        composeTestRule.onNodeWithText("chair").performClick()
+        composeTestRule.onNodeWithText("chair")
+            .performKeyInput { pressKey(Key.DirectionCenter) }
         composeTestRule.waitForIdle()
 
         assertThat(actions).isEmpty()

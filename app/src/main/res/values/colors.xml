@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="storybook_cream">#FFF8F1E7</color>
+    <!-- Referenced by themes.xml for the system bars, which are platform XML and cannot read the
+         Compose tokens. Kept in step with colors.action.primary by hand; every other colour in
+         this app comes from the token palette. -->
     <color name="storybook_navy">#FF082A4A</color>
 </resources>
