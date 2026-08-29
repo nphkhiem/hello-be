@@ -21,6 +21,9 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateScreen
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverFixtures
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverOverviewScreen
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverScaffold
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSection
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSettingsAction
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSettingsScreen
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
@@ -206,6 +209,75 @@ internal fun CaregiverOverviewCatalogSection() {
         ) {
             CaregiverScaffold(state = CaregiverFixtures.shell(), onAction = {}) {
                 CaregiverOverviewScreen(state = state)
+            }
+        }
+    }
+}
+
+/**
+ * The caregiver's controls.
+ *
+ * Walk it with the one question the draft asks: can you tell what each row is set to without
+ * looking at a colour? Every state is a word on the row and in its state description.
+ *
+ * Also worth checking that nothing here switches the child's theme. Night mode is not an approved
+ * caregiver control in this phase.
+ */
+@Composable
+internal fun CaregiverSettingsCatalogSection() {
+    val states = remember { CaregiverFixtures.settingsStates() }
+    var index by remember { mutableIntStateOf(0) }
+    var lastAction by remember { mutableStateOf<CaregiverSettingsAction?>(null) }
+    val (stateName, state) = states[index]
+
+    Column(verticalArrangement = Arrangement.spacedBy(HelloBeSpacing.space4)) {
+        Text(
+            text = stringResource(R.string.theme_catalog_settings_label),
+            style = HelloBeTheme.typography.labelSmall,
+            color = HelloBeTheme.colors.textTertiary
+        )
+
+        Row(
+            modifier = Modifier.helloBeFocusGroup(),
+            horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)
+        ) {
+            HelloBeAction(
+                label = stringResource(R.string.theme_catalog_lesson_next_state),
+                onClick = { index = (index + 1) % states.size },
+                tone = HelloBeActionTone.SECONDARY
+            )
+            Text(
+                text = stringResource(
+                    R.string.theme_catalog_lesson_showing,
+                    index + 1,
+                    states.size,
+                    stateName
+                ),
+                style = HelloBeTheme.typography.labelSmall,
+                color = HelloBeTheme.colors.textSecondary
+            )
+            lastAction?.let { action ->
+                Text(
+                    text = stringResource(
+                        R.string.theme_catalog_lesson_last_action,
+                        action.toString()
+                    ),
+                    style = HelloBeTheme.typography.labelSmall,
+                    color = HelloBeTheme.colors.textTertiary
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HelloBeLayout.referenceHeight)
+        ) {
+            CaregiverScaffold(
+                state = CaregiverFixtures.shell(CaregiverSection.SETTINGS),
+                onAction = {}
+            ) {
+                CaregiverSettingsScreen(state = state, onAction = { lastAction = it })
             }
         }
     }
