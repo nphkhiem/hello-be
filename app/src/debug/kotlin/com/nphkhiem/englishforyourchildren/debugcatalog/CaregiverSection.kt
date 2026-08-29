@@ -25,6 +25,8 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSection
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSettingsAction
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSettingsScreen
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellAction
+import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementAction
+import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementScreen
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
@@ -278,6 +280,76 @@ internal fun CaregiverSettingsCatalogSection() {
                 onAction = {}
             ) {
                 CaregiverSettingsScreen(state = state, onAction = { lastAction = it })
+            }
+        }
+    }
+}
+
+/**
+ * Switching, editing, and removing children.
+ *
+ * Walk it asking whether delete is far enough from everything else. A caregiver reaching for Reset
+ * progress must never be one press away from removing the child, which is why the two sit at
+ * opposite ends of the pane.
+ *
+ * Nothing here destroys anything: both destructive rows ask for their confirmations, which are
+ * HB-D21's.
+ */
+@Composable
+internal fun ProfileManagementCatalogSection() {
+    val states = remember { CaregiverFixtures.profileStates() }
+    var index by remember { mutableIntStateOf(0) }
+    var lastAction by remember { mutableStateOf<ProfileManagementAction?>(null) }
+    val (stateName, state) = states[index]
+
+    Column(verticalArrangement = Arrangement.spacedBy(HelloBeSpacing.space4)) {
+        Text(
+            text = stringResource(R.string.theme_catalog_profiles_label),
+            style = HelloBeTheme.typography.labelSmall,
+            color = HelloBeTheme.colors.textTertiary
+        )
+
+        Row(
+            modifier = Modifier.helloBeFocusGroup(),
+            horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)
+        ) {
+            HelloBeAction(
+                label = stringResource(R.string.theme_catalog_lesson_next_state),
+                onClick = { index = (index + 1) % states.size },
+                tone = HelloBeActionTone.SECONDARY
+            )
+            Text(
+                text = stringResource(
+                    R.string.theme_catalog_lesson_showing,
+                    index + 1,
+                    states.size,
+                    stateName
+                ),
+                style = HelloBeTheme.typography.labelSmall,
+                color = HelloBeTheme.colors.textSecondary
+            )
+            lastAction?.let { action ->
+                Text(
+                    text = stringResource(
+                        R.string.theme_catalog_lesson_last_action,
+                        action.toString()
+                    ),
+                    style = HelloBeTheme.typography.labelSmall,
+                    color = HelloBeTheme.colors.textTertiary
+                )
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HelloBeLayout.referenceHeight)
+        ) {
+            CaregiverScaffold(
+                state = CaregiverFixtures.shell(CaregiverSection.PROFILES),
+                onAction = {}
+            ) {
+                ProfileManagementScreen(state = state, onAction = { lastAction = it })
             }
         }
     }

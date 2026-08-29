@@ -204,6 +204,51 @@ object CaregiverFixtures {
         "accessibility on" to settingsAccessible()
     )
 
+    /** The draft's own two children. */
+    fun profiles(): ProfileManagementUiState = ProfileManagementUiState(
+        profiles = listOf(
+            ManagedProfile(id = "minh", name = PROFILE, avatar = "M", detail = MINH_DETAIL),
+            ManagedProfile(id = "lan", name = SECOND_PROFILE, avatar = "L", detail = LAN_DETAIL)
+        ),
+        selectedId = "minh",
+        persistenceFailed = false
+    )
+
+    /** Every slot in use, so adding another is refused with a reason. */
+    fun profilesAtLimit(): ProfileManagementUiState = profiles().copy(
+        profiles = (1..4).map {
+            ManagedProfile(id = "p$it", name = "Child $it", avatar = "C", detail = "Age $it")
+        },
+        selectedId = "p1"
+    )
+
+    fun profilesOnlyOne(): ProfileManagementUiState = profiles().copy(
+        profiles = profiles().profiles.take(1),
+        selectedId = "minh"
+    )
+
+    /** The selection names a child who has been removed. */
+    fun profilesStaleSelection(): ProfileManagementUiState = profiles().copy(selectedId = "deleted")
+
+    /** The second child selected, so an action that names the first is visibly wrong. */
+    fun profilesSecondSelected(): ProfileManagementUiState = profiles().copy(selectedId = "lan")
+
+    fun profilesNone(): ProfileManagementUiState =
+        profiles().copy(profiles = emptyList(), selectedId = null)
+
+    fun profilesPersistenceFailed(): ProfileManagementUiState =
+        profiles().copy(persistenceFailed = true)
+
+    fun profileStates(): List<Pair<String, ProfileManagementUiState>> = listOf(
+        "two profiles" to profiles(),
+        "one profile" to profilesOnlyOne(),
+        "at the four profile limit" to profilesAtLimit(),
+        "second child selected" to profilesSecondSelected(),
+        "selection has gone" to profilesStaleSelection(),
+        "no profiles" to profilesNone(),
+        "changes are not saving" to profilesPersistenceFailed()
+    )
+
     fun gateStates(): List<Pair<String, AdultGateUiState>> = listOf(
         "initial" to gate(),
         "correct answer first" to gateCorrectFirst(),
@@ -218,6 +263,9 @@ object CaregiverFixtures {
     )
 
     const val PROFILE = "Minh"
+    const val SECOND_PROFILE = "Lan"
+    const val MINH_DETAIL = "Age 3 · 6 adventures finished"
+    const val LAN_DETAIL = "Age 5 · 2 adventures finished"
     const val VIETNAMESE_HELP = "Vietnamese help"
     const val CAREGIVER_LANGUAGE = "Caregiver language"
     const val CAPTIONS = "Captions"
