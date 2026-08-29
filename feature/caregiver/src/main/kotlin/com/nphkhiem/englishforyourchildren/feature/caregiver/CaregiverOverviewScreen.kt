@@ -1,5 +1,6 @@
 package com.nphkhiem.englishforyourchildren.feature.caregiver
 
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
@@ -8,9 +9,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Surface
 import androidx.tv.material3.SurfaceDefaults
@@ -38,8 +42,32 @@ fun CaregiverOverviewScreen(state: CaregiverOverviewUiState, modifier: Modifier 
     // pressed, and a scrolling container that no remote can move puts its lower half out of reach
     // rather than out of sight. Everything a caregiver needs fits the stage at caregiver density,
     // and a test holds it there.
+    // The design brief asks caregiver content to reflow or reduce under a large font scale, and
+    // never to shrink text below its role size. Measured, this panel holds everything to a scale
+    // of about 1.4 and then runs out of stage: the instruction under the suggestion was the first
+    // thing to lose its height, which is the failure the brief names. Above that the recent words
+    // stand down. They are a reminder rather than the point of the screen, and every one of them
+    // is still in free play; the summaries and the one thing to try are what a caregiver came for.
+    val reduced = LocalDensity.current.fontScale >= REDUCE_CONTENT_ABOVE
+
+    // Above that scale the panel also has to reflow, because reducing alone is not enough: the
+    // heading and the three summaries fill the stage on their own, and whatever came last lost its
+    // height. It becomes a scrolling column, and it becomes focusable at the same time. On every
+    // other surface a scroll is safe because its rows take focus; nothing here does, so the
+    // container itself has to, or a caregiver with large text could see the lower half and never
+    // reach it. At ordinary scale it stays exactly as it was: no scroll, and nothing focusable.
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .then(
+                if (reduced) {
+                    Modifier
+                        .verticalScroll(rememberScrollState())
+                        .focusable()
+                } else {
+                    Modifier
+                }
+            ),
         verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space4)
     ) {
         PanelHead(state = state)
@@ -62,18 +90,25 @@ fun CaregiverOverviewScreen(state: CaregiverOverviewUiState, modifier: Modifier 
         // Side by side, as the draft draws them. Stacked they were a panel taller than the stage,
         // and on a surface where nothing takes focus the overflow would have been unreachable.
         Row(
-            modifier = Modifier.fillMaxWidth().weight(1f),
+            modifier = Modifier
+                .fillMaxWidth()
+                .then(if (reduced) Modifier else Modifier.weight(1f)),
             horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space4)
         ) {
             val progress = state.progress
-            if (progress is OverviewProgress.Practiced) {
+            if (progress is OverviewProgress.Practiced && !reduced) {
                 RecentWords(
                     words = recentWordsShown(progress.recentWords),
                     modifier = Modifier.weight(1f).fillMaxHeight()
                 )
             }
             state.suggestion?.let {
-                Suggestion(suggestion = it, modifier = Modifier.weight(1f).fillMaxHeight())
+                Suggestion(
+                    suggestion = it,
+                    modifier = Modifier
+                        .weight(1f)
+                        .then(if (reduced) Modifier else Modifier.fillMaxHeight())
+                )
             }
         }
     }
@@ -231,3 +266,11 @@ private fun Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit
         }
     }
 }
+
+/**
+ * The font scale above which the overview shows less at once.
+ *
+ * Measured rather than chosen: everything fits to about 1.4, and at 1.5 the instruction under the
+ * suggestion loses its height entirely. The threshold sits just below where that begins.
+ */
+private const val REDUCE_CONTENT_ABOVE = 1.4f
