@@ -37,4 +37,19 @@
     <string name="settings_saving">Saving\u2026</string>
     <string name="settings_save_failed">That change was not saved. Try again.</string>
     <string name="settings_restore">Restore defaults</string>
+    <string name="profiles_title">Profiles</string>
+    <string name="profiles_local">Stored only on this TV · Chỉ lưu trên TV này</string>
+    <string name="profiles_capacity">%1$d of %2$d profiles</string>
+    <string name="profiles_add">Add child</string>
+    <!-- Said rather than left to a greyed control, per the unavailable rule this product uses
+         everywhere: a thing a caregiver cannot do explains itself. -->
+    <string name="profiles_at_limit">This TV holds four profiles. Remove one to add another.</string>
+    <string name="profiles_selected">Selected profile</string>
+    <string name="profiles_edit_name">Edit name</string>
+    <string name="profiles_change_picture">Change picture</string>
+    <string name="profiles_reset">Reset progress</string>
+    <string name="profiles_delete">Delete profile</string>
+    <string name="profiles_empty_title">No profiles on this TV</string>
+    <string name="profiles_empty_hint">Add a child to start.</string>
+    <string name="profiles_persistence_failed">Profile changes are not being saved right now.</string>
 </resources>
