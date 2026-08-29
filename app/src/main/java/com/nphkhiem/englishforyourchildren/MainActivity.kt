@@ -4,87 +4,59 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.tv.material3.MaterialTheme
-import androidx.tv.material3.Text
+import com.nphkhiem.englishforyourchildren.navigation.HelloBeContent
+import com.nphkhiem.englishforyourchildren.navigation.HelloBeNavHost
+import com.nphkhiem.englishforyourchildren.navigation.ProfileGateway
+import com.nphkhiem.englishforyourchildren.navigation.UnavailableProfileGateway
+import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * The app root.
+ *
+ * It does two things: put the tokenized theme around everything, and hand the navigation host a
+ * way to read profiles and a way to leave. Every other decision belongs to the host or to a screen.
+ *
+ * The gateway an installed build gets reports that storage cannot be read, because nothing can read
+ * it yet. That is not a placeholder standing in for real data; it is the truth about a build with
+ * no data layer, and it sends the app to the caregiver recovery, which explains the situation to an
+ * adult. Inventing a child to show a home screen to would be the dishonest option.
+ */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            HelloBeApp()
+            HelloBeRoot(
+                gateway = remember { UnavailableProfileGateway() },
+                content = null,
+                onExitApp = { finish() }
+            )
         }
     }
 }
 
 @Composable
-private fun HelloBeApp() {
-    MaterialTheme {
-        val focusRequester = remember { FocusRequester() }
-        val homeContentDescription = stringResource(R.string.home_content_description)
-        var isFocused by remember { mutableStateOf(false) }
-
-        LaunchedEffect(focusRequester) {
-            focusRequester.requestFocus()
-        }
-
+internal fun HelloBeRoot(gateway: ProfileGateway, content: HelloBeContent?, onExitApp: () -> Unit) {
+    HelloBeTheme {
+        // The app root paints the canvas. Every screen sits on the stage rather than on whatever
+        // the window happens to be, and the recovery panel and the dialogs, which are cards on a
+        // background rather than full-bleed surfaces, would otherwise float on system grey.
         Box(
-            modifier =
-                Modifier
-                    .fillMaxSize()
-                    .background(colorResource(R.color.storybook_cream))
-                    .padding(horizontal = 64.dp, vertical = 36.dp),
-            contentAlignment = Alignment.Center
+            modifier = Modifier
+                .fillMaxSize()
+                .background(HelloBeTheme.colors.canvas)
         ) {
-            Box(
-                modifier =
-                    Modifier
-                        .focusRequester(focusRequester)
-                        .onFocusChanged { isFocused = it.isFocused }
-                        .focusable()
-                        .semantics {
-                            contentDescription = homeContentDescription
-                        }.background(
-                            color = Color(0xFF082A4A),
-                            shape = RoundedCornerShape(28.dp)
-                        ).border(
-                            width = if (isFocused) 6.dp else 2.dp,
-                            color = if (isFocused) Color(0xFFFFC857) else Color(0xFF8FB8D8),
-                            shape = RoundedCornerShape(28.dp)
-                        ).padding(horizontal = 72.dp, vertical = 48.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.app_name),
-                    color = Color.White,
-                    fontSize = 36.sp
-                )
-            }
+            HelloBeNavHost(
+                gateway = gateway,
+                content = content,
+                onExitApp = onExitApp
+            )
         }
     }
 }
