@@ -24,6 +24,8 @@
     <string name="theme_catalog_gate_label">Every gate state. Press Select without moving: it must never be the correct answer.</string>
     <string name="theme_catalog_overview_heading">Screen: caregiver overview</string>
     <string name="theme_catalog_overview_label">Every overview state. Does anything here read as a score, a ranking, or a log?</string>
+    <string name="theme_catalog_settings_heading">Screen: caregiver settings</string>
+    <string name="theme_catalog_settings_label">Every settings state. Can you tell what each row is set to without looking at colour?</string>
     <string name="theme_catalog_shell_heading">Shell: caregiver area</string>
     <string name="theme_catalog_shell_label">The stable rail. Nothing here may ask the gate question again.</string>
     <string name="theme_catalog_celebration_heading">Screen: lesson celebration</string>

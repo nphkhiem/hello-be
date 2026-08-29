@@ -25,4 +25,16 @@
     <string name="overview_nothing_recent_title">Nothing this week</string>
     <string name="overview_nothing_recent_hint">%1$s has practised before. There is nothing new to report for this period.</string>
     <string name="overview_pending_save">One recent session is still being written down.</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_intro">Changes describe their effect on the child experience.</string>
+    <string name="settings_group_language">Language support · Hỗ trợ ngôn ngữ</string>
+    <string name="settings_group_accessibility">Accessibility · Trợ năng</string>
+    <string name="settings_group_audio">Audio · Âm thanh</string>
+    <!-- State in words. The approved draft keeps setting state visible in text and semantics
+         rather than in the colour of a toggle. -->
+    <string name="settings_on">On</string>
+    <string name="settings_off">Off</string>
+    <string name="settings_saving">Saving\u2026</string>
+    <string name="settings_save_failed">That change was not saved. Try again.</string>
+    <string name="settings_restore">Restore defaults</string>
 </resources>

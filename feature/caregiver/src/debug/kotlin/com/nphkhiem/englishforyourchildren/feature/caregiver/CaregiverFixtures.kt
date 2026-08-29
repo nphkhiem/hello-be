@@ -112,6 +112,98 @@ object CaregiverFixtures {
         "long bilingual copy" to overviewLongCopy()
     )
 
+    /** The draft's own five rows, grouped as the information architecture asks. */
+    fun settings(): CaregiverSettingsUiState = CaregiverSettingsUiState(
+        rows = listOf(
+            SettingRow(
+                id = SettingId.VIETNAMESE_HELP,
+                group = SettingGroup.LANGUAGE,
+                title = VIETNAMESE_HELP,
+                consequence = "Appears after the third difficulty · Hỗ trợ tiếng Việt",
+                value = SettingValue.Choice(
+                    current = AUTOMATIC,
+                    options = listOf(AUTOMATIC, "Always", "Never")
+                )
+            ),
+            SettingRow(
+                id = SettingId.CAREGIVER_LANGUAGE,
+                group = SettingGroup.LANGUAGE,
+                title = CAREGIVER_LANGUAGE,
+                consequence = "Ngôn ngữ dành cho phụ huynh",
+                value = SettingValue.Choice(
+                    current = BOTH_LANGUAGES,
+                    options = listOf("English", "Tiếng Việt", BOTH_LANGUAGES)
+                )
+            ),
+            SettingRow(
+                id = SettingId.CAPTIONS,
+                group = SettingGroup.ACCESSIBILITY,
+                title = CAPTIONS,
+                consequence = "Show spoken instructions on screen",
+                value = SettingValue.Toggle(on = true)
+            ),
+            SettingRow(
+                id = SettingId.REDUCED_MOTION,
+                group = SettingGroup.ACCESSIBILITY,
+                title = REDUCED_MOTION,
+                consequence = "Use static pages and simple fades",
+                value = SettingValue.Toggle(on = false)
+            ),
+            SettingRow(
+                id = SettingId.HIGH_CONTRAST,
+                group = SettingGroup.ACCESSIBILITY,
+                title = HIGH_CONTRAST,
+                consequence = "Stronger borders and no faint text",
+                value = SettingValue.Toggle(on = false)
+            ),
+            SettingRow(
+                id = SettingId.BACKGROUND_MUSIC,
+                group = SettingGroup.AUDIO,
+                title = BACKGROUND_MUSIC,
+                consequence = "Speech always stays clear",
+                value = SettingValue.Toggle(on = true)
+            )
+        ),
+        expandedRow = null,
+        saveStatus = SettingsSaveStatus.Idle,
+        canRestoreDefaults = false
+    )
+
+    /** A caregiver has changed something, so putting it back becomes meaningful. */
+    fun settingsChanged(): CaregiverSettingsUiState = settings().copy(canRestoreDefaults = true)
+
+    /** The caregiver language row showing its options in place. */
+    fun settingsLanguageOpen(): CaregiverSettingsUiState =
+        settings().copy(expandedRow = SettingId.CAREGIVER_LANGUAGE)
+
+    fun settingsSaving(): CaregiverSettingsUiState =
+        settings().copy(saveStatus = SettingsSaveStatus.Saving, canRestoreDefaults = true)
+
+    fun settingsSaveFailed(): CaregiverSettingsUiState =
+        settings().copy(saveStatus = SettingsSaveStatus.Failed, canRestoreDefaults = true)
+
+    /** Reduced motion and high contrast both on, which is the preview the task card asks for. */
+    fun settingsAccessible(): CaregiverSettingsUiState = settings().copy(
+        rows = settings().rows.map { row ->
+            when (row.id) {
+                SettingId.REDUCED_MOTION, SettingId.HIGH_CONTRAST ->
+                    row.copy(value = SettingValue.Toggle(on = true))
+
+                else -> row
+            }
+        },
+        canRestoreDefaults = true
+    )
+
+    fun settingsStates(): List<Pair<String, CaregiverSettingsUiState>> = listOf(
+        "default" to settings(),
+        "changed" to settingsChanged(),
+        "language options open" to settingsLanguageOpen(),
+        "saving" to settingsSaving(),
+        "save failed" to settingsSaveFailed(),
+        "accessibility on" to settingsAccessible()
+    )
+
     fun gateStates(): List<Pair<String, AdultGateUiState>> = listOf(
         "initial" to gate(),
         "correct answer first" to gateCorrectFirst(),
@@ -126,6 +218,14 @@ object CaregiverFixtures {
     )
 
     const val PROFILE = "Minh"
+    const val VIETNAMESE_HELP = "Vietnamese help"
+    const val CAREGIVER_LANGUAGE = "Caregiver language"
+    const val CAPTIONS = "Captions"
+    const val REDUCED_MOTION = "Reduced motion"
+    const val HIGH_CONTRAST = "High contrast"
+    const val BACKGROUND_MUSIC = "Background music"
+    const val AUTOMATIC = "Automatic"
+    const val BOTH_LANGUAGES = "English + Tiếng Việt"
     const val PERIOD = "This week"
     const val NOT_A_SCORE = "Not a test score"
     const val SUGGESTION = "Find a chair"
