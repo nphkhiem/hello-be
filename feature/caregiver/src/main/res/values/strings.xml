@@ -14,4 +14,15 @@
     <string name="caregiver_settings">Settings</string>
     <string name="caregiver_profiles">Profiles</string>
     <string name="caregiver_return">Return to child mode</string>
+    <string name="overview_title">%1$s\u2019s learning</string>
+    <!-- The local-data explanation the information architecture asks for. It is a statement of
+         fact about this build: nothing here leaves the television. -->
+    <string name="overview_local_note">A simple local summary. Nothing is sent from this TV.</string>
+    <string name="overview_recent">Recently practiced</string>
+    <string name="overview_suggestion">Try away from the TV</string>
+    <string name="overview_new_profile_title">No sessions yet</string>
+    <string name="overview_new_profile_hint">When %1$s finishes a first adventure, a summary appears here.</string>
+    <string name="overview_nothing_recent_title">Nothing this week</string>
+    <string name="overview_nothing_recent_hint">%1$s has practised before. There is nothing new to report for this period.</string>
+    <string name="overview_pending_save">One recent session is still being written down.</string>
 </resources>

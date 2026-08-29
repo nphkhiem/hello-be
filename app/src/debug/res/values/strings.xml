@@ -22,6 +22,8 @@
     <string name="theme_catalog_path_label">Every path state. Does Pip stand over the lesson a child should open next?</string>
     <string name="theme_catalog_gate_heading">Screen: adult gate</string>
     <string name="theme_catalog_gate_label">Every gate state. Press Select without moving: it must never be the correct answer.</string>
+    <string name="theme_catalog_overview_heading">Screen: caregiver overview</string>
+    <string name="theme_catalog_overview_label">Every overview state. Does anything here read as a score, a ranking, or a log?</string>
     <string name="theme_catalog_shell_heading">Shell: caregiver area</string>
     <string name="theme_catalog_shell_label">The stable rail. Nothing here may ask the gate question again.</string>
     <string name="theme_catalog_celebration_heading">Screen: lesson celebration</string>

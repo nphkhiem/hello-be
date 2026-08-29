@@ -19,6 +19,7 @@ import com.nphkhiem.englishforyourchildren.R
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateAction
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateScreen
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverFixtures
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverOverviewScreen
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverScaffold
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
@@ -152,6 +153,59 @@ internal fun CaregiverShellCatalogSection() {
                     style = HelloBeTheme.typography.titleSmall,
                     color = HelloBeTheme.colors.textSecondary
                 )
+            }
+        }
+    }
+}
+
+/**
+ * What a caregiver reads about one child.
+ *
+ * Shown inside the real shell, because the panel is never seen on its own. Walk it asking whether
+ * anything reads as a score, a ranking, or a log: the summaries are bounded to three and the recent
+ * words to six by the screen itself, so the two overflowing states are the ones to check.
+ */
+@Composable
+internal fun CaregiverOverviewCatalogSection() {
+    val states = remember { CaregiverFixtures.overviewStates() }
+    var index by remember { mutableIntStateOf(0) }
+    val (stateName, state) = states[index]
+
+    Column(verticalArrangement = Arrangement.spacedBy(HelloBeSpacing.space4)) {
+        Text(
+            text = stringResource(R.string.theme_catalog_overview_label),
+            style = HelloBeTheme.typography.labelSmall,
+            color = HelloBeTheme.colors.textTertiary
+        )
+
+        Row(
+            modifier = Modifier.helloBeFocusGroup(),
+            horizontalArrangement = Arrangement.spacedBy(HelloBeSpacing.cardGap)
+        ) {
+            HelloBeAction(
+                label = stringResource(R.string.theme_catalog_lesson_next_state),
+                onClick = { index = (index + 1) % states.size },
+                tone = HelloBeActionTone.SECONDARY
+            )
+            Text(
+                text = stringResource(
+                    R.string.theme_catalog_lesson_showing,
+                    index + 1,
+                    states.size,
+                    stateName
+                ),
+                style = HelloBeTheme.typography.labelSmall,
+                color = HelloBeTheme.colors.textSecondary
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HelloBeLayout.referenceHeight)
+        ) {
+            CaregiverScaffold(state = CaregiverFixtures.shell(), onAction = {}) {
+                CaregiverOverviewScreen(state = state)
             }
         }
     }
