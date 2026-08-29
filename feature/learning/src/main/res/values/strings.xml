@@ -65,4 +65,7 @@
     <string name="celebration_saving">Pip is putting them in your storybook.</string>
     <string name="celebration_saved">They are in your storybook now.</string>
     <string name="celebration_pip">Pip is happy with you</string>
+    <string name="play_together_accept">Play together</string>
+    <string name="play_together_decline">Maybe later</string>
+    <string name="play_together_pip">Pip has an idea for you both</string>
 </resources>

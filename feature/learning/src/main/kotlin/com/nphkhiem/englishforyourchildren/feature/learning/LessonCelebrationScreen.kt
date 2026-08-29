@@ -28,10 +28,12 @@ import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeFocusFrame
+import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.component.LearningObjectCard
 import com.nphkhiem.englishforyourchildren.ui.tv.component.PipGuide
 import com.nphkhiem.englishforyourchildren.ui.tv.component.PipPose
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StorybookScaffold
+import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeShapes
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
@@ -53,10 +55,23 @@ fun LessonCelebrationScreen(
     modifier: Modifier = Modifier
 ) {
     val doneFocus = remember { FocusRequester() }
+    val promptRestorer = rememberHelloBeFocusRestorer()
+    val activity = state.playTogether
 
-    // Back and Done are the same press here. The information architecture has Back complete the
-    // return immediately, and without this it would pop back into the lesson just finished.
-    BackHandler { onAction(CelebrationAction.DoneRequested) }
+    // Back is whatever the safe way out of what is on screen happens to be. While the activity is
+    // being offered that is declining it, so Back never commits a caregiver to anything and a
+    // second overlay cannot stack on the first. With nothing offered it completes the return,
+    // which the information architecture asks for, and without which Back would pop back into the
+    // lesson just finished.
+    BackHandler {
+        onAction(
+            if (activity != null) {
+                CelebrationAction.MaybeLaterRequested
+            } else {
+                CelebrationAction.DoneRequested
+            }
+        )
+    }
 
     StorybookScaffold(
         modifier = modifier,
@@ -65,7 +80,20 @@ fun LessonCelebrationScreen(
             Box(modifier = Modifier.fillMaxSize().background(HelloBeTheme.colors.scenery))
         }
     ) {
-        StoryPage(state = state, onAction = onAction, doneFocus = doneFocus)
+        StoryPage(
+            state = state,
+            onAction = onAction,
+            doneFocus = doneFocus,
+            promptRestorer = promptRestorer
+        )
+
+        if (activity != null) {
+            PlayTogetherPrompt(
+                activity = activity,
+                focusRestorer = promptRestorer,
+                onAction = onAction
+            )
+        }
     }
 }
 
@@ -73,7 +101,8 @@ fun LessonCelebrationScreen(
 private fun StoryPage(
     state: CelebrationUiState,
     onAction: (CelebrationAction) -> Unit,
-    doneFocus: FocusRequester
+    doneFocus: FocusRequester,
+    promptRestorer: HelloBeFocusRestorer
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -133,9 +162,13 @@ private fun StoryPage(
                 label = stringResource(R.string.celebration_done),
                 onClick = { onAction(CelebrationAction.DoneRequested) },
                 tone = HelloBeActionTone.PRIMARY,
+                // Done is both where entry focus lands and the prompt's return target. Being the
+                // only focusable control on the page, focus would fall here anyway today, so the
+                // return target is wiring for correctness rather than something observable.
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .focusRequester(doneFocus)
+                    .focusRequester(promptRestorer.returnTarget)
             )
         }
     }

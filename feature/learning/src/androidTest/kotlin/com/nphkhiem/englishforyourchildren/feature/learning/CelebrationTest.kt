@@ -4,15 +4,18 @@ import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
+import androidx.compose.ui.test.requestFocus
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
@@ -227,6 +230,95 @@ class CelebrationTest {
         }
     }
 
+    @Test
+    fun givenNoActivityIsOffered_whenTheCelebrationIsDrawn_thenThereIsNoPrompt() {
+        setCelebration(CelebrationFixtures.settled())
+
+        composeTestRule.onNodeWithText(accept()).assertDoesNotExist()
+        composeTestRule.onNodeWithText(decline()).assertDoesNotExist()
+    }
+
+    @Test
+    fun givenAnActivityIsOffered_whenThePromptAppears_thenItSaysWhatToDoAndDecliningHoldsFocus() {
+        // S08 puts entry focus on the decline "to avoid pressure and accidental commitment", so a
+        // child alone with the remote cannot commit a caregiver to anything by pressing Select.
+        setCelebration(CelebrationFixtures.playTogether())
+
+        composeTestRule.onNodeWithText(CelebrationFixtures.ACTIVITY_TITLE).assertIsDisplayed()
+        composeTestRule.onNodeWithText(CelebrationFixtures.ACTIVITY_INSTRUCTION).assertIsDisplayed()
+        composeTestRule.onNodeWithText(decline()).assertIsFocused()
+        composeTestRule.onNodeWithText(accept()).assertIsNotFocused()
+    }
+
+    @Test
+    fun givenThePrompt_whenTheFocusedChoiceIsPressed_thenItDeclinesAndNothingElse() {
+        val actions = mutableListOf<CelebrationAction>()
+        setCelebration(CelebrationFixtures.playTogether(), onAction = { actions += it })
+
+        composeTestRule.onNodeWithText(decline()).performKeyInput { pressKey(Key.DirectionCenter) }
+        composeTestRule.waitForIdle()
+
+        assertThat(actions).containsExactly(CelebrationAction.MaybeLaterRequested)
+    }
+
+    @Test
+    fun givenThePrompt_whenTheOfferIsTaken_thenAcceptingIsItsOwnAction() {
+        val actions = mutableListOf<CelebrationAction>()
+        setCelebration(CelebrationFixtures.playTogether(), onAction = { actions += it })
+
+        composeTestRule.onNodeWithText(accept()).requestFocus()
+        composeTestRule.onNodeWithText(accept()).performKeyInput { pressKey(Key.DirectionCenter) }
+        composeTestRule.waitForIdle()
+
+        assertThat(actions).containsExactly(CelebrationAction.PlayTogetherAccepted)
+    }
+
+    @Test
+    fun givenThePromptIsOpen_whenBackIsPressed_thenItDeclinesRatherThanCompleting() {
+        // Back is the safe way out of whatever is on screen. While an activity is being offered
+        // that is declining it, so Back never accepts on a caregiver's behalf.
+        val actions = mutableListOf<CelebrationAction>()
+        setCelebration(CelebrationFixtures.playTogether(), onAction = { actions += it })
+
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
+        composeTestRule.waitForIdle()
+
+        assertThat(actions).containsExactly(CelebrationAction.MaybeLaterRequested)
+    }
+
+    @Test
+    fun givenThePromptIsOpen_whenTheStageBehindIsSought_thenDoneCannotBeReached() {
+        setCelebration(CelebrationFixtures.playTogether())
+
+        composeTestRule.onNodeWithText(done()).assertIsNotFocused()
+        composeTestRule.onNodeWithText(decline()).performKeyInput { pressKey(Key.DirectionDown) }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText(done()).assertIsNotFocused()
+    }
+
+    @Test
+    fun givenThePromptCloses_whenTheStageComesBack_thenFocusIsNotStranded() {
+        // What this proves is that focus is somewhere useful after the dialog goes, not that the
+        // restorer chose it: Done is the only focusable control on this page, so removing the
+        // return target entirely still passes. That was checked by mutation. The wiring stays
+        // because StoryDialog's contract expects it and the day this page grows a second control
+        // is the day the difference becomes visible, but the assertion claims only the weaker
+        // thing it can actually see.
+        val state = mutableStateOf(CelebrationFixtures.playTogether())
+        composeTestRule.setContent {
+            HelloBeTheme {
+                LessonCelebrationScreen(state = state.value, onAction = {})
+            }
+        }
+
+        composeTestRule.onNodeWithText(decline()).assertIsFocused()
+        composeTestRule.runOnIdle { state.value = CelebrationFixtures.settled() }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText(done()).assertIsFocused()
+    }
+
     private fun setCelebration(
         state: CelebrationUiState,
         onAction: (CelebrationAction) -> Unit = {},
@@ -246,6 +338,10 @@ class CelebrationTest {
     )
 
     private fun done() = resources.getString(R.string.celebration_done)
+
+    private fun accept() = resources.getString(R.string.play_together_accept)
+
+    private fun decline() = resources.getString(R.string.play_together_decline)
 
     private fun saved() = resources.getString(R.string.celebration_saved)
 

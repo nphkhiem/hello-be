@@ -41,7 +41,12 @@ internal fun CelebrationSection() {
     val states = remember { CelebrationFixtures.reviewStates() }
     var index by remember { mutableIntStateOf(0) }
     var lastAction by remember { mutableStateOf<CelebrationAction?>(null) }
-    val (stateName, state) = states[index]
+    // A dialog contains focus, which is correct on a television and would otherwise strand a
+    // reviewer: with the prompt open, Next state cannot be reached. So the prompt's own choices
+    // close it here, which is also what a real host would do.
+    var promptDismissed by remember(index) { mutableStateOf(false) }
+    val (stateName, rawState) = states[index]
+    val state = if (promptDismissed) rawState.copy(playTogether = null) else rawState
 
     Column(verticalArrangement = Arrangement.spacedBy(HelloBeSpacing.space4)) {
         Text(
@@ -86,7 +91,17 @@ internal fun CelebrationSection() {
                 .fillMaxWidth()
                 .height(HelloBeLayout.referenceHeight)
         ) {
-            LessonCelebrationScreen(state = state, onAction = { lastAction = it })
+            LessonCelebrationScreen(
+                state = state,
+                onAction = { action ->
+                    lastAction = action
+                    if (action is CelebrationAction.MaybeLaterRequested ||
+                        action is CelebrationAction.PlayTogetherAccepted
+                    ) {
+                        promptDismissed = true
+                    }
+                }
+            )
         }
     }
 }
