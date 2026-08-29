@@ -92,6 +92,9 @@ fun ThemeCatalogScreen() {
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_create_heading))
                 CreateProfileSection()
 
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_path_heading))
+                LearningPathSection()
+
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_lesson_heading))
                 LessonSection()
 
