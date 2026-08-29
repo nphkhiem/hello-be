@@ -83,4 +83,23 @@
     <string name="free_play_empty_title">No words here yet</string>
     <string name="free_play_empty_hint">Play a little adventure first, and Pip will keep the words here for you.</string>
     <string name="free_play_empty_action">Go home</string>
+    <!-- Recovery copy, transcribed from the approved drafts. Nothing here blames the child and
+         nothing claims something was saved or fixed before it was. -->
+    <string name="recovery_audio_title">I can\u2019t play the sound yet</string>
+    <string name="recovery_audio_body">The picture is still here. We can try the sound again or let Pip show the answer.</string>
+    <string name="recovery_audio_retry">Try sound again</string>
+    <string name="recovery_audio_show">Show me</string>
+    <string name="recovery_pending_title">Pip is still holding this part</string>
+    <string name="recovery_pending_body">This activity may not be remembered if you stop now. You can keep learning or ask a grown-up for help.</string>
+    <string name="recovery_pending_keep">Keep learning</string>
+    <string name="recovery_pending_grownup">Ask a grown-up</string>
+    <string name="recovery_lesson_kicker">This page is resting</string>
+    <string name="recovery_lesson_title">Let\u2019s choose another adventure</string>
+    <string name="recovery_lesson_body">This lesson cannot open right now. Your other story pages are still ready.</string>
+    <string name="recovery_lesson_action">Back to path</string>
+    <string name="recovery_empty_kicker">Your shelf is waiting</string>
+    <string name="recovery_empty_title">Finish one adventure to add words</string>
+    <string name="recovery_empty_body">Words you meet in lessons will appear here for free play.</string>
+    <string name="recovery_empty_action">Find an adventure</string>
+    <string name="recovery_pip">Pip is here to help</string>
 </resources>
