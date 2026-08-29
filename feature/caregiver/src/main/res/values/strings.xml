@@ -52,4 +52,20 @@
     <string name="profiles_empty_title">No profiles on this TV</string>
     <string name="profiles_empty_hint">Add a child to start.</string>
     <string name="profiles_persistence_failed">Profile changes are not being saved right now.</string>
+    <!-- Transcribed from the approved drafts rather than paraphrased. Softening the consequence
+         of deleting a child\u2019s profile would be the one place this product must not do it. -->
+    <string name="confirm_delete_title">Delete %1$s\u2019s profile?</string>
+    <string name="confirm_delete_body">This removes %1$s and all learning progress from this TV. It cannot be undone.</string>
+    <string name="confirm_delete_keep">Keep profile</string>
+    <string name="confirm_delete_do">Delete profile</string>
+    <string name="confirm_delete_working">Deleting\u2026</string>
+    <string name="confirm_delete_failed">%1$s\u2019s profile was not deleted. Nothing has changed.</string>
+    <string name="confirm_reset_title">Reset %1$s\u2019s learning progress?</string>
+    <string name="confirm_reset_body">%1$s\u2019s profile and picture will stay. Finished lessons and practiced words will start again.</string>
+    <string name="confirm_reset_keep">Keep progress</string>
+    <string name="confirm_reset_do">Reset progress</string>
+    <string name="confirm_reset_working">Resetting\u2026</string>
+    <string name="confirm_reset_failed">%1$s\u2019s progress was not reset. Nothing has changed.</string>
+    <string name="confirm_retry">Try again</string>
+    <string name="confirm_reset_mark">\u21BB</string>
 </resources>

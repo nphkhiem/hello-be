@@ -13,6 +13,9 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.tv.material)
+    // BackHandler only, so a destructive confirmation can treat Back as its safe choice. This
+    // module still reaches no navigation, repository or playback API.
+    implementation(libs.androidx.activity.compose)
 
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui)

@@ -86,6 +86,9 @@ fun ThemeCatalogScreen() {
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_profiles_heading))
                 ProfileManagementCatalogSection()
 
+                CatalogSectionHeading(stringResource(R.string.theme_catalog_confirm_heading))
+                CaregiverConfirmationCatalogSection()
+
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_stage_heading))
                 StageSection()
 

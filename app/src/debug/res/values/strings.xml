@@ -28,6 +28,8 @@
     <string name="theme_catalog_settings_label">Every settings state. Can you tell what each row is set to without looking at colour?</string>
     <string name="theme_catalog_profiles_heading">Screen: profile management</string>
     <string name="theme_catalog_profiles_label">Every management state. Is delete far enough from everything else?</string>
+    <string name="theme_catalog_confirm_heading">Dialogs: destructive caregiver confirmations</string>
+    <string name="theme_catalog_confirm_label">Press Select without moving, in every state. Nothing may ever be destroyed by it.</string>
     <string name="theme_catalog_shell_heading">Shell: caregiver area</string>
     <string name="theme_catalog_shell_label">The stable rail. Nothing here may ask the gate question again.</string>
     <string name="theme_catalog_celebration_heading">Screen: lesson celebration</string>
