@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Bilingual throughout, per the approved draft: caregiver surfaces address an adult who may
+         read either language, and the separator is a middle dot rather than a slash. -->
+    <string name="gate_title">Grown-ups only · Dành cho người lớn</string>
+    <string name="gate_instruction">Solve this quick question to open caregiver settings.</string>
+    <string name="gate_back_hint">Back returns to the child screen · Quay lại màn hình của bé</string>
+    <!-- Neutral on purpose. An incorrect answer is not a failure and is never styled as one. -->
+    <string name="gate_retry">Not quite. Here is another question.</string>
+    <string name="gate_unavailable">This question is not ready. Press Back to return.</string>
+    <string name="caregiver_area">Caregiver area · Khu vực phụ huynh</string>
+    <string name="caregiver_rail_title">For %1$s</string>
+    <string name="caregiver_overview">Overview</string>
+    <string name="caregiver_settings">Settings</string>
+    <string name="caregiver_profiles">Profiles</string>
+    <string name="caregiver_return">Return to child mode</string>
+</resources>
