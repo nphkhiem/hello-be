@@ -86,9 +86,28 @@ object LearningPathFixtures {
     fun emptyUnit(): LearningPathUiState =
         midUnit().copy(unit = midUnit().unit?.copy(lessons = emptyList()))
 
+    /**
+     * A unit whose titles are not all the same length.
+     *
+     * One short enough to fit a single line beside neighbours that need two, which is the case
+     * that pulls a row out of alignment unless the title block is held to a fixed height.
+     */
+    fun mixedTitleLengths(): LearningPathUiState = midUnit().copy(
+        unit = midUnit().unit?.copy(
+            lessons = listOf(
+                lesson(EARS, LessonProgress.COMPLETED),
+                lesson(NOSE, LessonProgress.COMPLETED),
+                lesson(HANDS, LessonProgress.RECOMMENDED),
+                lesson(MOVE, LessonProgress.FUTURE),
+                lesson(REVIEW, LessonProgress.FUTURE, LessonKind.REVIEW)
+            )
+        )
+    )
+
     /** Every approved path state, in the order a reviewer would walk them. */
     fun reviewStates(): List<Pair<String, LearningPathUiState>> = listOf(
         "part way through a unit" to midUnit(),
+        "titles of different lengths" to mixedTitleLengths(),
         "first unit" to firstUnit(),
         "last unit" to lastUnit(),
         "unit finished" to unitFinished(),
@@ -117,6 +136,7 @@ object LearningPathFixtures {
     const val OBJECTIVE = "Five little adventures"
     const val UNIT_COUNT = 12
     const val EYES = "Eyes and ears"
+    const val EARS = "Ears"
     const val NOSE = "Nose and mouth"
     const val HANDS = "Hands and feet"
     const val MOVE = "Move with me"

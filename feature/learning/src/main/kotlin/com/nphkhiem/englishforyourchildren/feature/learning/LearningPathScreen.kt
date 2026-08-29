@@ -1,5 +1,6 @@
 package com.nphkhiem.englishforyourchildren.feature.learning
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
@@ -123,7 +126,6 @@ private fun UnitPage(
             steppingUnits = steppingUnits,
             onSteppingUnits = { steppingUnits = it }
         )
-        PipRow(unit = unit, recommendedId = recommendedId)
         LessonRow(
             unit = unit,
             recommendedId = recommendedId,
@@ -256,38 +258,34 @@ private fun UnitStepper(
 }
 
 /**
- * Pip, in the recommended lesson's column.
+ * The space above one lesson, holding Pip when this is the lesson being recommended.
  *
- * Shares the lesson row's weights so the two stay aligned as the unit's lesson count changes.
- * Nothing is drawn when no lesson is recommended, because Pip pointing at nothing would be a
- * cue that means nothing.
+ * Pip travels in the lesson's own column rather than in a band of its own. A separate band divided
+ * the whole stage into equal shares, which stopped agreeing with the card positions the moment the
+ * cards took a fixed width and began to scroll, and left Pip standing over a gap.
  *
- * The band is deliberately shorter than Pip. Pip is drawn at its full minimum size with
- * `requiredSize` and rises out of the band into the empty stage beside the unit copy, which is
- * space nothing else wants. Claiming a full height band for it instead cost the lesson cards
- * ninety six dp they turned out to need, and clipped the word under every title.
+ * The perch is always occupied so every card in the row starts at the same height. It is
+ * deliberately shorter than Pip: Pip is drawn at its full minimum size with `requiredSize` and
+ * rises out of the perch into empty stage, so pointing costs the cards half its height rather than
+ * all of it.
+ *
+ * Nothing is drawn when no lesson is recommended, because Pip standing over nothing in particular
+ * is a cue that means nothing.
  */
 @Composable
-private fun PipRow(unit: UnitPageState, recommendedId: String?) {
-    Row(
+private fun PipPerch(present: Boolean) {
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(HelloBeLayout.pipMinSize * PIP_BAND_FRACTION),
-        horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap)
+        contentAlignment = Alignment.BottomCenter
     ) {
-        unit.lessons.forEach { node ->
-            Box(
-                modifier = Modifier.weight(1f).fillMaxHeight(),
-                contentAlignment = Alignment.BottomCenter
-            ) {
-                if (node.id == recommendedId) {
-                    PipGuide(
-                        pose = PipPose.GREETING,
-                        contentDescription = stringResource(R.string.path_pip_recommended),
-                        modifier = Modifier.requiredSize(HelloBeLayout.pipMinSize)
-                    )
-                }
-            }
+        if (present) {
+            PipGuide(
+                pose = PipPose.GREETING,
+                contentDescription = stringResource(R.string.path_pip_recommended),
+                modifier = Modifier.requiredSize(HelloBeLayout.pipMinSize)
+            )
         }
     }
 }
@@ -300,6 +298,10 @@ private fun ColumnScope.LessonRow(
     recommendedFocus: FocusRequester,
     onLessonFocused: () -> Unit
 ) {
+    // Equal shares of the stage, not a scrolling row of fixed-width cards. A scroller was tried
+    // and reverted: it made the cards larger but put the fifth lesson off stage, and a child who
+    // cannot read has no way to discover a lesson that is not on screen. The draft draws five
+    // columns because the page is the unit, and the unit is meant to be seen at once.
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -309,21 +311,30 @@ private fun ColumnScope.LessonRow(
         horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap)
     ) {
         unit.lessons.forEach { node ->
-            LessonNode(
-                node = node,
-                recommended = node.id == recommendedId,
-                onAction = onAction,
+            Column(
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight()
-                    .then(
-                        if (node.id == recommendedId) {
-                            Modifier.focusRequester(recommendedFocus)
-                        } else {
-                            Modifier
-                        }
-                    )
-            )
+                    .fillMaxHeight(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                PipPerch(present = node.id == recommendedId)
+
+                LessonNode(
+                    node = node,
+                    recommended = node.id == recommendedId,
+                    onAction = onAction,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .then(
+                            if (node.id == recommendedId) {
+                                Modifier.focusRequester(recommendedFocus)
+                            } else {
+                                Modifier
+                            }
+                        )
+                )
+            }
         }
     }
 }
@@ -360,31 +371,50 @@ private fun LessonNode(
             null
         },
         centerContent = true,
+        // Two lines whether the title needs them or not, so every card in the row puts its title,
+        // and the word under it, at the same height. A wider card lets some titles fit on one line
+        // and that alone was enough to make the row step up and down.
+        titleMinLines = LESSON_TITLE_LINES,
         illustration = lessonMark(node)
     )
 }
 
 /**
- * The card's mark, or nothing.
+ * The card's mark, and an empty space of the same height where there is no mark to draw.
  *
- * Returns a slot rather than drawing one, so a lesson with neither a completion nor a review to
- * report contributes no empty box to the card's layout.
+ * The slot is always occupied. Omitting it for a lesson with nothing to report made those cards
+ * shorter than their neighbours, and a centred card that is shorter sits its title higher, so the
+ * titles and the words under them stepped up and down across the row. Reserving the height costs
+ * a little space on three cards in five and buys one baseline for all of them.
  */
 @Composable
-private fun lessonMark(node: LessonNodeState): (@Composable () -> Unit)? {
+private fun lessonMark(node: LessonNodeState): (@Composable () -> Unit) {
     val completed = node.progress == LessonProgress.COMPLETED
     val review = node.kind == LessonKind.REVIEW
-    if (!completed && !review) return null
+    val style = HelloBeTheme.typography.titleMedium
+    val markHeight = with(LocalDensity.current) { style.lineHeight.toDp() }
 
-    val text = stringResource(
-        if (completed) R.string.path_complete_mark else R.string.path_review_mark
-    )
+    val text = when {
+        completed -> stringResource(R.string.path_complete_mark)
+        review -> stringResource(R.string.path_review_mark)
+        else -> null
+    }
     val color = if (completed) {
         HelloBeTheme.colors.successContent
     } else {
         HelloBeTheme.colors.textSecondary
     }
-    return { Text(text = text, style = HelloBeTheme.typography.titleMedium, color = color) }
+
+    return {
+        Box(
+            modifier = Modifier.height(markHeight),
+            contentAlignment = Alignment.Center
+        ) {
+            if (text != null) {
+                Text(text = text, style = style, color = color)
+            }
+        }
+    }
 }
 
 @Composable
@@ -440,3 +470,6 @@ private fun UnitRecovery(onAction: (LearningPathAction) -> Unit, recoveryFocus: 
  * the rest upward into empty stage, so pointing costs the lesson cards half its height, not all.
  */
 private const val PIP_BAND_FRACTION = 0.5f
+
+/** Every lesson title is drawn two lines tall, so the row shares one baseline. */
+private const val LESSON_TITLE_LINES = 2

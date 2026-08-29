@@ -22,6 +22,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
@@ -93,6 +94,8 @@ class LearningPathTest {
     fun givenALessonStillAhead_whenThePathIsRead_thenItIsShownAsLaterRatherThanHidden() {
         setPath(LearningPathFixtures.midUnit())
 
+        // Both on screen. The whole unit is visible at once, which is what makes the page a page:
+        // a child who cannot read cannot discover a lesson that is off stage.
         composeTestRule.onNodeWithText(LearningPathFixtures.MOVE).assertIsDisplayed()
         composeTestRule.onNodeWithText(LearningPathFixtures.REVIEW).assertIsDisplayed()
         composeTestRule.onAllNodesWithText(later()).assertCountEquals(2)
@@ -126,7 +129,9 @@ class LearningPathTest {
         assertThat(pipCentre).isAtLeast(recommended.left.value)
         assertThat(pipCentre).isAtMost(recommended.right.value)
         assertThat(pipCentre).isGreaterThan(neighbour.right.value)
-        assertThat(pip.bottom.value).isAtMost(recommended.top.value)
+        // Pip rises above the card it stands on and now perches on its top edge rather than
+        // floating in a band of its own, so it starts above the card and may overlap it.
+        assertThat(pip.top.value).isLessThan(recommended.top.value)
     }
 
     @Test
@@ -328,6 +333,93 @@ class LearningPathTest {
         }
     }
 
+    @Test
+    fun givenAStageNarrowerThanTheReference_whenLessonsAreDrawn_thenNoWordIsSqueezedEither() {
+        // The reference canvas was the only width the first version of this was ever checked at,
+        // and the fix there was a tuning: the Pip band was halved until the words happened to fit.
+        // Narrower stages make the titles wrap to a third and fourth line, and the status word was
+        // squeezed to zero height with nothing to catch it.
+        //
+        // A hundred and twenty dp below the reference, which is well under the catalog's own inset
+        // stage, so the margin is proved rather than assumed.
+        var fontSize = 0f
+        composeTestRule.setContent {
+            HelloBeTheme {
+                fontSize = with(LocalDensity.current) {
+                    HelloBeTheme.typography.bodyMedium.fontSize.toPx()
+                }
+                Box(
+                    modifier = Modifier.size(
+                        HelloBeLayout.referenceWidth - NARROW_STAGE_INSET,
+                        HelloBeLayout.referenceHeight
+                    )
+                ) {
+                    LearningPathScreen(state = LearningPathFixtures.midUnit(), onAction = {})
+                }
+            }
+        }
+
+        listOf(
+            LearningPathFixtures.EYES to FINISHED,
+            LearningPathFixtures.NOSE to FINISHED,
+            LearningPathFixtures.HANDS to CONTINUE,
+            LearningPathFixtures.MOVE to LATER,
+            LearningPathFixtures.REVIEW to LATER
+        ).forEach { (title, status) ->
+            val card = composeTestRule.onNodeWithText(title).fetchSemanticsNode()
+            val word = composeTestRule
+                .onAllNodesWithText(status, useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .single { it.positionInRoot.x in card.columnRange() }
+
+            assertThat(word.size.height.toFloat()).isAtLeast(fontSize)
+        }
+    }
+
+    @Test
+    fun givenTheLessonRow_whenItIsMeasured_thenEveryCardIsTheSameSizeAndSharesOneBaseline() {
+        // Three things at once, because they are one property: cards of one width, titles at one
+        // height, and the word under each title at one height. The row used to mix them. A card
+        // with no mark was shorter than its marked neighbours and, being centred, sat its title
+        // higher; and once the cards grew wide enough for some titles to fit on a single line the
+        // rest stepped again.
+        // The mixed-length fixture, because that is the case the fixed title block exists for. On
+        // a unit whose titles all happen to wrap the same way the guard cannot fail, and a test
+        // that cannot fail is not a guard.
+        setPath(LearningPathFixtures.mixedTitleLengths())
+
+        val cards = listOf(
+            LearningPathFixtures.EARS to FINISHED,
+            LearningPathFixtures.NOSE to FINISHED,
+            LearningPathFixtures.HANDS to CONTINUE,
+            LearningPathFixtures.MOVE to LATER,
+            LearningPathFixtures.REVIEW to LATER
+        ).map { (title, status) ->
+            val card = composeTestRule.onNodeWithText(title).fetchSemanticsNode()
+            // Unmerged, because the card merges its descendants: asking the merged tree hands back
+            // the card, which is a fixed size by construction and so agrees with itself no matter
+            // how badly its contents are arranged.
+            val titleNode = composeTestRule
+                .onAllNodesWithText(title, useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .single { it.positionInRoot.x in card.columnRange() }
+            val statusNode = composeTestRule
+                .onAllNodesWithText(status, useUnmergedTree = true)
+                .fetchSemanticsNodes()
+                .single { it.positionInRoot.x in card.columnRange() }
+            Triple(card.size.width, titleNode, statusNode)
+        }
+
+        // Width within a pixel rather than identical: five equal weights across an odd pixel
+        // count leave one column a pixel wider, which no eye resolves and which asserting exact
+        // equality would fail on while proving nothing.
+        val widths = cards.map { it.first }
+        assertThat(widths.max() - widths.min()).isAtMost(WEIGHT_ROUNDING)
+        assertThat(cards.map { it.second.positionInRoot.y }.distinct()).hasSize(1)
+        assertThat(cards.map { it.second.size.height }.distinct()).hasSize(1)
+        assertThat(cards.map { it.third.positionInRoot.y }.distinct()).hasSize(1)
+    }
+
     private fun SemanticsNode.columnRange(): ClosedFloatingPointRange<Float> =
         positionInRoot.x..(positionInRoot.x + size.width)
 
@@ -396,5 +488,11 @@ class LearningPathTest {
         const val FINISHED = "Finished"
         const val CONTINUE = "Continue"
         const val LATER = "Later"
+
+        /** How far below the reference stage the layout is proved to still hold. */
+        val NARROW_STAGE_INSET = 120.dp
+
+        /** One pixel of weight-distribution rounding across the row. */
+        const val WEIGHT_ROUNDING = 1
     }
 }

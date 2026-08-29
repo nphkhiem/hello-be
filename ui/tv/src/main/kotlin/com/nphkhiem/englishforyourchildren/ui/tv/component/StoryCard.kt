@@ -16,6 +16,7 @@ import androidx.compose.ui.semantics.disabled
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.tv.material3.Border
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -37,7 +38,14 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
  * example `layout.cardThreeColumnSet`) rather than the card filling its parent, so a row of
  * cards divides the grid instead of the first card consuming it.
  *
- * [centerContent] is for a card holding a single mark rather than a block. The default reads as a
+ * [titleMinLines] holds the title block to a fixed number of lines so a row of cards shares one
+ * baseline. Without it a row mixes one and two line titles and every line below them steps up and
+ * down, which is what the learning path's lesson row did until it was measured.
+ *
+ * [centerContent] is for a card holding a single mark rather than a block. It centres the text
+ * inside each line as well as centring the block on the card: without that, a title that wraps is
+ * still left aligned within its own box, so the second line hangs off the start of the first
+ * instead of sitting under its middle. The default reads as a
  * block, an optional picture then a title then a supporting line, and top left is right for that:
  * it is what a profile card and a unit card want. One glyph sitting in the corner of a large card
  * is not, which is what an age choice looked like before this existed.
@@ -51,6 +59,7 @@ fun StoryCard(
     availability: HelloBeAvailability = HelloBeAvailability.ENABLED,
     supportingText: String? = null,
     stateDescription: String? = null,
+    titleMinLines: Int = 1,
     centerContent: Boolean = false,
     minHeight: Dp = HelloBeTheme.layout.childChoiceMinHeight,
     illustration: (@Composable () -> Unit)? = null
@@ -142,10 +151,16 @@ fun StoryCard(
             Text(
                 text = title,
                 style = HelloBeTheme.typography.titleMedium,
+                minLines = titleMinLines,
+                textAlign = if (centerContent) TextAlign.Center else null,
                 modifier = Modifier.semantics { heading() }
             )
             if (supportingText != null) {
-                Text(text = supportingText, style = HelloBeTheme.typography.bodyMedium)
+                Text(
+                    text = supportingText,
+                    style = HelloBeTheme.typography.bodyMedium,
+                    textAlign = if (centerContent) TextAlign.Center else null
+                )
             }
         }
     }
