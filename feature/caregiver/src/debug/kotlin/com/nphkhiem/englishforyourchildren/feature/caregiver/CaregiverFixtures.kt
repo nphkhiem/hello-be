@@ -48,6 +48,70 @@ object CaregiverFixtures {
     fun shell(section: CaregiverSection = CaregiverSection.OVERVIEW): CaregiverShellState =
         CaregiverShellState(profileName = PROFILE, section = section)
 
+    /** A week with practice in it: the draft's own summaries and words. */
+    fun overview(): CaregiverOverviewUiState = CaregiverOverviewUiState(
+        profileName = PROFILE,
+        period = PERIOD,
+        progress = OverviewProgress.Practiced(
+            summaries = listOf(
+                OverviewSummary(
+                    label = "Adventures finished",
+                    value = "3",
+                    note = "Sessions completed"
+                ),
+                OverviewSummary(
+                    label = "Words encountered",
+                    value = "18",
+                    note = NOT_A_SCORE
+                ),
+                OverviewSummary(
+                    label = "Practice suggestion",
+                    value = "My Home",
+                    note = "Repeat familiar words"
+                )
+            ),
+            recentWords = RECENT_WORDS
+        ),
+        suggestion = CoPlaySuggestion(title = SUGGESTION, instruction = SUGGESTION_HINT),
+        pendingSave = false
+    )
+
+    /** More history than the panel may draw, which is what the bound exists for. */
+    fun overviewLongHistory(): CaregiverOverviewUiState = overview().copy(
+        progress = OverviewProgress.Practiced(
+            summaries = (overview().progress as OverviewProgress.Practiced).summaries +
+                OverviewSummary(label = "A fourth", value = "9", note = "Should not appear"),
+            recentWords = RECENT_WORDS + OVERFLOW_WORDS
+        )
+    )
+
+    fun overviewNewProfile(): CaregiverOverviewUiState =
+        overview().copy(progress = OverviewProgress.NewProfile)
+
+    fun overviewNothingRecent(): CaregiverOverviewUiState =
+        overview().copy(progress = OverviewProgress.NothingRecent)
+
+    fun overviewPendingSave(): CaregiverOverviewUiState = overview().copy(pendingSave = true)
+
+    /** No suggestion can be offered, which is the brief's unavailable-content state. */
+    fun overviewNoSuggestion(): CaregiverOverviewUiState = overview().copy(suggestion = null)
+
+    /** Vietnamese copy at its longest, to check the panels hold bilingual text. */
+    fun overviewLongCopy(): CaregiverOverviewUiState = overview().copy(
+        profileName = LONG_PROFILE,
+        suggestion = CoPlaySuggestion(title = LONG_SUGGESTION, instruction = LONG_HINT)
+    )
+
+    fun overviewStates(): List<Pair<String, CaregiverOverviewUiState>> = listOf(
+        "active learner" to overview(),
+        "more history than fits" to overviewLongHistory(),
+        "new profile" to overviewNewProfile(),
+        "nothing this week" to overviewNothingRecent(),
+        "progress pending" to overviewPendingSave(),
+        "no suggestion available" to overviewNoSuggestion(),
+        "long bilingual copy" to overviewLongCopy()
+    )
+
     fun gateStates(): List<Pair<String, AdultGateUiState>> = listOf(
         "initial" to gate(),
         "correct answer first" to gateCorrectFirst(),
@@ -62,6 +126,17 @@ object CaregiverFixtures {
     )
 
     const val PROFILE = "Minh"
+    const val PERIOD = "This week"
+    const val NOT_A_SCORE = "Not a test score"
+    const val SUGGESTION = "Find a chair"
+    const val SUGGESTION_HINT = "Point together and say chair."
+    const val LONG_PROFILE = "Nguyễn Hoàng Phương"
+    const val LONG_SUGGESTION = "Cùng nhau tìm một chiếc ghế trong nhà"
+    const val LONG_HINT =
+        "Chỉ vào chiếc ghế và cùng nói \u201cchair\u201d. Point together and say chair."
+    const val OVERFLOWED_WORD = "spoon"
+    val RECENT_WORDS = listOf("eyes", "hands", "mama", "chair", "bed", "lamp")
+    val OVERFLOW_WORDS = listOf(OVERFLOWED_WORD, "window", "rug")
     const val QUESTION = "What is 7 + 4?"
     const val WRONG_LOW = "10"
     const val CORRECT = "11"
