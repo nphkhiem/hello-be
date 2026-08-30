@@ -34,3 +34,12 @@ data class ChildProfile(
         require(nickname.isNotBlank()) { "A profile needs a nickname" }
     }
 }
+
+/**
+ * How many children one television may know.
+ *
+ * A rule about children rather than about SQLite or about a screen, so it lives beside
+ * [ChildProfile] and is enforced once, by the repository that creates them. The feature modules
+ * still carry their own copies for display; those consolidate here when they consume a repository.
+ */
+const val MAX_CHILD_PROFILES = 4
