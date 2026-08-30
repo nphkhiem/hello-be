@@ -21,4 +21,13 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     ksp(libs.androidx.room.compiler)
     ksp(libs.hilt.compiler)
+
+    androidTestImplementation(projects.testSupport)
+    androidTestImplementation(libs.androidx.room.testing)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    // :ui:tv gets the runner transitively through the Compose test artifact. This module has no
+    // Compose, so it asks for it directly, or the test APK has no runner to start.
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.junit4)
+    androidTestImplementation(libs.truth)
 }
