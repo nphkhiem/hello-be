@@ -1,14 +1,18 @@
 package com.nphkhiem.englishforyourchildren.data.curriculum
 
 import com.nphkhiem.englishforyourchildren.domain.model.Activity
+import com.nphkhiem.englishforyourchildren.domain.model.ActivityContent
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityFamily
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityId
+import com.nphkhiem.englishforyourchildren.domain.model.AnswerChoice
+import com.nphkhiem.englishforyourchildren.domain.model.AssetId
 import com.nphkhiem.englishforyourchildren.domain.model.Course
 import com.nphkhiem.englishforyourchildren.domain.model.CourseId
 import com.nphkhiem.englishforyourchildren.domain.model.CourseUnit
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.Lesson
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
+import com.nphkhiem.englishforyourchildren.domain.model.SkillId
 import com.nphkhiem.englishforyourchildren.domain.model.UnitId
 import kotlinx.serialization.json.Json
 
@@ -32,11 +36,11 @@ class CurriculumJsonParser(
     fun parseAttributions(source: String): AttributionsDto = json.decodeFromString(source)
 
     /**
-     * The domain course.
+     * The domain course, content and all.
      *
-     * The activity payload, what a question actually asks, stays in the DTO for now. `Activity` in
-     * the domain carries identity, order and family, and giving it content is a change that should
-     * happen when a screen is ready to read it rather than because a parser exists.
+     * The validator runs before this and refuses anything malformed, so a family this app has no
+     * screen for, or an answer that is not among the choices, never reaches here. What is left is
+     * a mapping, and it fails loudly rather than guessing if that assumption is ever wrong.
      */
     fun toDomain(course: CourseDto, units: List<UnitDto>): Course = Course(
         id = CourseId(course.id),
@@ -61,9 +65,75 @@ class CurriculumJsonParser(
         activities = activities.sortedBy { it.ordinal }.map { it.toDomain() }
     )
 
-    private fun ActivityDto.toDomain() = Activity(
-        id = ActivityId(id),
-        ordinal = ordinal,
-        family = ActivityFamily.valueOf(family)
+    private fun ActivityDto.toDomain(): Activity {
+        val activityFamily = ActivityFamily.valueOf(family)
+        return Activity(
+            id = ActivityId(id),
+            ordinal = ordinal,
+            family = activityFamily,
+            content = toContent(activityFamily)
+        )
+    }
+
+    private fun ActivityDto.toContent(family: ActivityFamily): ActivityContent {
+        val offered = choices.map { it.toChoice() }
+        return when (family) {
+            ActivityFamily.LISTEN_AND_CHOOSE -> ActivityContent.ListeningSelection(
+                prompt = prompt,
+                promptAsset = promptAsset.asAsset(),
+                choices = offered,
+                correct = SkillId(requireAnswer())
+            )
+
+            ActivityFamily.PICTURE_MATCHING -> ActivityContent.PictureMatching(
+                prompt = prompt,
+                promptAsset = promptAsset.asAsset(),
+                choices = offered,
+                correct = SkillId(requireAnswer())
+            )
+
+            ActivityFamily.LETTER_AND_SOUND -> ActivityContent.LetterAndSound(
+                prompt = prompt,
+                promptAsset = promptAsset.asAsset(),
+                choices = offered,
+                correct = SkillId(requireAnswer()),
+                letter = SkillId(
+                    requireNotNull(letterSkillId) { "$id is a letter activity naming no letter" }
+                ),
+                letterAsset = letterAsset.asAsset()
+            )
+
+            // Unscored by construction: whatever the file says about a correct answer, there is
+            // nowhere in this variant to put one.
+            ActivityFamily.SAY_WITH_PIP -> ActivityContent.GuidedRepetition(
+                prompt = prompt,
+                promptAsset = promptAsset.asAsset(),
+                words = offered
+            )
+
+            ActivityFamily.REVIEW -> ActivityContent.ReviewQuestion(
+                prompt = prompt,
+                promptAsset = promptAsset.asAsset(),
+                choices = offered,
+                correct = SkillId(requireAnswer())
+            )
+        }
+    }
+
+    private fun ActivityDto.requireAnswer(): String =
+        requireNotNull(correctSkillId) { "$id is a question with no right answer" }
+
+    private fun ChoiceDto.toChoice() = AnswerChoice(
+        skillId = SkillId(skillId),
+        label = label,
+        image = AssetId(image),
+        audio = AssetId(audio)
     )
+
+    /**
+     * An asset reference becomes an id only when a file could exist for it.
+     *
+     * Blank means the content author has nothing to point at yet, which is every recording today.
+     */
+    private fun String?.asAsset(): AssetId? = this?.takeIf { it.isNotBlank() }?.let { AssetId(it) }
 }

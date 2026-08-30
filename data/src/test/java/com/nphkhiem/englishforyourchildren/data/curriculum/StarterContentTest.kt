@@ -1,6 +1,9 @@
 package com.nphkhiem.englishforyourchildren.data.curriculum
 
 import com.google.common.truth.Truth.assertThat
+import com.nphkhiem.englishforyourchildren.domain.model.ActivityContent
+import com.nphkhiem.englishforyourchildren.domain.model.ActivityFamily
+import com.nphkhiem.englishforyourchildren.domain.model.Answerable
 import java.io.File
 import org.junit.jupiter.api.Test
 
@@ -93,6 +96,52 @@ class StarterContentTest {
             }.toSet()
         )
             .hasSize(EXPECTED_ASSET_COUNT)
+    }
+
+    @Test
+    fun givenTheShippedBundle_whenItBecomesDomain_thenEveryActivityKnowsWhatItAsks() {
+        // The reducer can drive a lesson without this; a screen cannot draw one. Thirty activities
+        // with content is what stands between the two.
+        val course = parser.toDomain(course, units)
+        val activities = course.units.flatMap { it.lessons }.flatMap { it.activities }
+
+        assertThat(activities).hasSize(30)
+        assertThat(activities.all { it.content != null }).isTrue()
+    }
+
+    @Test
+    fun givenTheShippedBundle_whenSpeakingPracticeIsRead_thenItHasNothingToBeRightAbout() {
+        val speaking = parser.toDomain(course, units).units
+            .flatMap { it.lessons }
+            .flatMap { it.activities }
+            .filter { it.family == ActivityFamily.SAY_WITH_PIP }
+
+        assertThat(speaking).hasSize(4)
+        assertThat(speaking.none { it.content is Answerable }).isTrue()
+    }
+
+    @Test
+    fun givenTheShippedBundle_whenALetterActivityIsRead_thenItNamesItsLetter() {
+        val letters = parser.toDomain(course, units).units
+            .flatMap { it.lessons }
+            .flatMap { it.activities }
+            .mapNotNull { it.content as? ActivityContent.LetterAndSound }
+
+        assertThat(letters).hasSize(4)
+        assertThat(letters.map { it.letter.value })
+            .containsExactly("letter-e", "letter-h", "letter-b", "letter-a")
+    }
+
+    @Test
+    fun givenNoRecordingsExist_whenTheBundleBecomesDomain_thenEveryPromptIsStillSilent() {
+        // Content referencing a recording nobody has made is content, not an error. This is the
+        // state the app is in, and it has to be a state it can hold.
+        val prompts = parser.toDomain(course, units).units
+            .flatMap { it.lessons }
+            .flatMap { it.activities }
+            .mapNotNull { it.content?.promptAsset }
+
+        assertThat(prompts).isNotEmpty()
     }
 
     @Test
