@@ -24,6 +24,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -77,6 +78,9 @@ class LessonViewModel @Inject constructor(
     private val lock = Mutex()
     private var session: LessonSessionState? = null
 
+    /** The theme of the unit this lesson belongs to. A slug is not a thing to show anybody. */
+    private var unitTheme: String = ""
+
     suspend fun start(profileId: ProfileId, lessonId: LessonId, courseVersion: CourseVersion) {
         val lesson = curriculum.getLesson(lessonId, courseVersion)
         if (lesson !is DomainResult.Success) {
@@ -110,8 +114,17 @@ class LessonViewModel @Inject constructor(
                 reducer.reduce(state, LessonAction.MediaUnavailable(state.currentInstance)).state
         }
 
+        unitTheme = themeOf(lesson.value)
         session = state
         publish(state)
+    }
+
+    private suspend fun themeOf(
+        lesson: com.nphkhiem.englishforyourchildren.domain.model.Lesson
+    ): String {
+        val course = curriculum.observeCourse().first()
+        if (course !is DomainResult.Success) return ""
+        return course.value.units.firstOrNull { it.id == lesson.unitId }?.theme.orEmpty()
     }
 
     suspend fun onAction(action: LessonUiAction) = lock.withLock {
@@ -197,7 +210,7 @@ class LessonViewModel @Inject constructor(
     }
 
     private fun publish(state: LessonSessionState) {
-        _state.value = LessonUiMapper.map(state)
+        _state.value = LessonUiMapper.map(state, unitTheme)
         if (state.phase == DomainPhase.Finished) {
             session = state
         }

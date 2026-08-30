@@ -145,6 +145,17 @@ class StarterContentTest {
     }
 
     @Test
+    fun givenNoMediaExists_whenTheGraphIsChecked_thenNothingIsBrokenAndOnlyFilesAreOwed() {
+        // The distinction that lets the app run today. Every asset is missing, and none of that is
+        // the content being wrong: a lesson opens, the words are on screen, and the files are a
+        // release gate rather than a runtime one.
+        val problems = validator.validate(course, units, availableAssets = emptySet())
+
+        assertThat(problems.filter { it.kind == ContentProblem.Kind.BROKEN_GRAPH }).isEmpty()
+        assertThat(problems.filter { it.kind == ContentProblem.Kind.MISSING_ASSET }).isNotEmpty()
+    }
+
+    @Test
     fun givenTheAttributionLedger_whenItIsRead_thenItIsHonestlyEmpty() {
         // An empty ledger stops a release. A ledger with invented evidence would not, which is why
         // this file is empty rather than filled in with plausible-looking rows.
