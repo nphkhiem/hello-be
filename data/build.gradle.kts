@@ -5,6 +5,12 @@ plugins {
 
 android {
     namespace = "com.nphkhiem.englishforyourchildren.data"
+
+    sourceSets {
+        // The migration test reads the exported schemas out of the test APK, so the directory KSP
+        // writes them to has to travel with it.
+        getByName("androidTest").assets.srcDir("$projectDir/schemas")
+    }
 }
 
 ksp {

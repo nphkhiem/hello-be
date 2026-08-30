@@ -9,7 +9,9 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
 import com.nphkhiem.englishforyourchildren.data.local.HelloBeDatabase
+import com.nphkhiem.englishforyourchildren.data.local.MIGRATION_1_2
 import com.nphkhiem.englishforyourchildren.data.profile.ChildProfileDao
+import com.nphkhiem.englishforyourchildren.data.progress.ProgressDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,11 +37,16 @@ object DataProvidersModule {
         // Deliberately no fallbackToDestructiveMigration. A database whose shape has moved on must
         // reach the caregiver recovery, where an adult decides whether to reset it, rather than
         // quietly deleting a child's progress on the way to a home screen.
-        Room.databaseBuilder(context, HelloBeDatabase::class.java, HelloBeDatabase.NAME).build()
+        Room.databaseBuilder(context, HelloBeDatabase::class.java, HelloBeDatabase.NAME)
+            .addMigrations(MIGRATION_1_2)
+            .build()
 
     @Provides
     fun provideChildProfileDao(database: HelloBeDatabase): ChildProfileDao =
         database.childProfileDao()
+
+    @Provides
+    fun provideProgressDao(database: HelloBeDatabase): ProgressDao = database.progressDao()
 
     @Provides
     @Singleton
