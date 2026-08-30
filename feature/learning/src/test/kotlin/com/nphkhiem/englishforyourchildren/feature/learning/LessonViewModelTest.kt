@@ -1,0 +1,283 @@
+package com.nphkhiem.englishforyourchildren.feature.learning
+
+import com.google.common.truth.Truth.assertThat
+import com.nphkhiem.englishforyourchildren.domain.model.Activity
+import com.nphkhiem.englishforyourchildren.domain.model.ActivityContent
+import com.nphkhiem.englishforyourchildren.domain.model.ActivityFamily
+import com.nphkhiem.englishforyourchildren.domain.model.ActivityId
+import com.nphkhiem.englishforyourchildren.domain.model.AnswerChoice
+import com.nphkhiem.englishforyourchildren.domain.model.AssetId
+import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
+import com.nphkhiem.englishforyourchildren.domain.model.EpochMillis
+import com.nphkhiem.englishforyourchildren.domain.model.Lesson
+import com.nphkhiem.englishforyourchildren.domain.model.LessonId
+import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
+import com.nphkhiem.englishforyourchildren.domain.model.SkillId
+import com.nphkhiem.englishforyourchildren.domain.model.UnitId
+import com.nphkhiem.englishforyourchildren.domain.result.DomainError
+import com.nphkhiem.englishforyourchildren.testsupport.FakeCurriculumRepository
+import com.nphkhiem.englishforyourchildren.testsupport.FakeProgressRepository
+import com.nphkhiem.englishforyourchildren.testsupport.FakeTimeProvider
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+
+class LessonViewModelTest {
+    private val curriculum = FakeCurriculumRepository()
+    private val progress = FakeProgressRepository(timeProvider = FakeTimeProvider(EpochMillis(NOW)))
+
+    @BeforeEach
+    fun useTestDispatcher() {
+        Dispatchers.setMain(UnconfinedTestDispatcher())
+        curriculum.setLesson(lesson())
+    }
+
+    @AfterEach
+    fun restoreDispatcher() {
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun givenALessonIsOpened_whenItIsStillLoading_thenNothingIsAskedOfTheChildYet() = runTest {
+        val model = viewModel()
+
+        assertThat(model.state.value.phase).isEqualTo(LessonPhase.PREPARING)
+    }
+
+    @Test
+    fun givenALessonThatExists_whenItLoads_thenTheFirstQuestionIsWhatTheContentSays() = runTest {
+        val model = started()
+
+        val state = model.state.value
+        assertThat(state.prompt).isEqualTo("Where are the eyes?")
+        assertThat(state.activityNumber).isEqualTo(1)
+        assertThat(state.activityCount).isEqualTo(3)
+        assertThat(state.answers.map { it.label }).containsExactly("eyes", "ears")
+    }
+
+    @Test
+    fun givenAQuestion_whenItIsShown_thenTheScreenIsNeverToldWhichAnswerIsRight() = runTest {
+        // The screen cannot give away an answer it does not know. Focus, order and selection are
+        // all it has, and none of them may hint.
+        val model = started()
+
+        val feedback = model.state.value.answers.map { it.feedback }
+
+        assertThat(feedback.toSet()).containsExactly(HelloBeChoiceFeedbackNeutral)
+    }
+
+    @Test
+    fun givenALessonThatIsNotThere_whenItIsOpened_thenTheChildIsNotLeftOnAnEmptyStage() = runTest {
+        curriculum.failNext(DomainError.LessonNotFound)
+
+        val model = started(lessonId = "u01-my-body-l9")
+
+        assertThat(model.state.value.phase).isEqualTo(LessonPhase.PREPARING)
+        assertThat(model.unavailable.value).isTrue()
+    }
+
+    @Test
+    fun givenNoRecordingExists_whenTheLessonStarts_thenItRunsSilentlyRatherThanWaiting() = runTest {
+        // Every prompt recording is unmade, which is the state the app ships in today. It was
+        // designed for absent audio, so the lesson runs with the words on screen instead of
+        // waiting for a sound that will never come.
+        curriculum.setLesson(lesson(withAudio = false))
+        val model = started()
+
+        assertThat(model.state.value.audioAvailable).isFalse()
+        assertThat(model.state.value.caption).isEqualTo("Where are the eyes?")
+    }
+
+    @Test
+    fun givenNoRecording_whenAnyAnswerIsChosen_thenItCostsTheChildNothing() = runTest {
+        // The consequence of shipping without recordings, stated rather than discovered later: a
+        // question nobody could hear is an unscored skip whichever picture is pressed, so a lesson
+        // can be walked through but nothing is really being taught yet.
+        curriculum.setLesson(lesson(withAudio = false))
+        val model = started()
+
+        model.onAction(LessonUiAction.AnswerChosen("word-ears", activityNumber = 1))
+
+        assertThat(model.state.value.support).isEqualTo(SupportLevel.NONE)
+        assertThat(model.state.value.activityNumber).isEqualTo(2)
+    }
+
+    @Test
+    fun givenACorrectAnswer_whenItIsChosen_thenTheWorkIsWrittenDownBeforeMovingOn() = runTest {
+        val model = started()
+
+        model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+
+        assertThat(progress.persisted).hasSize(1)
+        assertThat(model.state.value.activityNumber).isEqualTo(2)
+    }
+
+    @Test
+    fun givenTheSameAnswerPressedTwice_whenBothArrive_thenTheChildAnsweredOnce() = runTest {
+        // A button held a moment too long on a television. The reducer refuses the second, and the
+        // serialized queue is what makes sure the second is judged after the first, not beside it.
+        val model = started()
+
+        model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+        model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+
+        assertThat(progress.persisted).hasSize(1)
+    }
+
+    @Test
+    fun givenAWrongAnswer_whenItIsChosen_thenHelpArrivesAndNothingIsWrittenDown() = runTest {
+        val model = started()
+
+        model.onAction(LessonUiAction.AnswerChosen("word-ears", activityNumber = 1))
+
+        assertThat(progress.persisted).isEmpty()
+        assertThat(model.state.value.support).isEqualTo(SupportLevel.REPEAT)
+        assertThat(model.state.value.activityNumber).isEqualTo(1)
+    }
+
+    @Test
+    fun givenStorageRefusesTheWrite_whenAnAnswerIsChosen_thenTheScreenSaysItIsNotSavedYet() =
+        runTest {
+            val model = started()
+            progress.failNext(DomainError.PersistenceUnavailable)
+
+            model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+
+            assertThat(model.state.value.pendingSave).isTrue()
+            assertThat(model.state.value.activityNumber).isEqualTo(1)
+        }
+
+    @Test
+    fun givenAFailedWrite_whenTheChildCarriesOn_thenTheyMoveAndItStillSaysNotSaved() = runTest {
+        val model = started()
+        progress.failNext(DomainError.PersistenceUnavailable)
+        model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+
+        model.onAction(LessonUiAction.ContinueUnsaved)
+
+        assertThat(model.state.value.activityNumber).isEqualTo(2)
+        assertThat(model.state.value.pendingSave).isTrue()
+    }
+
+    @Test
+    fun givenAFailedWrite_whenItIsRetriedAndSucceeds_thenNothingIsPendingAnyMore() = runTest {
+        val model = started()
+        progress.failNext(DomainError.PersistenceUnavailable)
+        model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+
+        model.onAction(LessonUiAction.SaveRetryRequested)
+
+        assertThat(model.state.value.pendingSave).isFalse()
+        assertThat(model.state.value.activityNumber).isEqualTo(2)
+    }
+
+    @Test
+    fun givenALesson_whenBackIsPressed_thenTheStopQuestionIsAskedRatherThanLeaving() = runTest {
+        val model = started()
+
+        model.onAction(LessonUiAction.StopRequested)
+
+        assertThat(model.state.value.stopForNowVisible).isTrue()
+    }
+
+    @Test
+    fun givenTheLastActivity_whenItIsAnswered_thenTheSessionIsCompleted() = runTest {
+        val model = started()
+
+        repeat(3) {
+            model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = it + 1))
+        }
+
+        assertThat(progress.completed).hasSize(1)
+        assertThat(model.state.value.phase).isEqualTo(LessonPhase.COMPLETED)
+    }
+
+    @Test
+    fun givenALessonIsStarted_whenItBegins_thenASittingIsRecordedForThatChild() = runTest {
+        started()
+
+        assertThat(progress.started.single().profileId).isEqualTo(ProfileId(PROFILE))
+    }
+
+    private fun viewModel() = LessonViewModel(
+        curriculum = curriculum,
+        progress = progress,
+        timeProvider = FakeTimeProvider(EpochMillis(NOW))
+    )
+
+    private suspend fun started(lessonId: String = LESSON): LessonViewModel {
+        val model = viewModel()
+        model.start(
+            profileId = ProfileId(PROFILE),
+            lessonId = LessonId(lessonId),
+            courseVersion = CourseVersion(VERSION)
+        )
+        return model
+    }
+
+    private fun lesson(withAudio: Boolean = true) = Lesson(
+        id = LessonId(LESSON),
+        unitId = UnitId(UNIT),
+        ordinal = 0,
+        activities = listOf(
+            activity(1, ActivityFamily.LISTEN_AND_CHOOSE, withAudio),
+            activity(2, ActivityFamily.PICTURE_MATCHING, withAudio),
+            activity(3, ActivityFamily.REVIEW, withAudio)
+        )
+    )
+
+    private fun activity(n: Int, family: ActivityFamily, withAudio: Boolean) = Activity(
+        id = ActivityId("$LESSON-a$n"),
+        ordinal = n - 1,
+        family = family,
+        content = when (family) {
+            ActivityFamily.PICTURE_MATCHING -> ActivityContent.PictureMatching(
+                prompt = "Where are the eyes?",
+                promptAsset = promptAsset(withAudio),
+                choices = choices(),
+                correct = SkillId("word-eyes")
+            )
+
+            ActivityFamily.REVIEW -> ActivityContent.ReviewQuestion(
+                prompt = "Where are the eyes?",
+                promptAsset = promptAsset(withAudio),
+                choices = choices(),
+                correct = SkillId("word-eyes")
+            )
+
+            else -> ActivityContent.ListeningSelection(
+                prompt = "Where are the eyes?",
+                promptAsset = promptAsset(withAudio),
+                choices = choices(),
+                correct = SkillId("word-eyes")
+            )
+        }
+    )
+
+    private fun promptAsset(withAudio: Boolean) =
+        if (withAudio) AssetId("aud-en-prompt-where-is") else null
+
+    private fun choices() = listOf(choice("eyes"), choice("ears"))
+
+    private fun choice(word: String) = AnswerChoice(
+        skillId = SkillId("word-$word"),
+        label = word,
+        image = AssetId("img-$word"),
+        audio = AssetId("aud-en-$word")
+    )
+
+    private companion object {
+        const val PROFILE = "p1"
+        const val VERSION = "2026.09"
+        const val UNIT = "u01-my-body"
+        const val LESSON = "u01-my-body-l1"
+        const val NOW = 1_756_000_000_000
+        val HelloBeChoiceFeedbackNeutral =
+            com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeChoiceFeedback.NEUTRAL
+    }
+}

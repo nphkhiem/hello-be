@@ -3,6 +3,7 @@ package com.nphkhiem.englishforyourchildren.data
 import com.nphkhiem.englishforyourchildren.domain.id.IdProvider
 import com.nphkhiem.englishforyourchildren.domain.model.EpochMillis
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
+import com.nphkhiem.englishforyourchildren.domain.model.SessionId
 import com.nphkhiem.englishforyourchildren.domain.time.TimeProvider
 import java.util.UUID
 import javax.inject.Inject
@@ -10,6 +11,11 @@ import javax.inject.Inject
 /** The real clock. Everything that records a time takes it from here rather than reading it. */
 class SystemTimeProvider @Inject constructor() : TimeProvider {
     override fun now(): EpochMillis = EpochMillis(System.currentTimeMillis())
+}
+
+/** Real sitting identities. One per lesson a child opens, and never reused. */
+class UuidSessionIdProvider @Inject constructor() : IdProvider<SessionId> {
+    override fun next(): SessionId = SessionId(UUID.randomUUID().toString())
 }
 
 /**

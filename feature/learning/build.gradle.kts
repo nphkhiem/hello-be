@@ -19,6 +19,8 @@ dependencies {
     // BackHandler only. This module still reaches no navigation, repository or playback API.
     implementation(libs.androidx.activity.compose)
 
+    testImplementation(projects.testSupport)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui)
     testImplementation(libs.junit.jupiter)

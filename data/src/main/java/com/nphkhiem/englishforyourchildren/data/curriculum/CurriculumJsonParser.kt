@@ -14,21 +14,25 @@ import com.nphkhiem.englishforyourchildren.domain.model.Lesson
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.SkillId
 import com.nphkhiem.englishforyourchildren.domain.model.UnitId
+import javax.inject.Inject
 import kotlinx.serialization.json.Json
 
 /**
  * Turns the files on disk into the domain, or says why it cannot.
  *
- * Lenient about fields it does not know, so content written for a later app does not crash an older
- * one, and strict about everything it does read. Nothing here decides whether the content is
- * sensible; that is [CurriculumValidator]'s job, and it runs first.
+ * Nothing here decides whether the content is sensible; that is [CurriculumValidator]'s job, and it
+ * runs first.
  */
-class CurriculumJsonParser(
-    private val json: Json = Json {
+class CurriculumJsonParser @Inject constructor() {
+    /**
+     * Lenient about fields it does not know, so content written for a later app does not crash an
+     * older one, and strict about everything it does read.
+     */
+    private val json = Json {
         ignoreUnknownKeys = true
         explicitNulls = false
     }
-) {
+
     fun parseCourse(source: String): CourseDto = json.decodeFromString(source)
 
     fun parseUnit(source: String): UnitDto = json.decodeFromString(source)
