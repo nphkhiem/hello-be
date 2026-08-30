@@ -49,6 +49,17 @@ sealed interface LessonAction {
     data class MediaUnavailable(override val expectedActivityInstanceId: ActivityInstanceId) :
         LessonAction
 
+    /**
+     * The child took the fair way past a question that could not be asked properly.
+     *
+     * Only ever offered while the sound will not play, which is what makes it unscored: nobody
+     * skipped a question they had actually heard.
+     */
+    data class SkipRequested(
+        override val expectedActivityInstanceId: ActivityInstanceId,
+        val at: EpochMillis = EpochMillis(0)
+    ) : LessonAction
+
     /** Back was pressed. Nothing is abandoned until an adult or a child confirms it. */
     data class StopRequested(override val expectedActivityInstanceId: ActivityInstanceId) :
         LessonAction
