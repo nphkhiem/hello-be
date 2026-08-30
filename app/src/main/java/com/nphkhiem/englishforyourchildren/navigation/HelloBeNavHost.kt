@@ -13,6 +13,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.nphkhiem.englishforyourchildren.R
+import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateAction
@@ -264,67 +265,110 @@ fun HelloBeNavHost(
             } ?: MissingContent(modifier)
         }
 
-        is HelloBeKey.LearningPath -> content?.let {
-            LearningPathScreen(
-                state = it.learningPath(key.profileId, key.preferredUnitId),
-                onAction = { action ->
-                    when (action) {
-                        is LearningPathAction.LessonChosen -> push(
-                            HelloBeKey.Lesson(
-                                profileId = key.profileId,
-                                lessonId = LessonId(action.lessonId)
-                            )
-                        )
-
-                        LearningPathAction.HomeRequested -> pop()
-
-                        LearningPathAction.SwitchProfileRequested -> push(
-                            HelloBeKey.ProfilePicker(
-                                mode = ProfilePickerMode.Switch(key.profileId)
-                            )
-                        )
-
-                        else -> Unit
-                    }
+        is HelloBeKey.LearningPath -> if (content == null) {
+            LiveLearningPath(
+                profileId = key.profileId,
+                onLessonChosen = { lesson ->
+                    push(HelloBeKey.Lesson(profileId = key.profileId, lessonId = lesson))
+                },
+                onHome = { replaceAll(afterProfileChosen(key.profileId)) },
+                onSwitchProfile = {
+                    push(HelloBeKey.ProfilePicker(mode = ProfilePickerMode.Switch(key.profileId)))
+                },
+                onUnavailable = {
+                    replaceAll(
+                        listOf(HelloBeKey.Recovery(reason = RecoveryReason.APP_NEEDS_GROWN_UP))
+                    )
                 },
                 modifier = modifier
             )
-        } ?: MissingContent(modifier)
+        } else {
+            content.let {
+                LearningPathScreen(
+                    state = it.learningPath(key.profileId, key.preferredUnitId),
+                    onAction = { action ->
+                        when (action) {
+                            is LearningPathAction.LessonChosen -> push(
+                                HelloBeKey.Lesson(
+                                    profileId = key.profileId,
+                                    lessonId = LessonId(action.lessonId)
+                                )
+                            )
 
-        is HelloBeKey.Lesson -> content?.let {
-            // The stop-for-now dialog is local state, not a destination. It lives here rather than
-            // on the stack so Back cannot reach it as a page, and so dismissing it never pops
-            // anything: a child answering "keep learning" stays exactly where they were.
-            var stopForNowVisible by remember(key) { mutableStateOf(false) }
+                            LearningPathAction.HomeRequested -> pop()
 
-            ListenAndChooseActivity(
-                state = it.lesson(key.profileId, key.lessonId)
-                    .copy(stopForNowVisible = stopForNowVisible),
-                onAction = { action ->
-                    when (action) {
-                        LessonAction.BackRequested -> stopForNowVisible = true
+                            LearningPathAction.SwitchProfileRequested -> push(
+                                HelloBeKey.ProfilePicker(
+                                    mode = ProfilePickerMode.Switch(key.profileId)
+                                )
+                            )
 
-                        LessonAction.KeepLearningRequested -> stopForNowVisible = false
-
-                        LessonAction.StopForNowConfirmed -> {
-                            stopForNowVisible = false
-                            pop()
+                            else -> Unit
                         }
+                    },
+                    modifier = modifier
+                )
+            } ?: MissingContent(modifier)
+        }
 
-                        LessonAction.ContinueRequested -> replaceAll(
-                            resolved.dropLast(1) + HelloBeKey.LessonCelebration(
-                                profileId = key.profileId,
-                                lessonId = key.lessonId,
-                                returnTarget = LessonReturnTarget.LEARNING_PATH
-                            )
+        is HelloBeKey.Lesson -> if (content == null) {
+            LiveLesson(
+                profileId = key.profileId,
+                lessonId = key.lessonId,
+                courseVersion = SHIPPED_COURSE_VERSION,
+                onFinished = {
+                    replaceAll(
+                        resolved.dropLast(1) + HelloBeKey.LessonCelebration(
+                            profileId = key.profileId,
+                            lessonId = key.lessonId,
+                            returnTarget = LessonReturnTarget.LEARNING_PATH
                         )
-
-                        else -> Unit
-                    }
+                    )
+                },
+                onStopConfirmed = { pop() },
+                onUnavailable = {
+                    replaceAll(
+                        listOf(HelloBeKey.Recovery(reason = RecoveryReason.APP_NEEDS_GROWN_UP))
+                    )
                 },
                 modifier = modifier
             )
-        } ?: MissingContent(modifier)
+        } else {
+            content.let {
+                // The stop-for-now dialog is local state, not a destination. It lives here rather than
+                // on the stack so Back cannot reach it as a page, and so dismissing it never pops
+                // anything: a child answering "keep learning" stays exactly where they were.
+                var stopForNowVisible by remember(key) { mutableStateOf(false) }
+
+                ListenAndChooseActivity(
+                    state = it.lesson(key.profileId, key.lessonId)
+                        .copy(stopForNowVisible = stopForNowVisible),
+                    onAction = { action ->
+                        when (action) {
+                            LessonAction.BackRequested -> stopForNowVisible = true
+
+                            LessonAction.KeepLearningRequested -> stopForNowVisible = false
+
+                            LessonAction.StopForNowConfirmed -> {
+                                stopForNowVisible = false
+                                pop()
+                            }
+
+                            LessonAction.ContinueRequested -> replaceAll(
+                                resolved.dropLast(1) + HelloBeKey.LessonCelebration(
+                                    profileId = key.profileId,
+                                    lessonId = key.lessonId,
+                                    returnTarget = LessonReturnTarget.LEARNING_PATH
+                                )
+                            )
+
+                            else -> Unit
+                        }
+                    },
+                    modifier = modifier
+                )
+            } ?: MissingContent(modifier)
+        }
 
         is HelloBeKey.LessonCelebration -> content?.let {
             LessonCelebrationScreen(
@@ -601,6 +645,15 @@ private fun MissingContent(modifier: Modifier) {
         modifier = modifier
     )
 }
+
+/**
+ * The content version an installed build carries.
+ *
+ * One published version ships inside the app, so the lesson a child opens is always this one. When
+ * a second version exists, which one a child is working through becomes a stored fact rather than a
+ * constant, and it moves to their progress.
+ */
+private val SHIPPED_COURSE_VERSION = CourseVersion("2026.09")
 
 private const val DATABASE_CODE = "DB-OPEN-01"
 private const val CREATED_PROFILE = "created"

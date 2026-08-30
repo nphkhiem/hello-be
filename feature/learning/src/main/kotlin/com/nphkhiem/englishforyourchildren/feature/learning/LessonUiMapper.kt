@@ -34,10 +34,10 @@ internal object LessonUiMapper {
         pauseProgress = null
     )
 
-    fun map(state: LessonSessionState): LessonUiState {
+    fun map(state: LessonSessionState, unitTheme: String = ""): LessonUiState {
         val content = state.currentActivity.content
         return LessonUiState(
-            unitName = state.lesson.unitId.value,
+            unitName = unitTheme,
             activityTitle = title(state.currentActivity.family),
             prompt = content?.prompt.orEmpty(),
             // With no recording, the caption is the only way the question reaches a child. It is

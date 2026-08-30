@@ -7,10 +7,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
+import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeAction
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeViewModel
+import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathAction
+import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathScreen
+import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathViewModel
+import com.nphkhiem.englishforyourchildren.feature.learning.LessonAction
+import com.nphkhiem.englishforyourchildren.feature.learning.LessonPhase
+import com.nphkhiem.englishforyourchildren.feature.learning.LessonUiAction
+import com.nphkhiem.englishforyourchildren.feature.learning.LessonViewModel
+import com.nphkhiem.englishforyourchildren.feature.learning.ListenAndChooseActivity
 import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfilePickerScreen
@@ -105,6 +115,90 @@ internal fun LiveChildHome(
                 ChildHomeAction.SwitchProfileRequested -> onSwitchProfile()
 
                 ChildHomeAction.CaregiverEntryRequested -> onCaregiverEntry()
+            }
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun LiveLearningPath(
+    profileId: ProfileId,
+    onLessonChosen: (LessonId) -> Unit,
+    onHome: () -> Unit,
+    onSwitchProfile: () -> Unit,
+    onUnavailable: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val model: LearningPathViewModel = hiltViewModel()
+    val state by model.state.collectAsStateWithLifecycle()
+    val unavailable by model.unavailable.collectAsStateWithLifecycle()
+
+    LaunchedEffect(profileId) { model.start(profileId) }
+    LaunchedEffect(unavailable) { if (unavailable) onUnavailable() }
+
+    LearningPathScreen(
+        state = state,
+        onAction = { action ->
+            when (action) {
+                is LearningPathAction.LessonChosen -> onLessonChosen(LessonId(action.lessonId))
+                LearningPathAction.HomeRequested -> onHome()
+                LearningPathAction.SwitchProfileRequested -> onSwitchProfile()
+                else -> Unit
+            }
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun LiveLesson(
+    profileId: ProfileId,
+    lessonId: LessonId,
+    courseVersion: CourseVersion,
+    onFinished: () -> Unit,
+    onStopConfirmed: () -> Unit,
+    onUnavailable: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val model: LessonViewModel = hiltViewModel()
+    val state by model.state.collectAsStateWithLifecycle()
+    val unavailable by model.unavailable.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(lessonId) { model.start(profileId, lessonId, courseVersion) }
+    LaunchedEffect(unavailable) { if (unavailable) onUnavailable() }
+
+    // Finishing is the host's business, not the screen's: the lesson says it is over and the
+    // celebration is a destination rather than a state of this one.
+    LaunchedEffect(state.phase) {
+        if (state.phase == LessonPhase.COMPLETED) onFinished()
+    }
+
+    // One renderer for now. Every family shares the lesson scaffold, and the four that differ do so
+    // in what they draw inside it, which arrives when their content has pictures to draw.
+    ListenAndChooseActivity(
+        state = state,
+        onAction = { action ->
+            scope.launch {
+                when (action) {
+                    is LessonAction.AnswerChosen -> model.onAction(
+                        LessonUiAction.AnswerChosen(
+                            skillId = action.answerId,
+                            activityNumber = state.activityNumber
+                        )
+                    )
+
+                    LessonAction.ReplayRequested ->
+                        model.onAction(LessonUiAction.PromptReplayRequested)
+
+                    LessonAction.BackRequested ->
+                        model.onAction(LessonUiAction.StopRequested)
+
+                    LessonAction.StopForNowConfirmed -> onStopConfirmed()
+
+                    else -> Unit
+                }
             }
         },
         modifier = modifier

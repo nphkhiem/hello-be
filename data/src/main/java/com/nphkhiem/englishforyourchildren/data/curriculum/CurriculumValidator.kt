@@ -8,7 +8,19 @@ import javax.inject.Inject
  * Not an exception, because the point is to report every problem at once rather than the first one.
  * A content author fixing thirty activities should be told about all thirty.
  */
-data class ContentProblem(val where: String, val what: String) {
+data class ContentProblem(val where: String, val what: String, val kind: Kind = Kind.BROKEN_GRAPH) {
+    /**
+     * Two different kinds of wrong.
+     *
+     * A broken graph is content that cannot be taught: a question naming an answer it does not
+     * offer, an activity out of order. Nothing can run on it, so loading refuses.
+     *
+     * A missing file is work nobody has done yet. The app was designed to run without sound, and a
+     * word can be shown before it can be heard, so a lesson still runs. It is a release gate, not a
+     * runtime one: shipping is what these must block.
+     */
+    enum class Kind { BROKEN_GRAPH, MISSING_ASSET }
+
     override fun toString() = "$where: $what"
 }
 
@@ -107,7 +119,13 @@ class CurriculumValidator @Inject constructor() {
             )
             .distinct()
             .filterNot { it in assets }
-            .forEach { problems += ContentProblem(activity.id, "asset $it has no file") }
+            .forEach {
+                problems += ContentProblem(
+                    where = activity.id,
+                    what = "asset $it has no file",
+                    kind = ContentProblem.Kind.MISSING_ASSET
+                )
+            }
 
         return problems
     }

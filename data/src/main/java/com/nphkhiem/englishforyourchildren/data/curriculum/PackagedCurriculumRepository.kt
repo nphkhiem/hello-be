@@ -58,7 +58,12 @@ class PackagedCurriculumRepository @Inject constructor(
         val course = parser.parseCourse(read(COURSE))
         val units = course.units.map { parser.parseUnit(read("$CURRICULUM/${it.file}")) }
         val problems = validator.validate(course, units, availableAssets())
-        if (problems.isNotEmpty()) return DomainResult.Failure(DomainError.InvalidContent)
+        // Only a broken graph stops a lesson. A missing recording or picture is work still owed,
+        // and the app was built to run without it: the words are on screen either way. Blocking
+        // here would mean no lesson could open until every file existed.
+        if (problems.any { it.kind == ContentProblem.Kind.BROKEN_GRAPH }) {
+            return DomainResult.Failure(DomainError.InvalidContent)
+        }
         DomainResult.Success(parser.toDomain(course, units))
     }.getOrElse { DomainResult.Failure(DomainError.InvalidContent) }
 
