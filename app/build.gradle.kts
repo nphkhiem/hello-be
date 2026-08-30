@@ -22,6 +22,7 @@ dependencies {
     implementation(projects.playback)
     implementation(projects.domain)
     implementation(projects.data)
+    implementation(libs.androidx.hilt.navigation.compose)
     implementation(projects.content.starter)
 
     implementation(libs.androidx.core.ktx)

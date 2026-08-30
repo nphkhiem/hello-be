@@ -139,80 +139,130 @@ fun HelloBeNavHost(
     }
 
     when (val key = current) {
-        HelloBeKey.ProfileCreate -> content?.let {
-            CreateProfileScreen(
-                state = it.profileCreate(),
-                onAction = { action ->
-                    when (action) {
-                        // Creating a child replaces the entry destination with their home, so
-                        // Back leaves the app rather than returning to the form they just filled.
-                        is CreateProfileAction.CreateRequested ->
-                            replaceAll(afterProfileChosen(ProfileId(CREATED_PROFILE)))
-
-                        else -> Unit
-                    }
-                },
+        HelloBeKey.ProfileCreate -> if (content == null) {
+            LiveProfileCreate(
+                onCreated = { replaceAll(afterProfileChosen(it)) },
                 modifier = modifier
             )
-        } ?: MissingContent(modifier)
+        } else {
+            content.let {
+                CreateProfileScreen(
+                    state = it.profileCreate(),
+                    onAction = { action ->
+                        when (action) {
+                            // Creating a child replaces the entry destination with their home, so
+                            // Back leaves the app rather than returning to the form they just filled.
+                            is CreateProfileAction.CreateRequested ->
+                                replaceAll(afterProfileChosen(ProfileId(CREATED_PROFILE)))
 
-        is HelloBeKey.ProfilePicker -> content?.let {
-            ProfilePickerScreen(
-                state = it.profilePicker(key.mode),
-                onAction = { action ->
-                    when (action) {
-                        is ProfileAction.ProfileChosen ->
-                            replaceAll(afterProfileChosen(ProfileId(action.profileId)))
-
-                        ProfileAction.AddProfileRequested -> push(HelloBeKey.ProfileCreate)
-
-                        ProfileAction.CaregiverEntryRequested -> {
-                            caregiverOrigin = ChildReturnTarget.CHILD_HOME
-                            push(
-                                HelloBeKey.CaregiverGate(
-                                    profileId = null,
-                                    returnTarget = ChildReturnTarget.CHILD_HOME
-                                )
-                            )
+                            else -> Unit
                         }
-                    }
-                },
-                modifier = modifier
-            )
-        } ?: MissingContent(modifier)
+                    },
+                    modifier = modifier
+                )
+            } ?: MissingContent(modifier)
+        }
 
-        is HelloBeKey.ChildHome -> content?.let {
-            ChildHomeScreen(
-                state = it.childHome(key.profileId),
-                onAction = { action ->
-                    when (action) {
-                        ChildHomeAction.ContinueRequested,
-                        ChildHomeAction.LearningPathRequested ->
-                            push(HelloBeKey.LearningPath(profileId = key.profileId))
-
-                        ChildHomeAction.FreePlayRequested ->
-                            push(HelloBeKey.FreePlay(profileId = key.profileId))
-
-                        ChildHomeAction.SwitchProfileRequested -> push(
-                            HelloBeKey.ProfilePicker(
-                                mode = ProfilePickerMode.Switch(key.profileId)
-                            )
+        is HelloBeKey.ProfilePicker -> if (content == null) {
+            LiveProfilePicker(
+                onChosen = { replaceAll(afterProfileChosen(it)) },
+                onAddProfile = { push(HelloBeKey.ProfileCreate) },
+                onCaregiverEntry = {
+                    caregiverOrigin = ChildReturnTarget.CHILD_HOME
+                    push(
+                        HelloBeKey.CaregiverGate(
+                            profileId = null,
+                            returnTarget = ChildReturnTarget.CHILD_HOME
                         )
-
-                        ChildHomeAction.CaregiverEntryRequested -> {
-                            caregiverOrigin = ChildReturnTarget.CHILD_HOME
-                            push(
-                                HelloBeKey.CaregiverGate(
-                                    profileId = key.profileId,
-                                    returnTarget = ChildReturnTarget.CHILD_HOME
-                                )
-                            )
-                        }
-                    }
+                    )
+                },
+                onUnreadable = {
+                    replaceAll(
+                        listOf(HelloBeKey.Recovery(reason = RecoveryReason.APP_NEEDS_GROWN_UP))
+                    )
                 },
                 modifier = modifier
             )
-        } ?: MissingContent(modifier)
+        } else {
+            content.let {
+                ProfilePickerScreen(
+                    state = it.profilePicker(key.mode),
+                    onAction = { action ->
+                        when (action) {
+                            is ProfileAction.ProfileChosen ->
+                                replaceAll(afterProfileChosen(ProfileId(action.profileId)))
+
+                            ProfileAction.AddProfileRequested -> push(HelloBeKey.ProfileCreate)
+
+                            ProfileAction.CaregiverEntryRequested -> {
+                                caregiverOrigin = ChildReturnTarget.CHILD_HOME
+                                push(
+                                    HelloBeKey.CaregiverGate(
+                                        profileId = null,
+                                        returnTarget = ChildReturnTarget.CHILD_HOME
+                                    )
+                                )
+                            }
+                        }
+                    },
+                    modifier = modifier
+                )
+            } ?: MissingContent(modifier)
+        }
+
+        is HelloBeKey.ChildHome -> if (content == null) {
+            LiveChildHome(
+                profileId = key.profileId,
+                onLearningPath = { push(HelloBeKey.LearningPath(profileId = key.profileId)) },
+                onFreePlay = { push(HelloBeKey.FreePlay(profileId = key.profileId)) },
+                onSwitchProfile = {
+                    push(HelloBeKey.ProfilePicker(mode = ProfilePickerMode.Switch(key.profileId)))
+                },
+                onCaregiverEntry = {
+                    caregiverOrigin = ChildReturnTarget.CHILD_HOME
+                    push(
+                        HelloBeKey.CaregiverGate(
+                            profileId = key.profileId,
+                            returnTarget = ChildReturnTarget.CHILD_HOME
+                        )
+                    )
+                },
+                modifier = modifier
+            )
+        } else {
+            content.let {
+                ChildHomeScreen(
+                    state = it.childHome(key.profileId),
+                    onAction = { action ->
+                        when (action) {
+                            ChildHomeAction.ContinueRequested,
+                            ChildHomeAction.LearningPathRequested ->
+                                push(HelloBeKey.LearningPath(profileId = key.profileId))
+
+                            ChildHomeAction.FreePlayRequested ->
+                                push(HelloBeKey.FreePlay(profileId = key.profileId))
+
+                            ChildHomeAction.SwitchProfileRequested -> push(
+                                HelloBeKey.ProfilePicker(
+                                    mode = ProfilePickerMode.Switch(key.profileId)
+                                )
+                            )
+
+                            ChildHomeAction.CaregiverEntryRequested -> {
+                                caregiverOrigin = ChildReturnTarget.CHILD_HOME
+                                push(
+                                    HelloBeKey.CaregiverGate(
+                                        profileId = key.profileId,
+                                        returnTarget = ChildReturnTarget.CHILD_HOME
+                                    )
+                                )
+                            }
+                        }
+                    },
+                    modifier = modifier
+                )
+            } ?: MissingContent(modifier)
+        }
 
         is HelloBeKey.LearningPath -> content?.let {
             LearningPathScreen(

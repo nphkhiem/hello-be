@@ -1,6 +1,7 @@
 plugins {
     id("english.android.library")
     id("english.android.compose")
+    id("english.android.hilt")
 }
 
 android {
@@ -9,11 +10,14 @@ android {
 
 dependencies {
     implementation(projects.domain)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(projects.ui.tv)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.tv.material)
 
+    testImplementation(projects.testSupport)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui)
     testImplementation(libs.junit.jupiter)
