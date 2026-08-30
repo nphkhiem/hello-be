@@ -71,7 +71,12 @@ interface HelloBeContent {
  * because it is the one read the app cannot start without.
  */
 interface ProfileGateway {
-    fun snapshot(): ProfileSnapshot
+    /**
+     * Suspending because real storage is. Reading a database on the main thread is how a
+     * television stops responding, and the entry destination cannot be known until the read
+     * answers, so the host waits rather than guessing.
+     */
+    suspend fun snapshot(): ProfileSnapshot
 }
 
 /**
@@ -82,7 +87,7 @@ interface ProfileGateway {
  * is a great deal more honest than inventing a child to show a home screen to.
  */
 class UnavailableProfileGateway : ProfileGateway {
-    override fun snapshot(): ProfileSnapshot = ProfileSnapshot(
+    override suspend fun snapshot(): ProfileSnapshot = ProfileSnapshot(
         storageReadable = false,
         validProfileIds = emptyList(),
         rememberedProfileId = null

@@ -8,9 +8,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.nphkhiem.englishforyourchildren.R
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateAction
@@ -45,6 +47,7 @@ import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfilePickerScreen
+import com.nphkhiem.englishforyourchildren.ui.tv.component.StoryLoading
 import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 
 /**
@@ -70,29 +73,45 @@ fun HelloBeNavHost(
     onExitApp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val snapshot = remember(gateway) { gateway.snapshot() }
-    var stack by remember { mutableStateOf(listOf(resolveEntry(snapshot))) }
+    // Null until storage has answered. The entry destination is not knowable before then, and
+    // guessing one would mean showing a child a screen that the next frame takes away.
+    var stack by remember(gateway) { mutableStateOf<List<HelloBeKey>?>(null) }
+
+    LaunchedEffect(gateway) {
+        stack = listOf(resolveEntry(gateway.snapshot()))
+    }
+
+    val resolved = stack ?: run {
+        // Still is deliberate: this is the one screen that appears before anything else, and a
+        // moving thing here would be motion a child has to wait out. StoryLoading has no
+        // reduced-motion variant for the same reason.
+        StoryLoading(
+            contentDescription = stringResource(R.string.launch_loading),
+            modifier = modifier
+        )
+        return
+    }
 
     // The invoking child surface, remembered so closing the session can put it back. It is not a
     // key on the stack: the caregiver area replaces the child surface rather than covering it.
     var caregiverOrigin by remember { mutableStateOf(ChildReturnTarget.CHILD_HOME) }
 
     fun push(key: HelloBeKey) {
-        stack = stack + key
+        stack = resolved + key
     }
     fun replaceAll(keys: List<HelloBeKey>) {
         stack = keys
     }
     fun pop() {
-        if (stack.size > 1) stack = stack.dropLast(1)
+        if (resolved.size > 1) stack = resolved.dropLast(1)
     }
 
-    val current = stack.last()
+    val current = resolved.last()
 
     // The host's share of Back: pop, or leave. Screens that answer Back themselves are composed
     // deeper and take it first.
     BackHandler {
-        when (backOutcome(stack)) {
+        when (backOutcome(resolved)) {
             BackOutcome.Pop -> pop()
             BackOutcome.ExitApp -> onExitApp()
         }
@@ -107,8 +126,12 @@ fun HelloBeNavHost(
             // see when it started. Capturing that one sent a closing session to the launch picker
             // instead of the child's own home, because at first composition the top of the stack
             // was still child home and had no caregiver profile on it.
-            if (event == Lifecycle.Event.ON_STOP && stack.any { it.isCaregiver() }) {
-                val profileId = stack.firstNotNullOfOrNull { profileIdOf(it) }
+            val live = stack
+            if (event == Lifecycle.Event.ON_STOP &&
+                live != null &&
+                live.any { it.isCaregiver() }
+            ) {
+                val profileId = live.firstNotNullOfOrNull { profileIdOf(it) }
                 stack = afterCaregiverSessionClosed(profileId, caregiverOrigin)
             }
         }
@@ -239,7 +262,7 @@ fun HelloBeNavHost(
                         }
 
                         LessonAction.ContinueRequested -> replaceAll(
-                            stack.dropLast(1) + HelloBeKey.LessonCelebration(
+                            resolved.dropLast(1) + HelloBeKey.LessonCelebration(
                                 profileId = key.profileId,
                                 lessonId = key.lessonId,
                                 returnTarget = LessonReturnTarget.LEARNING_PATH
@@ -300,7 +323,7 @@ fun HelloBeNavHost(
                         action.index == challenge.correctIndex
                     ) {
                         replaceAll(
-                            stack.dropLast(1) +
+                            resolved.dropLast(1) +
                                 HelloBeKey.CaregiverDashboard(profileId = key.profileId)
                         )
                     }
@@ -328,7 +351,7 @@ fun HelloBeNavHost(
                 profileId = key.profileId,
                 section = CaregiverSection.SETTINGS,
                 onSection = { section ->
-                    replaceCaregiver(::replaceAll, stack, section, key.profileId)
+                    replaceCaregiver(::replaceAll, resolved, section, key.profileId)
                 },
                 onReturn = {
                     replaceAll(afterCaregiverSessionClosed(key.profileId, caregiverOrigin))
@@ -351,7 +374,12 @@ fun HelloBeNavHost(
                 profileId = key.selectedProfileId,
                 section = CaregiverSection.PROFILES,
                 onSection = { section ->
-                    replaceCaregiver(::replaceAll, stack, section, key.selectedProfileId)
+                    replaceCaregiver(
+                        ::replaceAll,
+                        resolved,
+                        section,
+                        key.selectedProfileId
+                    )
                 },
                 onReturn = {
                     replaceAll(
@@ -397,7 +425,7 @@ fun HelloBeNavHost(
 
         is HelloBeKey.Recovery -> Recovery(
             key = key,
-            onRetry = { stack = listOf(resolveEntry(gateway.snapshot())) },
+            onRetry = { stack = null },
             onSafeReturn = { pop() },
             modifier = modifier
         )

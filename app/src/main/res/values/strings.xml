@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Hello Bé</string>
+    <!-- Announced while the app works out which screen to open. Bilingual because it
+         is heard before anyone has chosen a language. -->
+    <string name="launch_loading">Getting ready · Đang chuẩn bị</string>
 </resources>

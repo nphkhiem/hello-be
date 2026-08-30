@@ -22,6 +22,10 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     ksp(libs.hilt.compiler)
 
+    testImplementation(projects.testSupport)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.truth)
+
     androidTestImplementation(projects.testSupport)
     androidTestImplementation(libs.androidx.room.testing)
     androidTestImplementation(libs.androidx.test.ext.junit)

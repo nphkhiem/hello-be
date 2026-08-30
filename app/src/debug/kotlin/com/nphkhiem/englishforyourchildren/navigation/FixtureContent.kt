@@ -82,5 +82,5 @@ class FixtureContent(
 
 /** A gateway that answers with whatever a test or the catalog wants launch to see. */
 class FixtureProfileGateway(private val snapshot: ProfileSnapshot) : ProfileGateway {
-    override fun snapshot(): ProfileSnapshot = snapshot
+    override suspend fun snapshot(): ProfileSnapshot = snapshot
 }
