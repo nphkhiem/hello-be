@@ -13,6 +13,9 @@ dependencies {
     api(projects.domain)
     // api: the controller implements DefaultLifecycleObserver, so the type is part of its shape.
     api(libs.androidx.lifecycle.runtime)
+    // For String.toUri. It is already on the classpath transitively, which is why lint asks for
+    // the extension; asking for it by name is the difference between using it and relying on it.
+    implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.media3.common)
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.kotlinx.coroutines.android)

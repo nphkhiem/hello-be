@@ -2,6 +2,7 @@ package com.nphkhiem.englishforyourchildren.playback
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toUri
 import com.nphkhiem.englishforyourchildren.domain.model.AssetId
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
@@ -19,7 +20,7 @@ class PackagedAssetLocator @Inject constructor(
 ) : MediaAssetLocator {
     override fun locate(assetId: AssetId): Uri? {
         val path = "$DIRECTORY/${assetId.value}.$EXTENSION"
-        return if (exists(path)) Uri.parse("asset:///$path") else null
+        return if (exists(path)) "asset:///$path".toUri() else null
     }
 
     /**
