@@ -2,13 +2,17 @@ package com.nphkhiem.englishforyourchildren.data.di
 
 import com.nphkhiem.englishforyourchildren.data.SystemTimeProvider
 import com.nphkhiem.englishforyourchildren.data.UuidProfileIdProvider
+import com.nphkhiem.englishforyourchildren.data.UuidSessionIdProvider
 import com.nphkhiem.englishforyourchildren.data.curriculum.PackagedCurriculumRepository
 import com.nphkhiem.englishforyourchildren.data.profile.RoomProfileRepository
+import com.nphkhiem.englishforyourchildren.data.progress.RoomProgressRepository
 import com.nphkhiem.englishforyourchildren.data.settings.DataStoreSettingsRepository
 import com.nphkhiem.englishforyourchildren.domain.id.IdProvider
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
+import com.nphkhiem.englishforyourchildren.domain.model.SessionId
 import com.nphkhiem.englishforyourchildren.domain.repository.CurriculumRepository
 import com.nphkhiem.englishforyourchildren.domain.repository.ProfileRepository
+import com.nphkhiem.englishforyourchildren.domain.repository.ProgressRepository
 import com.nphkhiem.englishforyourchildren.domain.repository.SettingsRepository
 import com.nphkhiem.englishforyourchildren.domain.time.TimeProvider
 import dagger.Binds
@@ -38,8 +42,15 @@ abstract class DataBindingsModule {
     ): CurriculumRepository
 
     @Binds
+    @Singleton
+    abstract fun bindProgressRepository(implementation: RoomProgressRepository): ProgressRepository
+
+    @Binds
     abstract fun bindTimeProvider(implementation: SystemTimeProvider): TimeProvider
 
     @Binds
     abstract fun bindProfileIdProvider(implementation: UuidProfileIdProvider): IdProvider<ProfileId>
+
+    @Binds
+    abstract fun bindSessionIdProvider(implementation: UuidSessionIdProvider): IdProvider<SessionId>
 }

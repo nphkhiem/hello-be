@@ -1,5 +1,7 @@
 package com.nphkhiem.englishforyourchildren.data.curriculum
 
+import javax.inject.Inject
+
 /**
  * What is wrong with a bundle, in words a person can act on.
  *
@@ -17,7 +19,7 @@ data class ContentProblem(val where: String, val what: String) {
  * not offer, ordinals that do not match their order, an id used twice. The asset check is the one
  * that matters today, because it is the difference between a lesson that runs and a silent screen.
  */
-class CurriculumValidator {
+class CurriculumValidator @Inject constructor() {
 
     fun validate(
         course: CourseDto,

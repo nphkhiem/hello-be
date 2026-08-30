@@ -23,8 +23,8 @@ import kotlinx.coroutines.flow.flow
  */
 class PackagedCurriculumRepository @Inject constructor(
     private val assets: AssetManager,
-    private val parser: CurriculumJsonParser = CurriculumJsonParser(),
-    private val validator: CurriculumValidator = CurriculumValidator()
+    private val parser: CurriculumJsonParser,
+    private val validator: CurriculumValidator
 ) : CurriculumRepository {
 
     private val loaded: DomainResult<Course> by lazy { load() }
