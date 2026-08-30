@@ -1,5 +1,7 @@
 package com.nphkhiem.englishforyourchildren.navigation
 
+import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
+
 /**
  * What the app knows about stored profiles when it starts.
  *

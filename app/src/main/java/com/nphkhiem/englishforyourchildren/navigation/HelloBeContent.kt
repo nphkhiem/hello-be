@@ -1,5 +1,9 @@
 package com.nphkhiem.englishforyourchildren.navigation
 
+import com.nphkhiem.englishforyourchildren.domain.model.LessonId
+import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
+import com.nphkhiem.englishforyourchildren.domain.model.ShelfId
+import com.nphkhiem.englishforyourchildren.domain.model.UnitId
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateUiState
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverConfirmationKind
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverConfirmationState

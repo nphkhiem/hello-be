@@ -17,6 +17,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.HelloBeRoot
+import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

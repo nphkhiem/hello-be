@@ -1,6 +1,7 @@
 package com.nphkhiem.englishforyourchildren.navigation
 
 import com.google.common.truth.Truth.assertThat
+import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import org.junit.jupiter.api.Test
 
 class EntryResolverTest {
