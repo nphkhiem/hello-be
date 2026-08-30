@@ -1,6 +1,7 @@
 plugins {
     id("english.android.library")
     id("english.android.compose")
+    id("english.android.hilt")
 }
 
 android {
@@ -9,6 +10,7 @@ android {
 
 dependencies {
     implementation(projects.domain)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(projects.ui.tv)
     implementation(projects.playback)
     implementation(platform(libs.androidx.compose.bom))

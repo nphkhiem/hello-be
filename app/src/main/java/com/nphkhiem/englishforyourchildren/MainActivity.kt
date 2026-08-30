@@ -12,9 +12,10 @@ import androidx.compose.ui.Modifier
 import com.nphkhiem.englishforyourchildren.navigation.HelloBeContent
 import com.nphkhiem.englishforyourchildren.navigation.HelloBeNavHost
 import com.nphkhiem.englishforyourchildren.navigation.ProfileGateway
-import com.nphkhiem.englishforyourchildren.navigation.UnavailableProfileGateway
+import com.nphkhiem.englishforyourchildren.navigation.RepositoryProfileGateway
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 /**
  * The app root.
@@ -22,18 +23,19 @@ import dagger.hilt.android.AndroidEntryPoint
  * It does two things: put the tokenized theme around everything, and hand the navigation host a
  * way to read profiles and a way to leave. Every other decision belongs to the host or to a screen.
  *
- * The gateway an installed build gets reports that storage cannot be read, because nothing can read
- * it yet. That is not a placeholder standing in for real data; it is the truth about a build with
- * no data layer, and it sends the app to the caregiver recovery, which explains the situation to an
- * adult. Inventing a child to show a home screen to would be the dishonest option.
+ * The gateway now reads real storage. Until P2-T2 there was no data layer at all, and the app
+ * honestly reported that storage could not be read; that is what [UnavailableProfileGateway] was
+ * for, and it stays in the source as the thing a build without a database should do.
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    @Inject lateinit var gateway: RepositoryProfileGateway
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             HelloBeRoot(
-                gateway = remember { UnavailableProfileGateway() },
+                gateway = gateway,
                 content = null,
                 onExitApp = { finish() }
             )
