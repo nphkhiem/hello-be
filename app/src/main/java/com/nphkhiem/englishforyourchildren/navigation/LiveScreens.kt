@@ -195,6 +195,9 @@ internal fun LiveLesson(
                     LessonAction.BackRequested ->
                         model.onAction(LessonUiAction.StopRequested)
 
+                    LessonAction.SkipRequested ->
+                        model.onAction(LessonUiAction.SkipRequested)
+
                     LessonAction.StopForNowConfirmed -> onStopConfirmed()
 
                     else -> Unit

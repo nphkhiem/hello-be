@@ -1,5 +1,9 @@
 package com.nphkhiem.englishforyourchildren.feature.learning
 
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.domain.model.Activity
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityContent
@@ -15,6 +19,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.domain.model.SkillId
 import com.nphkhiem.englishforyourchildren.domain.model.UnitId
 import com.nphkhiem.englishforyourchildren.domain.result.DomainError
+import com.nphkhiem.englishforyourchildren.playback.PlaybackFailureCode
 import com.nphkhiem.englishforyourchildren.testsupport.FakeCurriculumRepository
 import com.nphkhiem.englishforyourchildren.testsupport.FakeProgressRepository
 import com.nphkhiem.englishforyourchildren.testsupport.FakeTimeProvider
@@ -30,6 +35,9 @@ import org.junit.jupiter.api.Test
 class LessonViewModelTest {
     private val curriculum = FakeCurriculumRepository()
     private val progress = FakeProgressRepository(timeProvider = FakeTimeProvider(EpochMillis(NOW)))
+
+    /** Every recording the course names is unmade, so the shipped answer to any prompt is this. */
+    private var playback = FakePlaybackController(failWith = PlaybackFailureCode.MISSING)
 
     @BeforeEach
     fun useTestDispatcher() {
@@ -131,6 +139,10 @@ class LessonViewModelTest {
 
     @Test
     fun givenAWrongAnswer_whenItIsChosen_thenHelpArrivesAndNothingIsWrittenDown() = runTest {
+        // Says outright that this needs a recording that plays. A supportive retry only makes
+        // sense for a question the child could hear: when the sound is missing the same press is
+        // an unscored skip instead, which is the test below.
+        playback = FakePlaybackController()
         val model = started()
 
         model.onAction(LessonUiAction.AnswerChosen("word-ears", activityNumber = 1))
@@ -204,10 +216,54 @@ class LessonViewModelTest {
         assertThat(progress.started.single().profileId).isEqualTo(ProfileId(PROFILE))
     }
 
+    @Test
+    fun givenAPromptThatNamesARecording_whenTheLessonStarts_thenTheQuestionIsSpoken() = runTest {
+        started()
+
+        assertThat(playback.played).containsExactly(AssetId("aud-en-prompt-where-is"))
+    }
+
+    @Test
+    fun givenTheRecordingWasNeverMade_whenTheLessonStarts_thenItGoesQuietAndShowsTheWords() =
+        runTest {
+            // The state the app actually ships in. Content names a recording for every prompt and
+            // not one of those files exists, so the lesson has to find that out and say so: the
+            // question becomes something to read, and the unscored skip becomes reachable.
+            val model = started()
+
+            assertThat(model.state.value.audioAvailable).isFalse()
+            assertThat(model.state.value.caption).isEqualTo("Where are the eyes?")
+        }
+
+    @Test
+    fun givenSoundIsUnavailable_whenTheChildTakesTheSkip_thenTheyMoveOnWithoutBeingWrong() =
+        runTest {
+            val model = started()
+
+            model.onAction(LessonUiAction.SkipRequested)
+
+            assertThat(model.state.value.activityNumber).isEqualTo(2)
+            assertThat(model.state.value.support).isEqualTo(SupportLevel.NONE)
+        }
+
+    @Test
+    fun givenTheLessonScreenGoesAway_whenTheModelIsCleared_thenThePlayerIsLetGo() {
+        val store = ViewModelStore()
+        ViewModelProvider(
+            store,
+            viewModelFactory { initializer { viewModel() } }
+        )[LessonViewModel::class.java]
+
+        store.clear()
+
+        assertThat(playback.stopped).isTrue()
+    }
+
     private fun viewModel() = LessonViewModel(
         curriculum = curriculum,
         progress = progress,
-        timeProvider = FakeTimeProvider(EpochMillis(NOW))
+        timeProvider = FakeTimeProvider(EpochMillis(NOW)),
+        playback = playback
     )
 
     private suspend fun started(lessonId: String = LESSON): LessonViewModel {
