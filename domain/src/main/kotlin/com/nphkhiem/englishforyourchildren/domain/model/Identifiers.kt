@@ -119,6 +119,19 @@ value class ShelfId(val value: String) {
 }
 
 /**
+ * One packaged file: a picture, a recording, or a font.
+ *
+ * It arrives with the attribution ledger rather than with the curriculum models, because the first
+ * thing that needed to name an asset was the record of who made it and under what licence.
+ */
+@JvmInline
+value class AssetId(val value: String) {
+    init {
+        requireIdentifier(value, "AssetId")
+    }
+}
+
+/**
  * An instant, as milliseconds since the epoch.
  *
  * Zero is a real instant and is accepted. A model that means "no time yet" says so with null, so
