@@ -46,6 +46,11 @@ object DataProvidersModule {
         database.childProfileDao()
 
     @Provides
+    @Singleton
+    fun provideAssets(@ApplicationContext context: Context): android.content.res.AssetManager =
+        context.assets
+
+    @Provides
     fun provideProgressDao(database: HelloBeDatabase): ProgressDao = database.progressDao()
 
     @Provides

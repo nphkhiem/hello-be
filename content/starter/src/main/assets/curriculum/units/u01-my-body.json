@@ -1,0 +1,966 @@
+{
+  "schemaVersion": 1,
+  "id": "u01-my-body",
+  "ordinal": 0,
+  "theme": "My Body",
+  "scenery": "A child's bedroom in the morning",
+  "lessons": [
+    {
+      "id": "u01-my-body-l1",
+      "ordinal": 0,
+      "kind": "TEACHING",
+      "teaches": [
+        "word-eyes",
+        "word-ears",
+        "word-nose",
+        "word-mouth"
+      ],
+      "letters": [
+        "letter-e",
+        "letter-m"
+      ],
+      "activities": [
+        {
+          "id": "u01-my-body-l1-a1",
+          "ordinal": 0,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where are the eyes?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-eyes",
+              "label": "eyes",
+              "image": "img-eyes",
+              "audio": "aud-en-eyes"
+            },
+            {
+              "skillId": "word-ears",
+              "label": "ears",
+              "image": "img-ears",
+              "audio": "aud-en-ears"
+            }
+          ],
+          "correctSkillId": "word-eyes"
+        },
+        {
+          "id": "u01-my-body-l1-a2",
+          "ordinal": 1,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where is the nose?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-nose",
+              "label": "nose",
+              "image": "img-nose",
+              "audio": "aud-en-nose"
+            },
+            {
+              "skillId": "word-mouth",
+              "label": "mouth",
+              "image": "img-mouth",
+              "audio": "aud-en-mouth"
+            }
+          ],
+          "correctSkillId": "word-nose"
+        },
+        {
+          "id": "u01-my-body-l1-a3",
+          "ordinal": 2,
+          "family": "PICTURE_MATCHING",
+          "prompt": "Find the ears.",
+          "promptAsset": "aud-en-prompt-find-the",
+          "choices": [
+            {
+              "skillId": "word-eyes",
+              "label": "eyes",
+              "image": "img-eyes",
+              "audio": "aud-en-eyes"
+            },
+            {
+              "skillId": "word-ears",
+              "label": "ears",
+              "image": "img-ears",
+              "audio": "aud-en-ears"
+            },
+            {
+              "skillId": "word-nose",
+              "label": "nose",
+              "image": "img-nose",
+              "audio": "aud-en-nose"
+            },
+            {
+              "skillId": "word-mouth",
+              "label": "mouth",
+              "image": "img-mouth",
+              "audio": "aud-en-mouth"
+            }
+          ],
+          "correctSkillId": "word-ears"
+        },
+        {
+          "id": "u01-my-body-l1-a4",
+          "ordinal": 3,
+          "family": "LETTER_AND_SOUND",
+          "prompt": "Which one starts with E?",
+          "promptAsset": "aud-en-prompt-which-one-starts-with",
+          "choices": [
+            {
+              "skillId": "word-eyes",
+              "label": "eyes",
+              "image": "img-eyes",
+              "audio": "aud-en-eyes"
+            },
+            {
+              "skillId": "word-mouth",
+              "label": "mouth",
+              "image": "img-mouth",
+              "audio": "aud-en-mouth"
+            }
+          ],
+          "correctSkillId": "word-eyes",
+          "letterSkillId": "letter-e",
+          "letterAsset": "aud-en-letter-e"
+        },
+        {
+          "id": "u01-my-body-l1-a5",
+          "ordinal": 4,
+          "family": "SAY_WITH_PIP",
+          "prompt": "Say it with me: eyes.",
+          "promptAsset": "aud-en-prompt-say-with-me",
+          "choices": [
+            {
+              "skillId": "word-eyes",
+              "label": "eyes",
+              "image": "img-eyes",
+              "audio": "aud-en-eyes"
+            },
+            {
+              "skillId": "word-ears",
+              "label": "ears",
+              "image": "img-ears",
+              "audio": "aud-en-ears"
+            },
+            {
+              "skillId": "word-nose",
+              "label": "nose",
+              "image": "img-nose",
+              "audio": "aud-en-nose"
+            },
+            {
+              "skillId": "word-mouth",
+              "label": "mouth",
+              "image": "img-mouth",
+              "audio": "aud-en-mouth"
+            }
+          ]
+        },
+        {
+          "id": "u01-my-body-l1-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Where is the mouth?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-eyes",
+              "label": "eyes",
+              "image": "img-eyes",
+              "audio": "aud-en-eyes"
+            },
+            {
+              "skillId": "word-ears",
+              "label": "ears",
+              "image": "img-ears",
+              "audio": "aud-en-ears"
+            },
+            {
+              "skillId": "word-nose",
+              "label": "nose",
+              "image": "img-nose",
+              "audio": "aud-en-nose"
+            },
+            {
+              "skillId": "word-mouth",
+              "label": "mouth",
+              "image": "img-mouth",
+              "audio": "aud-en-mouth"
+            }
+          ],
+          "correctSkillId": "word-mouth"
+        }
+      ]
+    },
+    {
+      "id": "u01-my-body-l2",
+      "ordinal": 1,
+      "kind": "TEACHING",
+      "teaches": [
+        "word-hands",
+        "word-feet",
+        "word-fingers",
+        "word-toes"
+      ],
+      "letters": [
+        "letter-h",
+        "letter-f"
+      ],
+      "activities": [
+        {
+          "id": "u01-my-body-l2-a1",
+          "ordinal": 0,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where are the hands?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-hands",
+              "label": "hands",
+              "image": "img-hands",
+              "audio": "aud-en-hands"
+            },
+            {
+              "skillId": "word-feet",
+              "label": "feet",
+              "image": "img-feet",
+              "audio": "aud-en-feet"
+            }
+          ],
+          "correctSkillId": "word-hands"
+        },
+        {
+          "id": "u01-my-body-l2-a2",
+          "ordinal": 1,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where are the fingers?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-fingers",
+              "label": "fingers",
+              "image": "img-fingers",
+              "audio": "aud-en-fingers"
+            },
+            {
+              "skillId": "word-toes",
+              "label": "toes",
+              "image": "img-toes",
+              "audio": "aud-en-toes"
+            }
+          ],
+          "correctSkillId": "word-fingers"
+        },
+        {
+          "id": "u01-my-body-l2-a3",
+          "ordinal": 2,
+          "family": "PICTURE_MATCHING",
+          "prompt": "Find the feet.",
+          "promptAsset": "aud-en-prompt-find-the",
+          "choices": [
+            {
+              "skillId": "word-hands",
+              "label": "hands",
+              "image": "img-hands",
+              "audio": "aud-en-hands"
+            },
+            {
+              "skillId": "word-feet",
+              "label": "feet",
+              "image": "img-feet",
+              "audio": "aud-en-feet"
+            },
+            {
+              "skillId": "word-fingers",
+              "label": "fingers",
+              "image": "img-fingers",
+              "audio": "aud-en-fingers"
+            },
+            {
+              "skillId": "word-toes",
+              "label": "toes",
+              "image": "img-toes",
+              "audio": "aud-en-toes"
+            }
+          ],
+          "correctSkillId": "word-feet"
+        },
+        {
+          "id": "u01-my-body-l2-a4",
+          "ordinal": 3,
+          "family": "LETTER_AND_SOUND",
+          "prompt": "Which one starts with H?",
+          "promptAsset": "aud-en-prompt-which-one-starts-with",
+          "choices": [
+            {
+              "skillId": "word-hands",
+              "label": "hands",
+              "image": "img-hands",
+              "audio": "aud-en-hands"
+            },
+            {
+              "skillId": "word-toes",
+              "label": "toes",
+              "image": "img-toes",
+              "audio": "aud-en-toes"
+            }
+          ],
+          "correctSkillId": "word-hands",
+          "letterSkillId": "letter-h",
+          "letterAsset": "aud-en-letter-h"
+        },
+        {
+          "id": "u01-my-body-l2-a5",
+          "ordinal": 4,
+          "family": "SAY_WITH_PIP",
+          "prompt": "Say it with me: hands.",
+          "promptAsset": "aud-en-prompt-say-with-me",
+          "choices": [
+            {
+              "skillId": "word-hands",
+              "label": "hands",
+              "image": "img-hands",
+              "audio": "aud-en-hands"
+            },
+            {
+              "skillId": "word-feet",
+              "label": "feet",
+              "image": "img-feet",
+              "audio": "aud-en-feet"
+            },
+            {
+              "skillId": "word-fingers",
+              "label": "fingers",
+              "image": "img-fingers",
+              "audio": "aud-en-fingers"
+            },
+            {
+              "skillId": "word-toes",
+              "label": "toes",
+              "image": "img-toes",
+              "audio": "aud-en-toes"
+            }
+          ]
+        },
+        {
+          "id": "u01-my-body-l2-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Where are the toes?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-hands",
+              "label": "hands",
+              "image": "img-hands",
+              "audio": "aud-en-hands"
+            },
+            {
+              "skillId": "word-feet",
+              "label": "feet",
+              "image": "img-feet",
+              "audio": "aud-en-feet"
+            },
+            {
+              "skillId": "word-fingers",
+              "label": "fingers",
+              "image": "img-fingers",
+              "audio": "aud-en-fingers"
+            },
+            {
+              "skillId": "word-toes",
+              "label": "toes",
+              "image": "img-toes",
+              "audio": "aud-en-toes"
+            }
+          ],
+          "correctSkillId": "word-toes"
+        }
+      ]
+    },
+    {
+      "id": "u01-my-body-l3",
+      "ordinal": 2,
+      "kind": "TEACHING",
+      "teaches": [
+        "word-head",
+        "word-hair",
+        "word-tummy",
+        "word-back"
+      ],
+      "letters": [
+        "letter-b",
+        "letter-t"
+      ],
+      "activities": [
+        {
+          "id": "u01-my-body-l3-a1",
+          "ordinal": 0,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where is the head?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-head",
+              "label": "head",
+              "image": "img-head",
+              "audio": "aud-en-head"
+            },
+            {
+              "skillId": "word-hair",
+              "label": "hair",
+              "image": "img-hair",
+              "audio": "aud-en-hair"
+            }
+          ],
+          "correctSkillId": "word-head"
+        },
+        {
+          "id": "u01-my-body-l3-a2",
+          "ordinal": 1,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where is the tummy?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-tummy",
+              "label": "tummy",
+              "image": "img-tummy",
+              "audio": "aud-en-tummy"
+            },
+            {
+              "skillId": "word-back",
+              "label": "back",
+              "image": "img-back",
+              "audio": "aud-en-back"
+            }
+          ],
+          "correctSkillId": "word-tummy"
+        },
+        {
+          "id": "u01-my-body-l3-a3",
+          "ordinal": 2,
+          "family": "PICTURE_MATCHING",
+          "prompt": "Find the hair.",
+          "promptAsset": "aud-en-prompt-find-the",
+          "choices": [
+            {
+              "skillId": "word-head",
+              "label": "head",
+              "image": "img-head",
+              "audio": "aud-en-head"
+            },
+            {
+              "skillId": "word-hair",
+              "label": "hair",
+              "image": "img-hair",
+              "audio": "aud-en-hair"
+            },
+            {
+              "skillId": "word-tummy",
+              "label": "tummy",
+              "image": "img-tummy",
+              "audio": "aud-en-tummy"
+            },
+            {
+              "skillId": "word-back",
+              "label": "back",
+              "image": "img-back",
+              "audio": "aud-en-back"
+            }
+          ],
+          "correctSkillId": "word-hair"
+        },
+        {
+          "id": "u01-my-body-l3-a4",
+          "ordinal": 3,
+          "family": "LETTER_AND_SOUND",
+          "prompt": "Which one starts with B?",
+          "promptAsset": "aud-en-prompt-which-one-starts-with",
+          "choices": [
+            {
+              "skillId": "word-head",
+              "label": "head",
+              "image": "img-head",
+              "audio": "aud-en-head"
+            },
+            {
+              "skillId": "word-back",
+              "label": "back",
+              "image": "img-back",
+              "audio": "aud-en-back"
+            }
+          ],
+          "correctSkillId": "word-head",
+          "letterSkillId": "letter-b",
+          "letterAsset": "aud-en-letter-b"
+        },
+        {
+          "id": "u01-my-body-l3-a5",
+          "ordinal": 4,
+          "family": "SAY_WITH_PIP",
+          "prompt": "Say it with me: head.",
+          "promptAsset": "aud-en-prompt-say-with-me",
+          "choices": [
+            {
+              "skillId": "word-head",
+              "label": "head",
+              "image": "img-head",
+              "audio": "aud-en-head"
+            },
+            {
+              "skillId": "word-hair",
+              "label": "hair",
+              "image": "img-hair",
+              "audio": "aud-en-hair"
+            },
+            {
+              "skillId": "word-tummy",
+              "label": "tummy",
+              "image": "img-tummy",
+              "audio": "aud-en-tummy"
+            },
+            {
+              "skillId": "word-back",
+              "label": "back",
+              "image": "img-back",
+              "audio": "aud-en-back"
+            }
+          ]
+        },
+        {
+          "id": "u01-my-body-l3-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Where is the back?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-head",
+              "label": "head",
+              "image": "img-head",
+              "audio": "aud-en-head"
+            },
+            {
+              "skillId": "word-hair",
+              "label": "hair",
+              "image": "img-hair",
+              "audio": "aud-en-hair"
+            },
+            {
+              "skillId": "word-tummy",
+              "label": "tummy",
+              "image": "img-tummy",
+              "audio": "aud-en-tummy"
+            },
+            {
+              "skillId": "word-back",
+              "label": "back",
+              "image": "img-back",
+              "audio": "aud-en-back"
+            }
+          ],
+          "correctSkillId": "word-back"
+        }
+      ]
+    },
+    {
+      "id": "u01-my-body-l4",
+      "ordinal": 3,
+      "kind": "TEACHING",
+      "teaches": [
+        "word-arms",
+        "word-legs",
+        "word-knees",
+        "word-teeth"
+      ],
+      "letters": [
+        "letter-a",
+        "letter-k"
+      ],
+      "activities": [
+        {
+          "id": "u01-my-body-l4-a1",
+          "ordinal": 0,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where are the arms?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-arms",
+              "label": "arms",
+              "image": "img-arms",
+              "audio": "aud-en-arms"
+            },
+            {
+              "skillId": "word-legs",
+              "label": "legs",
+              "image": "img-legs",
+              "audio": "aud-en-legs"
+            }
+          ],
+          "correctSkillId": "word-arms"
+        },
+        {
+          "id": "u01-my-body-l4-a2",
+          "ordinal": 1,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where are the knees?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-knees",
+              "label": "knees",
+              "image": "img-knees",
+              "audio": "aud-en-knees"
+            },
+            {
+              "skillId": "word-teeth",
+              "label": "teeth",
+              "image": "img-teeth",
+              "audio": "aud-en-teeth"
+            }
+          ],
+          "correctSkillId": "word-knees"
+        },
+        {
+          "id": "u01-my-body-l4-a3",
+          "ordinal": 2,
+          "family": "PICTURE_MATCHING",
+          "prompt": "Find the legs.",
+          "promptAsset": "aud-en-prompt-find-the",
+          "choices": [
+            {
+              "skillId": "word-arms",
+              "label": "arms",
+              "image": "img-arms",
+              "audio": "aud-en-arms"
+            },
+            {
+              "skillId": "word-legs",
+              "label": "legs",
+              "image": "img-legs",
+              "audio": "aud-en-legs"
+            },
+            {
+              "skillId": "word-knees",
+              "label": "knees",
+              "image": "img-knees",
+              "audio": "aud-en-knees"
+            },
+            {
+              "skillId": "word-teeth",
+              "label": "teeth",
+              "image": "img-teeth",
+              "audio": "aud-en-teeth"
+            }
+          ],
+          "correctSkillId": "word-legs"
+        },
+        {
+          "id": "u01-my-body-l4-a4",
+          "ordinal": 3,
+          "family": "LETTER_AND_SOUND",
+          "prompt": "Which one starts with A?",
+          "promptAsset": "aud-en-prompt-which-one-starts-with",
+          "choices": [
+            {
+              "skillId": "word-arms",
+              "label": "arms",
+              "image": "img-arms",
+              "audio": "aud-en-arms"
+            },
+            {
+              "skillId": "word-teeth",
+              "label": "teeth",
+              "image": "img-teeth",
+              "audio": "aud-en-teeth"
+            }
+          ],
+          "correctSkillId": "word-arms",
+          "letterSkillId": "letter-a",
+          "letterAsset": "aud-en-letter-a"
+        },
+        {
+          "id": "u01-my-body-l4-a5",
+          "ordinal": 4,
+          "family": "SAY_WITH_PIP",
+          "prompt": "Say it with me: arms.",
+          "promptAsset": "aud-en-prompt-say-with-me",
+          "choices": [
+            {
+              "skillId": "word-arms",
+              "label": "arms",
+              "image": "img-arms",
+              "audio": "aud-en-arms"
+            },
+            {
+              "skillId": "word-legs",
+              "label": "legs",
+              "image": "img-legs",
+              "audio": "aud-en-legs"
+            },
+            {
+              "skillId": "word-knees",
+              "label": "knees",
+              "image": "img-knees",
+              "audio": "aud-en-knees"
+            },
+            {
+              "skillId": "word-teeth",
+              "label": "teeth",
+              "image": "img-teeth",
+              "audio": "aud-en-teeth"
+            }
+          ]
+        },
+        {
+          "id": "u01-my-body-l4-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Where are the teeth?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-arms",
+              "label": "arms",
+              "image": "img-arms",
+              "audio": "aud-en-arms"
+            },
+            {
+              "skillId": "word-legs",
+              "label": "legs",
+              "image": "img-legs",
+              "audio": "aud-en-legs"
+            },
+            {
+              "skillId": "word-knees",
+              "label": "knees",
+              "image": "img-knees",
+              "audio": "aud-en-knees"
+            },
+            {
+              "skillId": "word-teeth",
+              "label": "teeth",
+              "image": "img-teeth",
+              "audio": "aud-en-teeth"
+            }
+          ],
+          "correctSkillId": "word-teeth"
+        }
+      ]
+    },
+    {
+      "id": "u01-my-body-l5",
+      "ordinal": 4,
+      "kind": "REVIEW",
+      "teaches": [],
+      "letters": [],
+      "activities": [
+        {
+          "id": "u01-my-body-l5-a1",
+          "ordinal": 0,
+          "family": "REVIEW",
+          "prompt": "Where are the eyes?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-eyes",
+              "label": "eyes",
+              "image": "img-eyes",
+              "audio": "aud-en-eyes"
+            },
+            {
+              "skillId": "word-ears",
+              "label": "ears",
+              "image": "img-ears",
+              "audio": "aud-en-ears"
+            },
+            {
+              "skillId": "word-nose",
+              "label": "nose",
+              "image": "img-nose",
+              "audio": "aud-en-nose"
+            },
+            {
+              "skillId": "word-mouth",
+              "label": "mouth",
+              "image": "img-mouth",
+              "audio": "aud-en-mouth"
+            }
+          ],
+          "correctSkillId": "word-eyes"
+        },
+        {
+          "id": "u01-my-body-l5-a2",
+          "ordinal": 1,
+          "family": "REVIEW",
+          "prompt": "Where are the hands?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-hands",
+              "label": "hands",
+              "image": "img-hands",
+              "audio": "aud-en-hands"
+            },
+            {
+              "skillId": "word-feet",
+              "label": "feet",
+              "image": "img-feet",
+              "audio": "aud-en-feet"
+            },
+            {
+              "skillId": "word-fingers",
+              "label": "fingers",
+              "image": "img-fingers",
+              "audio": "aud-en-fingers"
+            },
+            {
+              "skillId": "word-toes",
+              "label": "toes",
+              "image": "img-toes",
+              "audio": "aud-en-toes"
+            }
+          ],
+          "correctSkillId": "word-hands"
+        },
+        {
+          "id": "u01-my-body-l5-a3",
+          "ordinal": 2,
+          "family": "REVIEW",
+          "prompt": "Where is the head?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-head",
+              "label": "head",
+              "image": "img-head",
+              "audio": "aud-en-head"
+            },
+            {
+              "skillId": "word-hair",
+              "label": "hair",
+              "image": "img-hair",
+              "audio": "aud-en-hair"
+            },
+            {
+              "skillId": "word-tummy",
+              "label": "tummy",
+              "image": "img-tummy",
+              "audio": "aud-en-tummy"
+            },
+            {
+              "skillId": "word-back",
+              "label": "back",
+              "image": "img-back",
+              "audio": "aud-en-back"
+            }
+          ],
+          "correctSkillId": "word-head"
+        },
+        {
+          "id": "u01-my-body-l5-a4",
+          "ordinal": 3,
+          "family": "REVIEW",
+          "prompt": "Where are the arms?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-arms",
+              "label": "arms",
+              "image": "img-arms",
+              "audio": "aud-en-arms"
+            },
+            {
+              "skillId": "word-legs",
+              "label": "legs",
+              "image": "img-legs",
+              "audio": "aud-en-legs"
+            },
+            {
+              "skillId": "word-knees",
+              "label": "knees",
+              "image": "img-knees",
+              "audio": "aud-en-knees"
+            },
+            {
+              "skillId": "word-teeth",
+              "label": "teeth",
+              "image": "img-teeth",
+              "audio": "aud-en-teeth"
+            }
+          ],
+          "correctSkillId": "word-arms"
+        },
+        {
+          "id": "u01-my-body-l5-a5",
+          "ordinal": 4,
+          "family": "REVIEW",
+          "prompt": "Where are the eyes?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-eyes",
+              "label": "eyes",
+              "image": "img-eyes",
+              "audio": "aud-en-eyes"
+            },
+            {
+              "skillId": "word-ears",
+              "label": "ears",
+              "image": "img-ears",
+              "audio": "aud-en-ears"
+            },
+            {
+              "skillId": "word-nose",
+              "label": "nose",
+              "image": "img-nose",
+              "audio": "aud-en-nose"
+            },
+            {
+              "skillId": "word-mouth",
+              "label": "mouth",
+              "image": "img-mouth",
+              "audio": "aud-en-mouth"
+            }
+          ],
+          "correctSkillId": "word-eyes"
+        },
+        {
+          "id": "u01-my-body-l5-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Where is the head?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-head",
+              "label": "head",
+              "image": "img-head",
+              "audio": "aud-en-head"
+            },
+            {
+              "skillId": "word-hair",
+              "label": "hair",
+              "image": "img-hair",
+              "audio": "aud-en-hair"
+            },
+            {
+              "skillId": "word-tummy",
+              "label": "tummy",
+              "image": "img-tummy",
+              "audio": "aud-en-tummy"
+            },
+            {
+              "skillId": "word-back",
+              "label": "back",
+              "image": "img-back",
+              "audio": "aud-en-back"
+            }
+          ],
+          "correctSkillId": "word-head"
+        }
+      ]
+    }
+  ]
+}
