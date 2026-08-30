@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "starter",
+  "courseVersion": "2026.09",
+  "supportedLocales": [
+    "en",
+    "vi"
+  ],
+  "units": [
+    {
+      "id": "u01-my-body",
+      "ordinal": 0,
+      "file": "units/u01-my-body.json"
+    }
+  ],
+  "supportPhrases": [
+    {
+      "id": "aud-vi-help-look-at-the-picture",
+      "vi": "Nhìn vào hình nhé."
+    },
+    {
+      "id": "aud-vi-help-press-the-one-you-hear",
+      "vi": "Nhấn vào cái con nghe thấy."
+    },
+    {
+      "id": "aud-vi-help-lets-try-together",
+      "vi": "Mình thử cùng nhau nhé."
+    }
+  ]
+}
