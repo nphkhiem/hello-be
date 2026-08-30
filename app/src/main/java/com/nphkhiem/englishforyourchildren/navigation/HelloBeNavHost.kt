@@ -11,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.nphkhiem.englishforyourchildren.domain.model.LessonId
+import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateAction
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateScreen
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverConfirmation

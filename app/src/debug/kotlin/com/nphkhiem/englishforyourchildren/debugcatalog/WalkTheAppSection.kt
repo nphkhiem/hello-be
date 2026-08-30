@@ -16,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.R
+import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.navigation.FixtureContent
 import com.nphkhiem.englishforyourchildren.navigation.FixtureProfileGateway
 import com.nphkhiem.englishforyourchildren.navigation.HelloBeNavHost
-import com.nphkhiem.englishforyourchildren.navigation.ProfileId
 import com.nphkhiem.englishforyourchildren.navigation.ProfileSnapshot
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone

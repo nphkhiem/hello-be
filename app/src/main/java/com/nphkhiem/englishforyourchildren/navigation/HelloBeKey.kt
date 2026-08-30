@@ -1,25 +1,10 @@
 package com.nphkhiem.englishforyourchildren.navigation
 
 import androidx.compose.runtime.Immutable
-
-/**
- * A profile's identity, and nothing about the child.
- *
- * A value class over an opaque id so a nickname, an age or an avatar can never travel in a
- * navigation key. The task's stop condition names child data in keys as the thing to keep out, and
- * a type that can only hold an id is how that is held rather than remembered.
- */
-@JvmInline
-value class ProfileId(val value: String)
-
-@JvmInline
-value class UnitId(val value: String)
-
-@JvmInline
-value class LessonId(val value: String)
-
-@JvmInline
-value class ShelfId(val value: String)
+import com.nphkhiem.englishforyourchildren.domain.model.LessonId
+import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
+import com.nphkhiem.englishforyourchildren.domain.model.ShelfId
+import com.nphkhiem.englishforyourchildren.domain.model.UnitId
 
 /** Which mode the profile picker was opened in. */
 sealed interface ProfilePickerMode {
