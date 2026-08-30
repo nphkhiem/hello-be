@@ -18,14 +18,22 @@ enum class ActivityFamily {
 /**
  * One step of a lesson: which step it is, where it comes, and what kind it is.
  *
- * It deliberately carries nothing about what it asks. What a listen-and-choose says, which pictures
- * it offers and which asset it plays are curriculum content, and the blueprint that approves that
- * content does not exist yet. Modelling it here from the built screens would encode a rendering
- * decision as content. The payload arrives with the task that owns it.
+ * [content] is what it asks: the prompt, the choices, and which one is right where that means
+ * anything. It is nullable because an activity existed as pure structure before the curriculum
+ * blueprint did, and a test that only cares about ordering still builds one that way.
  */
-data class Activity(val id: ActivityId, val ordinal: Int, val family: ActivityFamily) {
+data class Activity(
+    val id: ActivityId,
+    val ordinal: Int,
+    val family: ActivityFamily,
+    val content: ActivityContent? = null
+) {
     init {
         require(ordinal >= 0) { "An activity cannot come before the first one" }
+        // Two ways of saying the same thing can disagree, so the one place they meet checks them.
+        require(content == null || content.family == family) {
+            "An activity of $family cannot hold ${content?.family} content"
+        }
     }
 }
 
