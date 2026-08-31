@@ -8,6 +8,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.Course
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.EpochMillis
 import com.nphkhiem.englishforyourchildren.domain.model.Lesson
+import com.nphkhiem.englishforyourchildren.domain.model.LessonCheckpoint
 import com.nphkhiem.englishforyourchildren.domain.model.LessonCompletion
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.LessonSession
@@ -120,6 +121,12 @@ class FakeProgressRepository(
     private val starts = mutableListOf<StartSession>()
     private val completions = mutableListOf<CompleteSession>()
 
+    /**
+     * Deliberately outside the [failNext] queue. Opening a lesson reads this before anything else,
+     * so sharing that queue would let a failure meant for a write be eaten by a read instead.
+     */
+    private var resumePoint: DomainResult<LessonCheckpoint?> = DomainResult.Success(null)
+
     /** Every checkpoint this fake was asked to persist, oldest first, as a snapshot. */
     val persisted: List<PersistCheckpoint> get() = checkpoints.toList()
 
@@ -141,6 +148,21 @@ class FakeProgressRepository(
 
     override fun observeProfileProgress(profileId: ProfileId): Flow<DomainResult<ProfileProgress>> =
         progress.asStateFlow()
+
+    /** Where a child left a lesson, for a test that wants one resumed. */
+    fun setOpenCheckpoint(checkpoint: LessonCheckpoint?) {
+        resumePoint = DomainResult.Success(checkpoint)
+    }
+
+    fun setCheckpointFailure(error: DomainError) {
+        resumePoint = DomainResult.Failure(error)
+    }
+
+    override suspend fun openCheckpoint(
+        profileId: ProfileId,
+        lessonId: LessonId,
+        courseVersion: CourseVersion
+    ): DomainResult<LessonCheckpoint?> = resumePoint
 
     override suspend fun startSession(command: StartSession): DomainResult<LessonSession> {
         starts += command

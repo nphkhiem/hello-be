@@ -222,21 +222,27 @@ class LessonReducer {
         LessonReduction(state = state, effects = emptyList())
 
     companion object {
-        /** A lesson at its first activity, with nothing behind it and nothing pending. */
+        /**
+         * A lesson opened where the child actually is, with nothing pending.
+         *
+         * [activityIndex] is a resumed position rather than always zero, because a child who
+         * stopped part way through was promised they could come back to it.
+         */
         fun start(
             sessionId: SessionId,
             profileId: ProfileId,
             courseVersion: CourseVersion,
             lesson: Lesson,
-            firstInstance: ActivityInstanceId,
+            activityIndex: Int,
+            currentInstance: ActivityInstanceId,
             startedAt: EpochMillis
         ): LessonReduction = LessonSessionState(
             sessionId = sessionId,
             profileId = profileId,
             courseVersion = courseVersion,
             lesson = lesson,
-            activityIndex = 0,
-            currentInstance = firstInstance,
+            activityIndex = activityIndex,
+            currentInstance = currentInstance,
             phase = LessonPhase.Asking,
             saveStatus = SaveStatus.Saved,
             supportLevel = 0,

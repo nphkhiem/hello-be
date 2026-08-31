@@ -147,6 +147,39 @@ class ProgressTransactionTest {
         }
     }
 
+    @Test
+    fun givenWorkInTwoLessons_whenOneIsOpened_thenItResumesItsOwnAndNotTheOther() {
+        // The reason a lesson has to ask about itself. A child with work waiting in two lessons
+        // must not be dropped into the middle of the wrong one.
+        runBlocking {
+            dao.upsertCheckpoint(checkpoint(lastActivity = FIRST_ACTIVITY, lessonId = LESSON))
+            dao.upsertCheckpoint(
+                checkpoint(lastActivity = SECOND_ACTIVITY, lessonId = OTHER_LESSON)
+            )
+        }
+
+        runBlocking {
+            assertThat(dao.openCheckpoint(PROFILE, LESSON, VERSION)?.lastCompletedActivityId)
+                .isEqualTo(FIRST_ACTIVITY)
+            assertThat(dao.openCheckpoint(PROFILE, OTHER_LESSON, VERSION)?.lastCompletedActivityId)
+                .isEqualTo(SECOND_ACTIVITY)
+        }
+    }
+
+    @Test
+    fun givenALessonNobodyHasOpened_whenItIsAskedAbout_thenThereIsNowhereToResume() {
+        runBlocking { assertThat(dao.openCheckpoint(PROFILE, LESSON, VERSION)).isNull() }
+    }
+
+    @Test
+    fun givenWorkUnderAnotherCourseVersion_whenThisOneIsOpened_thenItIsNotCountedAsProgress() {
+        // Progress carries the version it was made under, so work done against different content
+        // never decides where a child lands in this one.
+        runBlocking { dao.upsertCheckpoint(checkpoint(courseVersion = "2025.01")) }
+
+        runBlocking { assertThat(dao.openCheckpoint(PROFILE, LESSON, VERSION)).isNull() }
+    }
+
     private fun profileRow() = ChildProfileEntity(
         id = PROFILE,
         nickname = "Minh",
@@ -180,10 +213,14 @@ class ProgressTransactionTest {
         at = NOW
     )
 
-    private fun checkpoint(lastActivity: String = FIRST_ACTIVITY) = LessonCheckpointEntity(
+    private fun checkpoint(
+        lastActivity: String = FIRST_ACTIVITY,
+        lessonId: String = LESSON,
+        courseVersion: String = VERSION
+    ) = LessonCheckpointEntity(
         profileId = PROFILE,
-        lessonId = LESSON,
-        courseVersion = VERSION,
+        lessonId = lessonId,
+        courseVersion = courseVersion,
         lastCompletedActivityId = lastActivity,
         sessionId = SESSION,
         updatedAt = NOW
@@ -203,6 +240,7 @@ class ProgressTransactionTest {
         const val LESSON = "u01-my-body-l1"
         const val FIRST_ACTIVITY = "u01-my-body-l1-a1"
         const val SECOND_ACTIVITY = "u01-my-body-l1-a2"
+        const val OTHER_LESSON = "u01-my-body-l2"
         const val FIRST_INSTANCE = "u01-my-body-l1-a1-1"
         const val SECOND_INSTANCE = "u01-my-body-l1-a2-1"
         const val NOW = 1_756_000_000_000

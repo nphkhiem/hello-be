@@ -20,6 +20,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.SkillId
 import com.nphkhiem.englishforyourchildren.domain.model.UnitId
 import com.nphkhiem.englishforyourchildren.domain.result.DomainError
 import com.nphkhiem.englishforyourchildren.playback.PlaybackFailureCode
+import com.nphkhiem.englishforyourchildren.testsupport.DomainBuilders
 import com.nphkhiem.englishforyourchildren.testsupport.FakeCurriculumRepository
 import com.nphkhiem.englishforyourchildren.testsupport.FakeProgressRepository
 import com.nphkhiem.englishforyourchildren.testsupport.FakeTimeProvider
@@ -294,6 +295,48 @@ class LessonViewModelTest {
         assertThat(model.state.value.activityNumber).isEqualTo(2)
         assertThat(playback.played).hasSize(1)
     }
+
+    @Test
+    fun givenAChildLeftPartWayThrough_whenTheLessonOpensAgain_thenItPicksUpWhereTheyStopped() =
+        runTest {
+            // What the stop-for-now dialog promises: "Pip will remember your last finished
+            // activity." The checkpoint names the last one finished, so the child is on the next.
+            progress.setOpenCheckpoint(
+                DomainBuilders.lessonCheckpoint(
+                    lastCompletedActivity = ActivityId("$LESSON-a1")
+                )
+            )
+
+            val model = started()
+
+            assertThat(model.state.value.activityNumber).isEqualTo(2)
+        }
+
+    @Test
+    fun givenACheckpointNamingAnActivityThatIsGone_whenItOpens_thenItStartsAtTheBeginning() =
+        runTest {
+            // Content can move under a saved checkpoint. Repeating a question costs a child
+            // nothing, so this opens the lesson rather than refusing it.
+            progress.setOpenCheckpoint(
+                DomainBuilders.lessonCheckpoint(lastCompletedActivity = ActivityId("gone-a9"))
+            )
+
+            val model = started()
+
+            assertThat(model.state.value.activityNumber).isEqualTo(1)
+        }
+
+    @Test
+    fun givenStorageCannotSayWhereTheChildWas_whenTheLessonOpens_thenItIsNotQuietlyRestarted() =
+        runTest {
+            // Silently starting over would throw away work a child had already done and claim
+            // nothing was wrong. An adult is asked instead.
+            progress.setCheckpointFailure(DomainError.PersistenceUnavailable)
+
+            val model = started()
+
+            assertThat(model.unavailable.value).isTrue()
+        }
 
     private fun viewModel() = LessonViewModel(
         curriculum = curriculum,

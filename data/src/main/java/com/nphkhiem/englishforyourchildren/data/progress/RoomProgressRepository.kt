@@ -84,6 +84,16 @@ class RoomProgressRepository @Inject constructor(
             DomainResult.Success(session)
         }
 
+    override suspend fun openCheckpoint(
+        profileId: ProfileId,
+        lessonId: LessonId,
+        courseVersion: CourseVersion
+    ): DomainResult<LessonCheckpoint?> = attempt {
+        DomainResult.Success(
+            dao.openCheckpoint(profileId.value, lessonId.value, courseVersion.value)?.toDomain()
+        )
+    }
+
     override suspend fun persistCheckpoint(
         command: PersistCheckpoint
     ): DomainResult<ConfirmedCheckpoint> = attempt {
