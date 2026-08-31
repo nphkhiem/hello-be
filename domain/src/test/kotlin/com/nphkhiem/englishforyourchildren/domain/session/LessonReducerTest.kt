@@ -1,7 +1,12 @@
 package com.nphkhiem.englishforyourchildren.domain.session
 
 import com.google.common.truth.Truth.assertThat
+import com.nphkhiem.englishforyourchildren.domain.model.Activity
+import com.nphkhiem.englishforyourchildren.domain.model.ActivityContent
+import com.nphkhiem.englishforyourchildren.domain.model.ActivityFamily
+import com.nphkhiem.englishforyourchildren.domain.model.ActivityId
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityInstanceId
+import com.nphkhiem.englishforyourchildren.domain.model.AnswerChoice
 import com.nphkhiem.englishforyourchildren.domain.model.AssetId
 import com.nphkhiem.englishforyourchildren.domain.model.AttemptOutcome
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
@@ -10,6 +15,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.Lesson
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.domain.model.SessionId
+import com.nphkhiem.englishforyourchildren.domain.model.SkillId
 import com.nphkhiem.englishforyourchildren.domain.model.UnitId
 import org.junit.jupiter.api.Test
 
@@ -203,7 +209,7 @@ class LessonReducerTest {
     @Test
     fun givenAPromptWithSound_whenReplayIsAsked_thenItPlaysAgainAndNothingElseChanges() {
         val replayed = reducer.reduce(
-            start(promptAsset = AssetId("aud-en-prompt-where-is")),
+            start(withAudio = true),
             LessonAction.PromptReplayRequested(instance(FIRST_INSTANCE))
         )
 
@@ -301,13 +307,62 @@ class LessonReducerTest {
         assertThat(stayed.effects).isEmpty()
     }
 
-    private fun start(activities: Int = 3, promptAsset: AssetId? = null) = LessonReducer.start(
+    @Test
+    fun givenALessonWithRecordings_whenItStarts_thenItsFirstQuestionIsAsked() {
+        // A lesson that never says its own question is not a lesson. Starting asks for it, rather
+        // than leaving whoever holds the reducer to remember to.
+        val begun = started(withAudio = true)
+
+        assertThat(begun.effects).contains(LessonEffect.Play(asset(1)))
+    }
+
+    @Test
+    fun givenTheFirstActivityIsConfirmed_whenTheSecondAppears_thenItAsksForItsOwnRecording() {
+        // The bug this test exists for: the prompt used to be a field set once at the start, so
+        // every later question asked for the first question's recording.
+        val awaiting = reducer.reduce(start(withAudio = true), answer(correct = true)).state
+
+        val moved = reducer.reduce(
+            awaiting,
+            LessonAction.CheckpointConfirmed(instance(FIRST_INSTANCE), instance(SECOND_INSTANCE))
+        )
+
+        assertThat(moved.effects).contains(LessonEffect.Play(asset(2)))
+        assertThat(moved.effects).doesNotContain(LessonEffect.Play(asset(1)))
+    }
+
+    @Test
+    fun givenTheLessonKnowsItHasNoSound_whenTheNextActivityAppears_thenNothingIsAsked() {
+        // Once a lesson has found out it is running silent, asking again for every remaining
+        // question is noise. It has already told the child, and the words are on screen.
+        val quiet = reducer.reduce(
+            start(withAudio = true),
+            LessonAction.MediaUnavailable(instance(FIRST_INSTANCE))
+        ).state
+        val awaiting = reducer.reduce(quiet, answer(correct = true)).state
+
+        val moved = reducer.reduce(
+            awaiting,
+            LessonAction.CheckpointConfirmed(instance(FIRST_INSTANCE), instance(SECOND_INSTANCE))
+        )
+
+        assertThat(moved.effects.filterIsInstance<LessonEffect.Play>()).isEmpty()
+    }
+
+    @Test
+    fun givenALessonWhoseRecordingsAreAllUnmade_whenItStarts_thenNothingIsAsked() {
+        assertThat(started().effects).isEmpty()
+    }
+
+    private fun start(activities: Int = 3, withAudio: Boolean = false) =
+        started(activities, withAudio).state
+
+    private fun started(activities: Int = 3, withAudio: Boolean = false) = LessonReducer.start(
         sessionId = SessionId(SESSION),
         profileId = ProfileId(PROFILE),
         courseVersion = CourseVersion(VERSION),
-        lesson = lesson(activities),
+        lesson = lesson(activities, withAudio),
         firstInstance = ActivityInstanceId(FIRST_INSTANCE),
-        promptAsset = promptAsset,
         startedAt = EpochMillis(NOW)
     )
 
@@ -335,15 +390,22 @@ class LessonReducerTest {
 
     private fun instance(value: String) = ActivityInstanceId(value)
 
-    private fun lesson(activities: Int): Lesson {
-        val steps = (0 until activities).map {
-            com.nphkhiem.englishforyourchildren.domain.model.Activity(
-                id = com.nphkhiem.englishforyourchildren.domain.model.ActivityId(
-                    "$LESSON-a${it + 1}"
-                ),
-                ordinal = it,
-                family = com.nphkhiem.englishforyourchildren.domain.model.ActivityFamily
-                    .LISTEN_AND_CHOOSE
+    /**
+     * Activities that carry their own content, because that is what a real lesson holds and what
+     * makes "the second question asks for its own recording" a thing a test can tell apart.
+     */
+    private fun lesson(activities: Int, withAudio: Boolean = false): Lesson {
+        val steps = (0 until activities).map { index ->
+            Activity(
+                id = ActivityId("$LESSON-a${index + 1}"),
+                ordinal = index,
+                family = ActivityFamily.LISTEN_AND_CHOOSE,
+                content = ActivityContent.ListeningSelection(
+                    prompt = "Where are the eyes?",
+                    promptAsset = if (withAudio) asset(index + 1) else null,
+                    choices = listOf(choice("eyes"), choice("ears")),
+                    correct = SkillId("word-eyes")
+                )
             )
         }
         return Lesson(
@@ -353,6 +415,15 @@ class LessonReducerTest {
             activities = steps
         )
     }
+
+    private fun asset(n: Int) = AssetId("aud-en-prompt-a$n")
+
+    private fun choice(word: String) = AnswerChoice(
+        skillId = SkillId("word-$word"),
+        label = word,
+        image = AssetId("img-$word"),
+        audio = AssetId("aud-en-$word")
+    )
 
     private companion object {
         const val SESSION = "s1"

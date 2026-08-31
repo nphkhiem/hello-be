@@ -118,31 +118,26 @@ class LessonViewModel @Inject constructor(
             return
         }
 
-        var state = LessonReducer.start(
+        var opening = LessonReducer.start(
             sessionId = started.value.id,
             profileId = profileId,
             courseVersion = courseVersion,
             lesson = lesson.value,
             firstInstance = instanceOf(lesson.value.activities.first()),
-            promptAsset = lesson.value.activities.first().content?.promptAsset,
             startedAt = timeProvider.now()
         )
 
         // Content that names no recording at all is quiet from the first moment. Content that
-        // names one finds out by asking, below.
-        if (state.promptAsset == null) {
-            state =
-                reducer.reduce(state, LessonAction.MediaUnavailable(state.currentInstance)).state
+        // names one finds out by asking, which opening the lesson has already done.
+        if (opening.state.promptAsset == null) {
+            opening = reducer.reduce(
+                opening.state,
+                LessonAction.MediaUnavailable(opening.state.currentInstance)
+            )
         }
 
         unitTheme = themeOf(lesson.value)
-        session = state
-        publish(state)
-
-        // The reducer's start hands back a state rather than a reduction, so nothing has asked for
-        // the first question to be spoken. A lesson that never says its own question is not one, so
-        // the asking happens here and the answer arrives where a later replay's would.
-        state.promptAsset?.let { playback.play(it) }
+        apply(opening)
     }
 
     /**

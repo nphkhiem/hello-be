@@ -271,6 +271,30 @@ class LessonViewModelTest {
         assertThat(model.state.value.activityNumber).isEqualTo(1)
     }
 
+    @Test
+    fun givenTheRecordingsPlay_whenTheChildMovesOn_thenTheNextQuestionIsSpokenToo() = runTest {
+        // Every question asks itself, not just the first one.
+        playback = FakePlaybackController()
+        val model = started()
+
+        model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+
+        assertThat(model.state.value.activityNumber).isEqualTo(2)
+        assertThat(playback.played).hasSize(2)
+    }
+
+    @Test
+    fun givenTheLessonHasGoneQuiet_whenTheChildMovesOn_thenItStopsAskingForSound() = runTest {
+        // Having found out once that there are no recordings, it does not go asking five more
+        // times on the way through the lesson.
+        val model = started()
+
+        model.onAction(LessonUiAction.SkipRequested)
+
+        assertThat(model.state.value.activityNumber).isEqualTo(2)
+        assertThat(playback.played).hasSize(1)
+    }
+
     private fun viewModel() = LessonViewModel(
         curriculum = curriculum,
         progress = progress,
