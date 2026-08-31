@@ -11,6 +11,10 @@ android {
         applicationId = "com.nphkhiem.englishforyourchildren"
         versionCode = 1
         versionName = "0.1.0"
+
+        // Swaps the application for HiltTestApplication so an instrumented test can replace
+        // bindings. HelloBeApplication carries nothing but @HiltAndroidApp, so nothing is lost.
+        testInstrumentationRunner = "com.nphkhiem.englishforyourchildren.HelloBeTestRunner"
     }
 }
 
@@ -46,5 +50,14 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.junit4)
     androidTestImplementation(libs.truth)
+    // The custom runner subclasses AndroidJUnitRunner, which the Compose test artifact brings in
+    // at runtime but not on the compile classpath.
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.hilt.android.testing)
+    // Test scope only, and deliberately. Building a journey's graph means naming the storage types
+    // it replaces, while production :app still cannot reach a database directly.
+    androidTestImplementation(libs.androidx.room.runtime)
+    androidTestImplementation(libs.androidx.datastore.preferences)
+    kspAndroidTest(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
