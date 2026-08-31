@@ -59,6 +59,7 @@ class CurriculumJsonParser @Inject constructor() {
         courseId = CourseId(courseId),
         ordinal = ordinal,
         theme = theme,
+        word = word,
         lessons = lessons.sortedBy { it.ordinal }.map { it.toDomain(id) }
     )
 
@@ -66,6 +67,7 @@ class CurriculumJsonParser @Inject constructor() {
         id = LessonId(id),
         unitId = UnitId(unitId),
         ordinal = ordinal,
+        teaches = teaches.map { SkillId(it) },
         activities = activities.sortedBy { it.ordinal }.map { it.toDomain() }
     )
 

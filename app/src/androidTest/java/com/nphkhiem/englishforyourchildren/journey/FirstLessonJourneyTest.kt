@@ -105,9 +105,12 @@ class FirstLessonJourneyTest {
             tv.press(tv.string("lesson_skip"))
         }
 
-        // Asserted through storage rather than through the celebration, which does not exist in an
-        // installed build: finishing a lesson currently lands on MissingContent. What matters is
-        // that the work was recorded, and that is a fact no screen can fake.
+        // The storybook page at the end, on the words this lesson is for. The wait covers the
+        // reveal budget, which is a little over three seconds.
+        tv.awaitText(tv.string("celebration_done"))
+        TAUGHT_WORDS.forEach { tv.awaitText(it) }
+
+        // And the same thing again as a fact rather than a picture: no screen can fake this.
         compose.waitUntil(TIMEOUT_MILLIS) { completedLessons().contains(LessonId(FIRST_LESSON_ID)) }
         assertThat(completedLessons()).contains(LessonId(FIRST_LESSON_ID))
     }
@@ -130,6 +133,9 @@ class FirstLessonJourneyTest {
         const val AGE = "3"
         const val FIRST_LESSON = "Lesson 1"
         const val FIRST_LESSON_ID = "u01-my-body-l1"
+
+        /** What the shipped first lesson declares it teaches. */
+        val TAUGHT_WORDS = listOf("eyes", "ears", "nose", "mouth")
 
         /** The approved spine: listen, listen, picture, letter, say with Pip, review. */
         const val ACTIVITIES = 6

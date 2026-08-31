@@ -31,6 +31,7 @@ data class UnitDto(
     val id: String,
     val ordinal: Int,
     val theme: String,
+    val word: String,
     val scenery: String = "",
     val lessons: List<LessonDto>
 )

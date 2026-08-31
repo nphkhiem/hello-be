@@ -370,9 +370,17 @@ fun HelloBeNavHost(
             } ?: MissingContent(modifier)
         }
 
-        is HelloBeKey.LessonCelebration -> content?.let {
+        is HelloBeKey.LessonCelebration -> if (content == null) {
+            LiveLessonCelebration(
+                profileId = key.profileId,
+                lessonId = key.lessonId,
+                courseVersion = SHIPPED_COURSE_VERSION,
+                onDone = { replaceAll(afterCelebrationDone(key.profileId, key.returnTarget)) },
+                modifier = modifier
+            )
+        } else {
             LessonCelebrationScreen(
-                state = it.celebration(key.profileId, key.lessonId),
+                state = content.celebration(key.profileId, key.lessonId),
                 onAction = { action ->
                     when (action) {
                         CelebrationAction.DoneRequested,
@@ -383,7 +391,7 @@ fun HelloBeNavHost(
                 },
                 modifier = modifier
             )
-        } ?: MissingContent(modifier)
+        }
 
         is HelloBeKey.FreePlay -> content?.let {
             FreePlayScreen(

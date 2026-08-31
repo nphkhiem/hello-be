@@ -121,6 +121,15 @@ class StarterContentTest {
     }
 
     @Test
+    fun givenTheShippedUnit_whenItIsRead_thenItNamesTheWordACelebrationCanSay() {
+        // "You found 4 body words!" needs a noun, and the theme is a title rather than one.
+        // Deriving one by trimming "My Body" would be code inventing child-facing copy.
+        val unit = parser.toDomain(course, units).units.single()
+
+        assertThat(unit.word).isEqualTo("body")
+    }
+
+    @Test
     fun givenTheShippedBundle_whenALetterActivityIsRead_thenItNamesItsLetter() {
         val letters = parser.toDomain(course, units).units
             .flatMap { it.lessons }

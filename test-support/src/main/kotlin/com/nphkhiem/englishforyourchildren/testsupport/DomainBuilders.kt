@@ -83,12 +83,14 @@ object DomainBuilders {
         courseId: CourseId = CourseId("starter"),
         ordinal: Int = 0,
         theme: String = "My Body",
+        word: String = "body",
         lessons: List<Lesson> = listOf(lesson())
     ) = CourseUnit(
         id = id,
         courseId = courseId,
         ordinal = ordinal,
         theme = theme,
+        word = word,
         lessons = lessons
     )
 

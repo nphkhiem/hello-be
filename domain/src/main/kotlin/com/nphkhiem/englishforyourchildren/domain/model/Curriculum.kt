@@ -48,6 +48,12 @@ data class Lesson(
     val id: LessonId,
     val unitId: UnitId,
     val ordinal: Int,
+    /**
+     * The words this lesson is for, which is what its celebration is about.
+     *
+     * Empty on a review lesson, which teaches nothing new and gathers up what came before.
+     */
+    val teaches: List<SkillId> = emptyList(),
     val activities: List<Activity>
 ) {
     init {
@@ -68,11 +74,19 @@ data class CourseUnit(
     val courseId: CourseId,
     val ordinal: Int,
     val theme: String,
+    /**
+     * The unit's own noun, as a child hears it: "body" gives "You found 4 body words!".
+     *
+     * Separate from [theme], which is a title. Trimming one into the other would be code inventing
+     * copy a child reads, and the registry's posture is that nothing parses content strings.
+     */
+    val word: String,
     val lessons: List<Lesson>
 ) {
     init {
         require(ordinal >= 0) { "A unit cannot come before the first one" }
         require(theme.isNotBlank()) { "A unit needs a theme" }
+        require(word.isNotBlank()) { "A unit needs a word a celebration can say" }
         requireOrderedSteps(lessons, "unit ${id.value}") { it.ordinal }
         requireDistinct(lessons.map { it.id }, "unit ${id.value}", "lesson")
     }

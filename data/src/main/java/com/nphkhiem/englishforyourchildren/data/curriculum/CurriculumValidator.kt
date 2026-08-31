@@ -144,7 +144,7 @@ class CurriculumValidator @Inject constructor() {
         .map { ContentProblem(it.key, "the same $kind id appears ${it.value} times") }
 
     private companion object {
-        const val SUPPORTED_SCHEMA = 1
+        const val SUPPORTED_SCHEMA = 2
         val FAMILIES = setOf(
             "LISTEN_AND_CHOOSE",
             "PICTURE_MATCHING",

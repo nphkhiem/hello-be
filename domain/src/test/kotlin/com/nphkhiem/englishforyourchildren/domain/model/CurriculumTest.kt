@@ -114,6 +114,7 @@ class CurriculumTest {
         courseId = CourseId(COURSE),
         ordinal = 0,
         theme = THEME,
+        word = WORD,
         lessons = lessons
     )
 
@@ -133,6 +134,7 @@ class CurriculumTest {
         const val VERSION = "2026.08"
         const val UNIT = "my-home"
         const val LESSON = "l1"
+        const val WORD = "body"
         const val THEME = "My Home"
     }
 }
