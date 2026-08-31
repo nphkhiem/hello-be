@@ -1,7 +1,6 @@
 package com.nphkhiem.englishforyourchildren.domain.session
 
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityInstanceId
-import com.nphkhiem.englishforyourchildren.domain.model.AssetId
 import com.nphkhiem.englishforyourchildren.domain.model.AttemptOutcome
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.EpochMillis
@@ -152,15 +151,14 @@ class LessonReducer {
         }
 
         val next = action.nextInstance ?: return unchanged(state)
-        return unchanged(
-            state.copy(
-                activityIndex = state.activityIndex + 1,
-                currentInstance = next,
-                phase = LessonPhase.Asking,
-                saveStatus = SaveStatus.Saved,
-                supportLevel = 0
-            )
+        val moved = state.copy(
+            activityIndex = state.activityIndex + 1,
+            currentInstance = next,
+            phase = LessonPhase.Asking,
+            saveStatus = SaveStatus.Saved,
+            supportLevel = 0
         )
+        return LessonReduction(state = moved, effects = askFor(moved))
     }
 
     private fun failed(state: LessonSessionState): LessonReduction {
@@ -206,14 +204,13 @@ class LessonReducer {
         val next = action.nextInstance ?: return unchanged(state)
         // The pending checkpoint travels with them. Clearing it here is what would turn carrying on
         // into a quiet claim that the work was saved.
-        return unchanged(
-            state.copy(
-                activityIndex = state.activityIndex + 1,
-                currentInstance = next,
-                phase = LessonPhase.Asking,
-                supportLevel = 0
-            )
+        val moved = state.copy(
+            activityIndex = state.activityIndex + 1,
+            currentInstance = next,
+            phase = LessonPhase.Asking,
+            supportLevel = 0
         )
+        return LessonReduction(state = moved, effects = askFor(moved))
     }
 
     private fun replay(state: LessonSessionState): LessonReduction {
@@ -232,9 +229,8 @@ class LessonReducer {
             courseVersion: CourseVersion,
             lesson: Lesson,
             firstInstance: ActivityInstanceId,
-            promptAsset: AssetId?,
             startedAt: EpochMillis
-        ) = LessonSessionState(
+        ): LessonReduction = LessonSessionState(
             sessionId = sessionId,
             profileId = profileId,
             courseVersion = courseVersion,
@@ -245,8 +241,22 @@ class LessonReducer {
             saveStatus = SaveStatus.Saved,
             supportLevel = 0,
             audioAvailable = true,
-            stopRequested = false,
-            promptAsset = promptAsset
-        ).also { require(startedAt.value >= 0) { "A lesson cannot start before the epoch" } }
+            stopRequested = false
+        )
+            .also { require(startedAt.value >= 0) { "A lesson cannot start before the epoch" } }
+            .let { LessonReduction(state = it, effects = askFor(it)) }
+
+        /**
+         * The question speaks itself.
+         *
+         * Nothing is asked for once a lesson has found out it is running silent: it has already
+         * told the child so, the words are on screen, and asking again for every remaining question
+         * would only produce the same failure five more times.
+         */
+        private fun askFor(state: LessonSessionState): List<LessonEffect> {
+            if (!state.audioAvailable) return emptyList()
+            val asset = state.promptAsset ?: return emptyList()
+            return listOf(LessonEffect.Play(asset))
+        }
     }
 }

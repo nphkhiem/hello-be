@@ -46,8 +46,7 @@ data class LessonSessionState(
     /** How much help Pip is giving, from none to the last rung. Reset by moving on. */
     val supportLevel: Int,
     val audioAvailable: Boolean,
-    val stopRequested: Boolean,
-    val promptAsset: AssetId?
+    val stopRequested: Boolean
 ) {
     init {
         require(activityIndex in lesson.activities.indices) {
@@ -57,6 +56,15 @@ data class LessonSessionState(
     }
 
     val currentActivity get() = lesson.activities[activityIndex]
+
+    /**
+     * The recording for the question being asked right now.
+     *
+     * Derived rather than stored, so it cannot be left behind when a child moves on. It used to be
+     * a field set once at the start, which meant every question after the first asked for the
+     * first one's recording.
+     */
+    val promptAsset: AssetId? get() = currentActivity.content?.promptAsset
 
     val isLastActivity get() = activityIndex == lesson.activities.lastIndex
 
