@@ -6,6 +6,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.Activity
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityInstanceId
 import com.nphkhiem.englishforyourchildren.domain.model.Answerable
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
+import com.nphkhiem.englishforyourchildren.domain.model.LessonCheckpoint
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.domain.repository.CompleteSession
@@ -110,6 +111,15 @@ class LessonViewModel @Inject constructor(
             return
         }
 
+        // Read before writing, and before anything is shown. Storage that cannot say where a child
+        // was must not lead to quietly starting them over, because that throws away work they
+        // actually did while claiming nothing is wrong.
+        val resumePoint = progress.openCheckpoint(profileId, lessonId, courseVersion)
+        if (resumePoint !is DomainResult.Success) {
+            _unavailable.value = true
+            return
+        }
+
         val started = progress.startSession(
             StartSession(profileId = profileId, lessonId = lessonId, courseVersion = courseVersion)
         )
@@ -118,12 +128,16 @@ class LessonViewModel @Inject constructor(
             return
         }
 
+        val activities = lesson.value.activities
+        val resumeAt = resumeIndex(activities, resumePoint.value)
+
         var opening = LessonReducer.start(
             sessionId = started.value.id,
             profileId = profileId,
             courseVersion = courseVersion,
             lesson = lesson.value,
-            firstInstance = instanceOf(lesson.value.activities.first()),
+            activityIndex = resumeAt,
+            currentInstance = instanceOf(activities[resumeAt]),
             startedAt = timeProvider.now()
         )
 
@@ -156,6 +170,21 @@ class LessonViewModel @Inject constructor(
     override fun onCleared() {
         // The lesson is the player's owning scope. Leaving it is what releases the player.
         playback.stop()
+    }
+
+    /**
+     * The activity to open on.
+     *
+     * A checkpoint names the last activity a child finished, so where they are is the one after it.
+     * An activity the lesson no longer has, or one at the very end, opens at the beginning instead
+     * of refusing: content can move under a saved checkpoint, and meeting a question twice costs a
+     * child nothing.
+     */
+    private fun resumeIndex(activities: List<Activity>, checkpoint: LessonCheckpoint?): Int {
+        val finished = checkpoint?.lastCompletedActivity ?: return 0
+        val completed = activities.indexOfFirst { it.id == finished }
+        if (completed < 0) return 0
+        return (completed + 1).takeIf { it in activities.indices } ?: 0
     }
 
     private suspend fun themeOf(

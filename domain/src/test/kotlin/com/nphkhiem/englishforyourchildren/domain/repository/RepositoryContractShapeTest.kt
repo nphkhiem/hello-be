@@ -11,6 +11,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.ChildProfile
 import com.nphkhiem.englishforyourchildren.domain.model.ConfirmedCheckpoint
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.EpochMillis
+import com.nphkhiem.englishforyourchildren.domain.model.LessonCheckpoint
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileProgress
@@ -184,6 +185,12 @@ class RepositoryContractShapeTest {
                 )
             )
         )
+
+        override suspend fun openCheckpoint(
+            profileId: ProfileId,
+            lessonId: LessonId,
+            courseVersion: CourseVersion
+        ): DomainResult<LessonCheckpoint?> = DomainResult.Success(null)
 
         override suspend fun startSession(command: StartSession) =
             DomainResult.Failure(DomainError.LessonNotFound)

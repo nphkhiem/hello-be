@@ -40,6 +40,17 @@ interface ProgressDao {
     @Query("SELECT * FROM lesson_checkpoint WHERE profileId = :profileId")
     suspend fun checkpointsFor(profileId: String): List<LessonCheckpointEntity>
 
+    /** Where one child left one lesson. Newest first, because only the latest one is where they are. */
+    @Query(
+        "SELECT * FROM lesson_checkpoint WHERE profileId = :profileId AND lessonId = :lessonId " +
+            "AND courseVersion = :courseVersion ORDER BY updatedAt DESC LIMIT 1"
+    )
+    suspend fun openCheckpoint(
+        profileId: String,
+        lessonId: String,
+        courseVersion: String
+    ): LessonCheckpointEntity?
+
     /**
      * One finished activity, written down in one go.
      *

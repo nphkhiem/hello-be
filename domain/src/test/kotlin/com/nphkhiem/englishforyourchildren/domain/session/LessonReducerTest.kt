@@ -354,15 +354,33 @@ class LessonReducerTest {
         assertThat(started().effects).isEmpty()
     }
 
+    @Test
+    fun givenAChildIsComingBack_whenTheLessonOpens_thenItOpensOnTheActivityTheyWereOn() {
+        // Coming back to the first question is the thing the stop-for-now dialog promises not to
+        // do. The reducer takes where the child is rather than assuming the beginning.
+        val resumed =
+            started(withAudio = true, activityIndex = 1, currentInstance = SECOND_INSTANCE)
+
+        assertThat(resumed.state.activityIndex).isEqualTo(1)
+        assertThat(resumed.state.currentInstance).isEqualTo(instance(SECOND_INSTANCE))
+        assertThat(resumed.effects).contains(LessonEffect.Play(asset(2)))
+    }
+
     private fun start(activities: Int = 3, withAudio: Boolean = false) =
         started(activities, withAudio).state
 
-    private fun started(activities: Int = 3, withAudio: Boolean = false) = LessonReducer.start(
+    private fun started(
+        activities: Int = 3,
+        withAudio: Boolean = false,
+        activityIndex: Int = 0,
+        currentInstance: String = FIRST_INSTANCE
+    ) = LessonReducer.start(
         sessionId = SessionId(SESSION),
         profileId = ProfileId(PROFILE),
         courseVersion = CourseVersion(VERSION),
         lesson = lesson(activities, withAudio),
-        firstInstance = ActivityInstanceId(FIRST_INSTANCE),
+        activityIndex = activityIndex,
+        currentInstance = ActivityInstanceId(currentInstance),
         startedAt = EpochMillis(NOW)
     )
 

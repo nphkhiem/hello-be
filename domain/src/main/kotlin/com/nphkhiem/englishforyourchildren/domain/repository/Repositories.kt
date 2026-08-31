@@ -13,6 +13,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.Course
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.EpochMillis
 import com.nphkhiem.englishforyourchildren.domain.model.Lesson
+import com.nphkhiem.englishforyourchildren.domain.model.LessonCheckpoint
 import com.nphkhiem.englishforyourchildren.domain.model.LessonCompletion
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.LessonSession
@@ -66,6 +67,19 @@ interface ProgressRepository {
     fun observeProfileProgress(profileId: ProfileId): Flow<DomainResult<ProfileProgress>>
 
     suspend fun startSession(command: StartSession): DomainResult<LessonSession>
+
+    /**
+     * Where a child left this lesson, or null if they have never been in it.
+     *
+     * A lesson has to ask about itself. [observeProfileProgress] carries a single open checkpoint
+     * for the whole profile, which cannot say which lesson it belongs to without the caller
+     * checking, and a child may have work waiting in more than one.
+     */
+    suspend fun openCheckpoint(
+        profileId: ProfileId,
+        lessonId: LessonId,
+        courseVersion: CourseVersion
+    ): DomainResult<LessonCheckpoint?>
 
     suspend fun persistCheckpoint(command: PersistCheckpoint): DomainResult<ConfirmedCheckpoint>
 
