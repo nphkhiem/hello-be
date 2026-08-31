@@ -2,7 +2,9 @@ package com.nphkhiem.englishforyourchildren.journey
 
 import android.content.Context
 import android.content.res.AssetManager
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.google.common.truth.Truth.assertThat
@@ -115,6 +117,19 @@ class FirstLessonJourneyTest {
         assertThat(completedLessons()).contains(LessonId(FIRST_LESSON_ID))
     }
 
+    @Test
+    fun givenAScreenNobodyHasBuiltYet_whenAChildWalksIntoIt_thenNoDiagnosticCodeIsShown() {
+        // Free play has no live screen, so it lands on the missing-content fallback. That fallback
+        // used to be the caregiver database recovery, which documents itself as the one recovery a
+        // child never sees, and which offers to erase their progress.
+        createChild()
+
+        tv.press(tv.string("home_free_play"))
+
+        tv.awaitText(tv.string("recovery_lesson_title"))
+        compose.onAllNodesWithText(DATABASE_CODE, substring = true).assertCountEquals(0)
+    }
+
     private fun createChild() {
         tv.press(AGE)
         tv.press(tv.string("create_submit"))
@@ -131,6 +146,9 @@ class FirstLessonJourneyTest {
 
     private companion object {
         const val AGE = "3"
+
+        /** The code the fallback used to show a child. It must appear nowhere they can reach. */
+        const val DATABASE_CODE = "DB-OPEN-01"
         const val FIRST_LESSON = "Lesson 1"
         const val FIRST_LESSON_ID = "u01-my-body-l1"
 

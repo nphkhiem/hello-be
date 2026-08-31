@@ -161,7 +161,7 @@ fun HelloBeNavHost(
                     },
                     modifier = modifier
                 )
-            } ?: MissingContent(modifier)
+            } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
         }
 
         is HelloBeKey.ProfilePicker -> if (content == null) {
@@ -208,7 +208,7 @@ fun HelloBeNavHost(
                     },
                     modifier = modifier
                 )
-            } ?: MissingContent(modifier)
+            } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
         }
 
         is HelloBeKey.ChildHome -> if (content == null) {
@@ -262,7 +262,7 @@ fun HelloBeNavHost(
                     },
                     modifier = modifier
                 )
-            } ?: MissingContent(modifier)
+            } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
         }
 
         is HelloBeKey.LearningPath -> if (content == null) {
@@ -308,7 +308,7 @@ fun HelloBeNavHost(
                     },
                     modifier = modifier
                 )
-            } ?: MissingContent(modifier)
+            } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
         }
 
         is HelloBeKey.Lesson -> if (content == null) {
@@ -367,7 +367,7 @@ fun HelloBeNavHost(
                     },
                     modifier = modifier
                 )
-            } ?: MissingContent(modifier)
+            } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
         }
 
         is HelloBeKey.LessonCelebration -> if (content == null) {
@@ -411,7 +411,7 @@ fun HelloBeNavHost(
                 },
                 modifier = modifier
             )
-        } ?: MissingContent(modifier)
+        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
 
         is HelloBeKey.CaregiverGate -> content?.let {
             AdultGateScreen(
@@ -432,7 +432,7 @@ fun HelloBeNavHost(
                 },
                 modifier = modifier
             )
-        } ?: MissingContent(modifier)
+        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
 
         is HelloBeKey.CaregiverDashboard -> content?.let {
             CaregiverShell(
@@ -445,7 +445,7 @@ fun HelloBeNavHost(
                 },
                 modifier = modifier
             ) { CaregiverOverviewScreen(state = it.caregiverOverview(key.profileId)) }
-        } ?: MissingContent(modifier)
+        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
 
         is HelloBeKey.CaregiverSettings -> content?.let {
             CaregiverShell(
@@ -468,7 +468,7 @@ fun HelloBeNavHost(
                     onAction = {}
                 )
             }
-        } ?: MissingContent(modifier)
+        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
 
         is HelloBeKey.ProfileManagement -> content?.let {
             CaregiverShell(
@@ -507,7 +507,7 @@ fun HelloBeNavHost(
                     }
                 )
             }
-        } ?: MissingContent(modifier)
+        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
 
         is HelloBeKey.DeleteProfileConfirmation -> content?.let {
             Confirmation(
@@ -515,7 +515,7 @@ fun HelloBeNavHost(
                 onFinished = { pop() },
                 modifier = modifier
             )
-        } ?: MissingContent(modifier)
+        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
 
         is HelloBeKey.ResetProgressConfirmation -> content?.let {
             Confirmation(
@@ -523,7 +523,7 @@ fun HelloBeNavHost(
                 onFinished = { pop() },
                 modifier = modifier
             )
-        } ?: MissingContent(modifier)
+        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
 
         is HelloBeKey.Recovery -> Recovery(
             key = key,
@@ -639,19 +639,45 @@ private fun profileIdOf(key: HelloBeKey): ProfileId? = when (key) {
 }
 
 /**
- * What an installed build shows until a data layer exists.
+ * A destination with no live screen behind it.
  *
- * Never reached in practice, because with no gateway the entry resolver sends the app to the
- * caregiver recovery before any of these destinations is asked for. It exists so that "there is no
- * content" is a drawn state rather than a crash.
+ * This was documented as never reached in practice. It is reached: free play and the adult gate
+ * are one press from child home and neither has a live screen, so pressing either arrives here.
+ *
+ * This used to render the caregiver database recovery for every one of them, which said three
+ * untrue things at once: that storage had failed, that a reset might be the answer, and, on a
+ * destination a child can reach, it said both of those to a child. `CaregiverRecovery` documents
+ * itself as the one recovery a child never sees, and free play is a press away on child home.
+ *
+ * A child is now told the page is resting, calmly and with no code. Behind the gate, where a code
+ * is safe, it carries one that names this rather than the database, and offers no reset.
  */
 @Composable
-private fun MissingContent(modifier: Modifier) {
-    CaregiverRecovery(
-        state = CaregiverRecoveryState(code = DATABASE_CODE),
-        onAction = {},
-        modifier = modifier
-    )
+private fun MissingContent(key: HelloBeKey, onSafeReturn: () -> Unit, modifier: Modifier) {
+    if (key.isCaregiver()) {
+        CaregiverRecovery(
+            state = CaregiverRecoveryState(code = UNBUILT_SCREEN_CODE),
+            onAction = { action ->
+                when (action) {
+                    CaregiverRecoveryAction.RetryRequested -> onSafeReturn()
+
+                    // Deliberately nothing. No storage fault happened here, so erasing a child's
+                    // progress could not repair it.
+                    CaregiverRecoveryAction.ResetReviewRequested -> Unit
+                }
+            },
+            modifier = modifier
+        )
+    } else {
+        ChildRecovery(
+            reason = ChildRecoveryReason.LESSON_UNAVAILABLE,
+            focusRestorer = rememberHelloBeFocusRestorer(),
+            onAction = { action ->
+                if (action is ChildRecoveryAction.LearningPathRequested) onSafeReturn()
+            },
+            modifier = modifier
+        )
+    }
 }
 
 /**
@@ -664,4 +690,12 @@ private fun MissingContent(modifier: Modifier) {
 private val SHIPPED_COURSE_VERSION = CourseVersion("2026.09")
 
 private const val DATABASE_CODE = "DB-OPEN-01"
+
+/**
+ * A destination with no screen behind it yet.
+ *
+ * Not `DB-OPEN-01`. Storage is fine, and a caregiver who reads a database code aloud to someone
+ * helping them deserves one that names what actually happened.
+ */
+private const val UNBUILT_SCREEN_CODE = "SCREEN-MISSING-01"
 private const val CREATED_PROFILE = "created"
