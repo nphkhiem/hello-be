@@ -52,6 +52,9 @@ class LessonReducer {
 
             is LessonAction.SkipRequested -> skip(state, action)
 
+            is LessonAction.KeepLearningRequested ->
+                unchanged(state.copy(stopRequested = false))
+
             is LessonAction.StopRequested -> LessonReduction(
                 state = state.copy(stopRequested = true),
                 effects = listOf(LessonEffect.PausePlayback)
