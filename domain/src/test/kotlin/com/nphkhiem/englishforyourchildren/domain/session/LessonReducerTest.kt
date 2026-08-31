@@ -234,6 +234,48 @@ class LessonReducerTest {
         assertThat(asked.effects.filterIsInstance<LessonEffect.PausePlayback>()).hasSize(1)
     }
 
+    @Test
+    fun givenSoundIsUnavailable_whenTheChildTakesTheSkip_thenItCostsThemNothing() {
+        // The fair way past a question that cannot be asked properly. It is written down, because
+        // the child was here and did the only thing on offer, and it is written down as unscored.
+        val quiet = reducer.reduce(
+            start(),
+            LessonAction.MediaUnavailable(instance(FIRST_INSTANCE))
+        ).state
+
+        val skipped = reducer.reduce(quiet, LessonAction.SkipRequested(instance(FIRST_INSTANCE)))
+
+        assertThat(skipped.state.phase).isEqualTo(LessonPhase.AwaitingCheckpoint)
+        assertThat(
+            skipped.effects.filterIsInstance<LessonEffect.Persist>().single().command.outcome
+        ).isEqualTo(AttemptOutcome.UNSCORED_SKIP)
+    }
+
+    @Test
+    fun givenSoundIsWorking_whenASkipArrives_thenItIsIgnoredBecauseNoneWasOffered() {
+        // The skip only exists while the sound does not, so a press for it at any other moment is
+        // for a control this child was never shown. Honouring it would turn a real question into
+        // an unscored one.
+        val skipped = reducer.reduce(start(), LessonAction.SkipRequested(instance(FIRST_INSTANCE)))
+
+        assertThat(skipped.effects).isEmpty()
+        assertThat(skipped.state.phase).isEqualTo(LessonPhase.Asking)
+    }
+
+    @Test
+    fun givenASkipAlreadyWaitingOnAWrite_whenItIsPressedAgain_thenNothingIsRecordedTwice() {
+        val quiet = reducer.reduce(
+            start(),
+            LessonAction.MediaUnavailable(instance(FIRST_INSTANCE))
+        ).state
+        val waiting =
+            reducer.reduce(quiet, LessonAction.SkipRequested(instance(FIRST_INSTANCE))).state
+
+        val again = reducer.reduce(waiting, LessonAction.SkipRequested(instance(FIRST_INSTANCE)))
+
+        assertThat(again.effects).isEmpty()
+    }
+
     private fun start(activities: Int = 3, promptAsset: AssetId? = null) = LessonReducer.start(
         sessionId = SessionId(SESSION),
         profileId = ProfileId(PROFILE),

@@ -13,6 +13,7 @@ import com.nphkhiem.englishforyourchildren.navigation.HelloBeContent
 import com.nphkhiem.englishforyourchildren.navigation.HelloBeNavHost
 import com.nphkhiem.englishforyourchildren.navigation.ProfileGateway
 import com.nphkhiem.englishforyourchildren.navigation.RepositoryProfileGateway
+import com.nphkhiem.englishforyourchildren.playback.Media3PlaybackController
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -31,8 +32,16 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
     @Inject lateinit var gateway: RepositoryProfileGateway
 
+    @Inject lateinit var playback: Media3PlaybackController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // This app has one activity, so its onStop is the television leaving Hello Bé. Registering
+        // here rather than reaching for ProcessLifecycleOwner keeps the signal exact and costs no
+        // dependency. Coming back does not start the sound again: only a child does.
+        lifecycle.addObserver(playback)
+
         setContent {
             HelloBeRoot(
                 gateway = gateway,

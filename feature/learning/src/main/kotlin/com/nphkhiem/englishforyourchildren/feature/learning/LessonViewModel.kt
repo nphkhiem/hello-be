@@ -1,6 +1,7 @@
 package com.nphkhiem.englishforyourchildren.feature.learning
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.nphkhiem.englishforyourchildren.domain.model.Activity
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityInstanceId
 import com.nphkhiem.englishforyourchildren.domain.model.Answerable
@@ -19,12 +20,15 @@ import com.nphkhiem.englishforyourchildren.domain.session.LessonReducer
 import com.nphkhiem.englishforyourchildren.domain.session.LessonReduction
 import com.nphkhiem.englishforyourchildren.domain.session.LessonSessionState
 import com.nphkhiem.englishforyourchildren.domain.time.TimeProvider
+import com.nphkhiem.englishforyourchildren.playback.PlaybackController
+import com.nphkhiem.englishforyourchildren.playback.PlaybackEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -45,6 +49,9 @@ sealed interface LessonUiAction {
 
     data object ContinueUnsaved : LessonUiAction
 
+    /** The fair way past a question that could not be asked properly. */
+    data object SkipRequested : LessonUiAction
+
     data object StopRequested : LessonUiAction
 }
 
@@ -64,8 +71,20 @@ sealed interface LessonUiAction {
 class LessonViewModel @Inject constructor(
     private val curriculum: CurriculumRepository,
     private val progress: ProgressRepository,
-    private val timeProvider: TimeProvider
+    private val timeProvider: TimeProvider,
+    private val playback: PlaybackController
 ) : ViewModel() {
+
+    init {
+        // Subscribed before anything can be played, which is the whole reason this is in init.
+        // The event flow keeps no replay, so a listener that arrived after the first prompt had
+        // already failed would never learn that this lesson is running without sound.
+        viewModelScope.launch {
+            playback.events.collect { event ->
+                if (event is PlaybackEvent.Failed) reportSilence()
+            }
+        }
+    }
 
     private val _state = MutableStateFlow(LessonUiMapper.preparing())
     val state: StateFlow<LessonUiState> = _state.asStateFlow()
@@ -106,9 +125,8 @@ class LessonViewModel @Inject constructor(
             startedAt = timeProvider.now()
         )
 
-        // No recording exists for any prompt yet. Rather than waiting for a sound that will never
-        // arrive, the lesson enters the state this app was designed to have: the words on screen,
-        // and an answer that costs nothing if it was never really askable.
+        // Content that names no recording at all is quiet from the first moment. Content that
+        // names one finds out by asking, below.
         if (state.promptAsset == null) {
             state =
                 reducer.reduce(state, LessonAction.MediaUnavailable(state.currentInstance)).state
@@ -117,6 +135,29 @@ class LessonViewModel @Inject constructor(
         unitTheme = themeOf(lesson.value)
         session = state
         publish(state)
+
+        // The reducer's start hands back a state rather than a reduction, so nothing has asked for
+        // the first question to be spoken. A lesson that never says its own question is not one, so
+        // the asking happens here and the answer arrives where a later replay's would.
+        state.promptAsset?.let { playback.play(it) }
+    }
+
+    /**
+     * A recording would not play, so the lesson stops pretending otherwise.
+     *
+     * Under the same lock as everything else a child does, so a failure arriving while a checkpoint
+     * is in flight queues behind that write rather than racing it. Reported once: after the first
+     * one the lesson already knows, and saying it again would republish the screen for nothing.
+     */
+    private suspend fun reportSilence() = lock.withLock {
+        val current = session ?: return@withLock
+        if (!current.audioAvailable) return@withLock
+        apply(reducer.reduce(current, LessonAction.MediaUnavailable(current.currentInstance)))
+    }
+
+    override fun onCleared() {
+        // The lesson is the player's owning scope. Leaving it is what releases the player.
+        playback.stop()
     }
 
     private suspend fun themeOf(
@@ -173,11 +214,8 @@ class LessonViewModel @Inject constructor(
     private suspend fun run(effect: LessonEffect) {
         when (effect) {
             is LessonEffect.Complete -> progress.completeSession(effect.command)
-
-            // Playback has no module yet, and no recording exists to play. Doing nothing here is
-            // the honest behaviour: the lesson already knows it is running without sound.
-            is LessonEffect.Play, LessonEffect.PausePlayback -> Unit
-
+            is LessonEffect.Play -> playback.play(effect.assetId)
+            LessonEffect.PausePlayback -> playback.pause()
             is LessonEffect.Persist -> progress.persistCheckpoint(effect.command)
         }
     }
@@ -204,6 +242,11 @@ class LessonViewModel @Inject constructor(
         LessonUiAction.ContinueUnsaved -> LessonAction.ContinueUnsaved(
             expectedActivityInstanceId = state.currentInstance,
             nextInstance = nextInstance(state)
+        )
+
+        LessonUiAction.SkipRequested -> LessonAction.SkipRequested(
+            expectedActivityInstanceId = state.currentInstance,
+            at = timeProvider.now()
         )
 
         LessonUiAction.StopRequested -> LessonAction.StopRequested(state.currentInstance)

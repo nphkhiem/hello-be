@@ -50,6 +50,8 @@ class LessonReducer {
 
             is LessonAction.MediaUnavailable -> unchanged(state.copy(audioAvailable = false))
 
+            is LessonAction.SkipRequested -> skip(state, action)
+
             is LessonAction.StopRequested -> LessonReduction(
                 state = state.copy(stopRequested = true),
                 effects = listOf(LessonEffect.PausePlayback)
@@ -85,22 +87,49 @@ class LessonReducer {
             else -> AttemptOutcome.CORRECT
         }
 
-        val checkpoint = PersistCheckpoint(
-            sessionId = state.sessionId,
-            profileId = state.profileId,
-            courseVersion = state.courseVersion,
-            lessonId = state.lesson.id,
-            activityId = state.currentActivity.id,
-            activityInstanceId = state.currentInstance,
-            activityOrdinal = state.currentActivity.ordinal,
-            outcome = outcome,
-            completedAt = action.at
-        )
-        return LessonReduction(
-            state = state.copy(phase = LessonPhase.AwaitingCheckpoint),
-            effects = listOf(LessonEffect.Persist(checkpoint))
-        )
+        return record(state, outcome, action.at)
     }
+
+    /**
+     * The unscored skip.
+     *
+     * Refused while the sound works, because the control is only ever offered while it does not. A
+     * press that arrives at any other moment is for something this child was never shown, and
+     * honouring it would turn a question they could hear into one that counted for nothing.
+     */
+    private fun skip(
+        state: LessonSessionState,
+        action: LessonAction.SkipRequested
+    ): LessonReduction {
+        if (state.audioAvailable) return unchanged(state)
+        if (state.phase == LessonPhase.AwaitingCheckpoint) return unchanged(state)
+
+        return record(state, AttemptOutcome.UNSCORED_SKIP, action.at)
+    }
+
+    /** Ask for the write, and wait. Nothing moves the child on until storage confirms it. */
+    private fun record(
+        state: LessonSessionState,
+        outcome: AttemptOutcome,
+        at: EpochMillis
+    ): LessonReduction = LessonReduction(
+        state = state.copy(phase = LessonPhase.AwaitingCheckpoint),
+        effects = listOf(
+            LessonEffect.Persist(
+                PersistCheckpoint(
+                    sessionId = state.sessionId,
+                    profileId = state.profileId,
+                    courseVersion = state.courseVersion,
+                    lessonId = state.lesson.id,
+                    activityId = state.currentActivity.id,
+                    activityInstanceId = state.currentInstance,
+                    activityOrdinal = state.currentActivity.ordinal,
+                    outcome = outcome,
+                    completedAt = at
+                )
+            )
+        )
+    )
 
     private fun confirmed(
         state: LessonSessionState,
