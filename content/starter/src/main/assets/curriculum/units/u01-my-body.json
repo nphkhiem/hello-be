@@ -1,8 +1,9 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "u01-my-body",
   "ordinal": 0,
   "theme": "My Body",
+  "word": "body",
   "scenery": "A child's bedroom in the morning",
   "lessons": [
     {

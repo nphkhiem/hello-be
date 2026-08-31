@@ -3,7 +3,10 @@ package com.nphkhiem.englishforyourchildren.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -17,6 +20,8 @@ import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathAction
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathViewModel
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonAction
+import com.nphkhiem.englishforyourchildren.feature.learning.LessonCelebrationScreen
+import com.nphkhiem.englishforyourchildren.feature.learning.LessonCelebrationViewModel
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonPhase
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonUiAction
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonViewModel
@@ -25,6 +30,8 @@ import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfilePickerScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileViewModel
+import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -147,6 +154,37 @@ internal fun LiveLearningPath(
                 else -> Unit
             }
         },
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun LiveLessonCelebration(
+    profileId: ProfileId,
+    lessonId: LessonId,
+    courseVersion: CourseVersion,
+    onDone: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val model: LessonCelebrationViewModel = hiltViewModel()
+    val state by model.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(lessonId) { model.start(profileId, lessonId, courseVersion) }
+
+    // The reveal is a clock, and ADR 0003 keeps clocks out of the screen. It lives here with the
+    // motion token that names the budget, the way the stop-for-now dialog's visibility does.
+    val revealBudget = HelloBeTheme.motion.durations.celebrationMax.toLong()
+    var revealed by remember(lessonId) { mutableStateOf(false) }
+    LaunchedEffect(lessonId) {
+        delay(revealBudget)
+        revealed = true
+    }
+
+    LessonCelebrationScreen(
+        state = state.copy(revealed = revealed),
+        // Done, Maybe later and Play together all leave the same way. Only the host counts a
+        // decline, and there is nothing to decline until play-together content exists.
+        onAction = { onDone() },
         modifier = modifier
     )
 }
