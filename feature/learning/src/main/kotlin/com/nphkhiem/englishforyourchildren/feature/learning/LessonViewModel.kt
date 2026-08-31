@@ -52,6 +52,9 @@ sealed interface LessonUiAction {
     /** The fair way past a question that could not be asked properly. */
     data object SkipRequested : LessonUiAction
 
+    /** The child chose to stay. The stop question goes away and the lesson is where it was. */
+    data object KeepLearningRequested : LessonUiAction
+
     data object StopRequested : LessonUiAction
 }
 
@@ -248,6 +251,9 @@ class LessonViewModel @Inject constructor(
             expectedActivityInstanceId = state.currentInstance,
             at = timeProvider.now()
         )
+
+        LessonUiAction.KeepLearningRequested ->
+            LessonAction.KeepLearningRequested(state.currentInstance)
 
         LessonUiAction.StopRequested -> LessonAction.StopRequested(state.currentInstance)
     }

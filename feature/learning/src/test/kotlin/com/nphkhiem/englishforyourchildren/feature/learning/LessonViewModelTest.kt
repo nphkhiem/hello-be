@@ -259,6 +259,18 @@ class LessonViewModelTest {
         assertThat(playback.stopped).isTrue()
     }
 
+    @Test
+    fun givenTheStopQuestionIsOpen_whenTheChildKeepsLearning_thenTheLessonIsStillThere() = runTest {
+        val model = started()
+        model.onAction(LessonUiAction.StopRequested)
+        assertThat(model.state.value.stopForNowVisible).isTrue()
+
+        model.onAction(LessonUiAction.KeepLearningRequested)
+
+        assertThat(model.state.value.stopForNowVisible).isFalse()
+        assertThat(model.state.value.activityNumber).isEqualTo(1)
+    }
+
     private fun viewModel() = LessonViewModel(
         curriculum = curriculum,
         progress = progress,

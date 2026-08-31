@@ -60,6 +60,16 @@ sealed interface LessonAction {
         val at: EpochMillis = EpochMillis(0)
     ) : LessonAction
 
+    /**
+     * The child chose to stay, so the stop question goes away.
+     *
+     * The sound is deliberately not started again. "Keep learning" means do not end the lesson, not
+     * play that again, and a recording restarting on its own is the thing this app refuses to do
+     * anywhere else. Replay is right there when a child wants it.
+     */
+    data class KeepLearningRequested(override val expectedActivityInstanceId: ActivityInstanceId) :
+        LessonAction
+
     /** Back was pressed. Nothing is abandoned until an adult or a child confirms it. */
     data class StopRequested(override val expectedActivityInstanceId: ActivityInstanceId) :
         LessonAction

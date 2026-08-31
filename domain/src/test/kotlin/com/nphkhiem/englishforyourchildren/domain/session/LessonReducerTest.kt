@@ -276,6 +276,31 @@ class LessonReducerTest {
         assertThat(again.effects).isEmpty()
     }
 
+    @Test
+    fun givenTheStopQuestionIsOpen_whenTheChildKeepsLearning_thenItClosesAndNothingWasLost() {
+        // Back asks rather than leaves, so the answer "keep learning" has to be able to put the
+        // question away again. Without this the child is left holding a dialog that will not go.
+        val asked = reducer.reduce(start(), LessonAction.StopRequested(instance(FIRST_INSTANCE)))
+
+        val stayed = reducer.reduce(
+            asked.state,
+            LessonAction.KeepLearningRequested(instance(FIRST_INSTANCE))
+        )
+
+        assertThat(stayed.state.stopRequested).isFalse()
+        assertThat(stayed.state.phase).isEqualTo(LessonPhase.Asking)
+        assertThat(stayed.state.activityIndex).isEqualTo(0)
+    }
+
+    @Test
+    fun givenNobodyAskedToStop_whenKeepLearningArrives_thenNothingChanges() {
+        val stayed =
+            reducer.reduce(start(), LessonAction.KeepLearningRequested(instance(FIRST_INSTANCE)))
+
+        assertThat(stayed.state.stopRequested).isFalse()
+        assertThat(stayed.effects).isEmpty()
+    }
+
     private fun start(activities: Int = 3, promptAsset: AssetId? = null) = LessonReducer.start(
         sessionId = SessionId(SESSION),
         profileId = ProfileId(PROFILE),

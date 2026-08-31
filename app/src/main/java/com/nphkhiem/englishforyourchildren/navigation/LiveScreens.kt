@@ -198,9 +198,15 @@ internal fun LiveLesson(
                     LessonAction.SkipRequested ->
                         model.onAction(LessonUiAction.SkipRequested)
 
+                    LessonAction.KeepLearningRequested ->
+                        model.onAction(LessonUiAction.KeepLearningRequested)
+
                     LessonAction.StopForNowConfirmed -> onStopConfirmed()
 
-                    else -> Unit
+                    // Only Say with Pip offers Continue, and only one renderer is live, so this
+                    // cannot arrive yet. It is named rather than swallowed by an else, so that
+                    // wiring that renderer has to come back here and decide.
+                    LessonAction.ContinueRequested -> Unit
                 }
             }
         },
