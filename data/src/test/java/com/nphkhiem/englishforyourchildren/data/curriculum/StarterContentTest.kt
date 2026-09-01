@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test
 class StarterContentTest {
     private val parser = CurriculumJsonParser()
     private val validator = CurriculumValidator()
+    private val ledger = AttributionLedger()
 
     private val course = parser.parseCourse(read("curriculum/course.json"))
     private val units = course.units.map { parser.parseUnit(read("curriculum/${it.file}")) }
@@ -165,13 +166,40 @@ class StarterContentTest {
     }
 
     @Test
-    fun givenTheAttributionLedger_whenItIsRead_thenItIsHonestlyEmpty() {
+    fun givenTheShippingLedger_whenItIsCheckedAgainstWhatIsPackaged_thenTheyAccountForEachOther() {
         // An empty ledger stops a release. A ledger with invented evidence would not, which is why
-        // this file is empty rather than filled in with plausible-looking rows.
-        val attributions = parser.parseAttributions(read("attribution/attributions.json"))
+        // that file is empty rather than filled in with plausible-looking rows.
+        //
+        // This used to assert the emptiness itself, which was a fact about today rather than the
+        // rule that made it right. Both sides are empty now and both will be full later, and what
+        // has to hold either way is that they agree.
+        val rows = parser.parseAttributions(read("attribution/attributions.json")).entries
 
-        assertThat(attributions.entries).isEmpty()
+        assertThat(ledger.checkShipping(packagedIn(ASSETS), rows)).isEmpty()
     }
+
+    @Test
+    fun givenTheDevelopmentLedger_whenItIsChecked_thenItAccountsForWhatDebugPackages() {
+        // Standing-in audio lives in the debug source set, so a release build cannot contain it
+        // whatever any row claims. It is still owed a row: a file nobody can name is a file nobody
+        // can replace.
+        val rows = parser
+            .parseAttributions(File(DEBUG_ASSETS, DEVELOPMENT_LEDGER).readText())
+            .entries
+
+        assertThat(ledger.checkDevelopment(packagedIn(DEBUG_ASSETS), rows)).isEmpty()
+    }
+
+    /**
+     * The asset ids of the files actually present, which is the inverse of the packaging convention
+     * `PackagedAssetLocator` owns: `media/<kind>/<id>.<ext>`. The two cannot share code across the
+     * module boundary, so `CONTENT_ID_REGISTRY.md` is the source of truth they both follow.
+     */
+    private fun packagedIn(assets: File): Set<String> = File(assets, "media")
+        .walkTopDown()
+        .filter { it.isFile }
+        .map { it.nameWithoutExtension }
+        .toSet()
 
     @Test
     fun givenAnActivityNamingAnAnswerItDoesNotOffer_whenChecked_thenItIsReported() {
@@ -223,6 +251,8 @@ class StarterContentTest {
 
     private companion object {
         val ASSETS = File("../content/starter/src/main/assets")
+        val DEBUG_ASSETS = File("../content/starter/src/debug/assets")
+        const val DEVELOPMENT_LEDGER = "attribution/attributions-development.json"
         const val EXPECTED_ASSET_COUNT = 40
     }
 }
