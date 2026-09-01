@@ -20,12 +20,12 @@ import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathAction
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathViewModel
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonAction
+import com.nphkhiem.englishforyourchildren.feature.learning.LessonActivity
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonCelebrationScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonCelebrationViewModel
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonPhase
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonUiAction
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonViewModel
-import com.nphkhiem.englishforyourchildren.feature.learning.ListenAndChooseActivity
 import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfilePickerScreen
@@ -213,9 +213,7 @@ internal fun LiveLesson(
         if (state.phase == LessonPhase.COMPLETED) onFinished()
     }
 
-    // One renderer for now. Every family shares the lesson scaffold, and the four that differ do so
-    // in what they draw inside it, which arrives when their content has pictures to draw.
-    ListenAndChooseActivity(
+    LessonActivity(
         state = state,
         onAction = { action ->
             scope.launch {

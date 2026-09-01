@@ -42,8 +42,8 @@ import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathAction
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonAction
+import com.nphkhiem.englishforyourchildren.feature.learning.LessonActivity
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonCelebrationScreen
-import com.nphkhiem.englishforyourchildren.feature.learning.ListenAndChooseActivity
 import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileAction
@@ -340,7 +340,7 @@ fun HelloBeNavHost(
                 // anything: a child answering "keep learning" stays exactly where they were.
                 var stopForNowVisible by remember(key) { mutableStateOf(false) }
 
-                ListenAndChooseActivity(
+                LessonActivity(
                     state = it.lesson(key.profileId, key.lessonId)
                         .copy(stopForNowVisible = stopForNowVisible),
                     onAction = { action ->

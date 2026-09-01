@@ -18,6 +18,9 @@ import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeChoiceFeedback
 internal object LessonUiMapper {
 
     fun preparing() = LessonUiState(
+        // Nothing is being asked yet, so no shape is being drawn. Listen-and-choose is the arbitrary
+        // one this never reaches: the host shows the loading surface while the phase is PREPARING.
+        kind = LessonActivityKind.LISTEN_AND_CHOOSE,
         unitName = "",
         activityTitle = "",
         prompt = "",
@@ -53,9 +56,28 @@ internal object LessonUiMapper {
             pendingSave = state.saveStatus is SaveStatus.Unsaved,
             stopForNowVisible = state.stopRequested,
             // The speaking pause is a clock, and no clock runs yet. Null is the honest value.
-            pauseProgress = null
+            pauseProgress = null,
+            kind = kind(state.currentActivity.family)
         )
     }
+
+    private fun kind(family: com.nphkhiem.englishforyourchildren.domain.model.ActivityFamily) =
+        when (family) {
+            com.nphkhiem.englishforyourchildren.domain.model.ActivityFamily.LISTEN_AND_CHOOSE ->
+                LessonActivityKind.LISTEN_AND_CHOOSE
+
+            com.nphkhiem.englishforyourchildren.domain.model.ActivityFamily.PICTURE_MATCHING ->
+                LessonActivityKind.PICTURE_MATCHING
+
+            com.nphkhiem.englishforyourchildren.domain.model.ActivityFamily.LETTER_AND_SOUND ->
+                LessonActivityKind.LETTER_AND_SOUND
+
+            com.nphkhiem.englishforyourchildren.domain.model.ActivityFamily.SAY_WITH_PIP ->
+                LessonActivityKind.SAY_WITH_PIP
+
+            com.nphkhiem.englishforyourchildren.domain.model.ActivityFamily.REVIEW ->
+                LessonActivityKind.REVIEW
+        }
 
     private fun phase(state: LessonSessionState) = when (state.phase) {
         DomainPhase.Asking ->
