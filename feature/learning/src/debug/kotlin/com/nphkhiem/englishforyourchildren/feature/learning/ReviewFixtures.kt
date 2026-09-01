@@ -18,6 +18,7 @@ import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeChoiceFeedback
 object ReviewFixtures {
 
     fun answering(): LessonUiState = LessonUiState(
+        kind = LessonActivityKind.REVIEW,
         unitName = "My Home review",
         activityTitle = "Remember our words",
         prompt = "Find something you sit on",

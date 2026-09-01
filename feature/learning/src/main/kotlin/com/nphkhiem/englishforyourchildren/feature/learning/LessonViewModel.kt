@@ -50,6 +50,9 @@ sealed interface LessonUiAction {
 
     data object ContinueUnsaved : LessonUiAction
 
+    /** Saying it with Pip, finished. The only way past an activity with nothing to answer. */
+    data object RepetitionFinished : LessonUiAction
+
     /** The fair way past a question that could not be asked properly. */
     data object SkipRequested : LessonUiAction
 
@@ -269,6 +272,11 @@ class LessonViewModel @Inject constructor(
         LessonUiAction.ContinueUnsaved -> LessonAction.ContinueUnsaved(
             expectedActivityInstanceId = state.currentInstance,
             nextInstance = nextInstance(state)
+        )
+
+        LessonUiAction.RepetitionFinished -> LessonAction.RepetitionFinished(
+            expectedActivityInstanceId = state.currentInstance,
+            at = timeProvider.now()
         )
 
         LessonUiAction.SkipRequested -> LessonAction.SkipRequested(

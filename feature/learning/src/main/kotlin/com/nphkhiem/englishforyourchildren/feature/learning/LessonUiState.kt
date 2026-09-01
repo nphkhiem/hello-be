@@ -56,6 +56,22 @@ enum class SupportLevel {
 }
 
 /**
+ * Which of the five activity families a lesson is showing.
+ *
+ * A UI enum rather than the domain's, for the same reason [LessonPhase] is one: what a screen needs
+ * to know is which shape to draw, and nothing above it should be able to reach a domain type by
+ * following this state. It exists so the activity-to-renderer mapping is a `when` the compiler can
+ * check, rather than a default that quietly draws the wrong activity.
+ */
+enum class LessonActivityKind {
+    LISTEN_AND_CHOOSE,
+    PICTURE_MATCHING,
+    LETTER_AND_SOUND,
+    SAY_WITH_PIP,
+    REVIEW
+}
+
+/**
  * One picture a child can choose.
  *
  * [feedback] arrives from state rather than being worked out here from a correct answer id. That
@@ -116,7 +132,14 @@ data class LessonUiState(
      *
      * A value the state carries, not a clock this screen runs. See ADR 0003.
      */
-    val pauseProgress: Float?
+    val pauseProgress: Float?,
+    /**
+     * Which shape to draw. See [LessonActivityKind].
+     *
+     * No default on purpose. A default would let a family that nobody has thought about render as
+     * listen-and-choose, which is the bug this field exists to end.
+     */
+    val kind: LessonActivityKind
 )
 
 /** What a lesson screen reports upward. Typed, so no untyped escape hatch can grow here. */

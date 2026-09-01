@@ -15,6 +15,7 @@ import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeChoiceFeedback
 object PictureMatchingFixtures {
 
     fun answering(): LessonUiState = LessonUiState(
+        kind = LessonActivityKind.PICTURE_MATCHING,
         unitName = "My Home",
         activityTitle = "Find the same picture",
         prompt = "Match the bed",

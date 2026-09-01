@@ -13,6 +13,7 @@ import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeChoiceFeedback
 object LetterAndSoundFixtures {
 
     fun answering(): LessonUiState = LessonUiState(
+        kind = LessonActivityKind.LETTER_AND_SOUND,
         unitName = "Letters with Pip",
         activityTitle = "Listen for the sound",
         prompt = "Which starts with /ae/?",

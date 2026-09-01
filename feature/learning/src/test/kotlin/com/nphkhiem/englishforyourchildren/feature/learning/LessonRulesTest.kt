@@ -110,6 +110,7 @@ class LessonRulesTest {
             AnswerOption(id = "bed", label = "bed")
         )
     ) = LessonUiState(
+        kind = LessonActivityKind.LISTEN_AND_CHOOSE,
         unitName = "My Home",
         activityTitle = "Listen and choose",
         prompt = "Where is the chair?",

@@ -20,12 +20,12 @@ import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathAction
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathViewModel
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonAction
+import com.nphkhiem.englishforyourchildren.feature.learning.LessonActivity
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonCelebrationScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonCelebrationViewModel
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonPhase
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonUiAction
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonViewModel
-import com.nphkhiem.englishforyourchildren.feature.learning.ListenAndChooseActivity
 import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfilePickerScreen
@@ -213,9 +213,7 @@ internal fun LiveLesson(
         if (state.phase == LessonPhase.COMPLETED) onFinished()
     }
 
-    // One renderer for now. Every family shares the lesson scaffold, and the four that differ do so
-    // in what they draw inside it, which arrives when their content has pictures to draw.
-    ListenAndChooseActivity(
+    LessonActivity(
         state = state,
         onAction = { action ->
             scope.launch {
@@ -241,10 +239,11 @@ internal fun LiveLesson(
 
                     LessonAction.StopForNowConfirmed -> onStopConfirmed()
 
-                    // Only Say with Pip offers Continue, and only one renderer is live, so this
-                    // cannot arrive yet. It is named rather than swallowed by an else, so that
-                    // wiring that renderer has to come back here and decide.
-                    LessonAction.ContinueRequested -> Unit
+                    // Say with Pip's Next. It became reachable the moment every activity started
+                    // rendering as itself, which is what the note here previously said would have
+                    // to come back and be decided.
+                    LessonAction.ContinueRequested ->
+                        model.onAction(LessonUiAction.RepetitionFinished)
                 }
             }
         },

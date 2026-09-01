@@ -18,7 +18,16 @@ enum class LessonStatus {
 enum class AttemptOutcome {
     CORRECT,
     SUPPORTIVE_RETRY,
-    UNSCORED_SKIP
+    UNSCORED_SKIP,
+
+    /**
+     * A guided repetition the child worked through.
+     *
+     * Distinct from [UNSCORED_SKIP], which says a child went past something. This says they did it.
+     * Both are unscored, and recording one as the other would put a skip in a child's history for
+     * an activity they actually took part in.
+     */
+    PRACTISED
 }
 
 /**
