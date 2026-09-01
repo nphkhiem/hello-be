@@ -366,6 +366,35 @@ class LessonReducerTest {
         assertThat(resumed.effects).contains(LessonEffect.Play(asset(2)))
     }
 
+    @Test
+    fun givenSayingItWithPip_whenTheChildFinishes_thenItIsPractisedRatherThanSkipped() {
+        // The distinction the fourth outcome exists for. A child who worked through a repetition
+        // did not skip it, and their history should not say they did.
+        val finished = reducer.reduce(
+            startSpeaking(),
+            LessonAction.RepetitionFinished(instance(FIRST_INSTANCE))
+        )
+
+        assertThat(
+            finished.effects.filterIsInstance<LessonEffect.Persist>().single().command.outcome
+        ).isEqualTo(AttemptOutcome.PRACTISED)
+        assertThat(finished.state.phase).isEqualTo(LessonPhase.AwaitingCheckpoint)
+    }
+
+    @Test
+    fun givenAQuestionToAnswer_whenARepetitionFinishArrives_thenItIsIgnored() {
+        // Every other family is answered rather than worked through. A press arriving from the
+        // wrong screen must not record a child as having practised something they were asked to
+        // choose.
+        val ignored = reducer.reduce(
+            start(),
+            LessonAction.RepetitionFinished(instance(FIRST_INSTANCE))
+        )
+
+        assertThat(ignored.effects).isEmpty()
+        assertThat(ignored.state.phase).isEqualTo(LessonPhase.Asking)
+    }
+
     private fun start(activities: Int = 3, withAudio: Boolean = false) =
         started(activities, withAudio).state
 
@@ -433,6 +462,45 @@ class LessonReducerTest {
             activities = steps
         )
     }
+
+    private fun speakingLesson() = Lesson(
+        id = LessonId(LESSON),
+        unitId = UnitId(UNIT),
+        ordinal = 0,
+        activities = listOf(
+            Activity(
+                id = ActivityId("$LESSON-a1"),
+                ordinal = 0,
+                family = ActivityFamily.SAY_WITH_PIP,
+                content = ActivityContent.GuidedRepetition(
+                    prompt = "Say it with me: eyes.",
+                    promptAsset = null,
+                    words = listOf(choice("eyes"))
+                )
+            ),
+            Activity(
+                id = ActivityId("$LESSON-a2"),
+                ordinal = 1,
+                family = ActivityFamily.LISTEN_AND_CHOOSE,
+                content = ActivityContent.ListeningSelection(
+                    prompt = "Where are the eyes?",
+                    promptAsset = null,
+                    choices = listOf(choice("eyes"), choice("ears")),
+                    correct = SkillId("word-eyes")
+                )
+            )
+        )
+    )
+
+    private fun startSpeaking() = LessonReducer.start(
+        sessionId = SessionId(SESSION),
+        profileId = ProfileId(PROFILE),
+        courseVersion = CourseVersion(VERSION),
+        lesson = speakingLesson(),
+        activityIndex = 0,
+        currentInstance = ActivityInstanceId(FIRST_INSTANCE),
+        startedAt = EpochMillis(NOW)
+    ).state
 
     private fun asset(n: Int) = AssetId("aud-en-prompt-a$n")
 

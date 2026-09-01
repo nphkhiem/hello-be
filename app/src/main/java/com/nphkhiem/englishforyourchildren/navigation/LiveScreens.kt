@@ -239,10 +239,11 @@ internal fun LiveLesson(
 
                     LessonAction.StopForNowConfirmed -> onStopConfirmed()
 
-                    // Only Say with Pip offers Continue, and only one renderer is live, so this
-                    // cannot arrive yet. It is named rather than swallowed by an else, so that
-                    // wiring that renderer has to come back here and decide.
-                    LessonAction.ContinueRequested -> Unit
+                    // Say with Pip's Next. It became reachable the moment every activity started
+                    // rendering as itself, which is what the note here previously said would have
+                    // to come back and be decided.
+                    LessonAction.ContinueRequested ->
+                        model.onAction(LessonUiAction.RepetitionFinished)
                 }
             }
         },

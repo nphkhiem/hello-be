@@ -59,12 +59,14 @@ class ProgressTest {
 
     @Test
     fun givenTheApprovedOutcomes_whenListed_thenNoneOfThemIsAFailure() {
-        // Supportive retry, never wrong. Unscored skip, never a penalty. The vocabulary in
+        // Supportive retry, never wrong. Unscored skip, never a penalty. Practised, which says a
+        // child worked through a guided repetition rather than went past it. The vocabulary in
         // CONTEXT.md is the vocabulary here, so a scoring word cannot be introduced by accident.
         assertThat(AttemptOutcome.entries).containsExactly(
             AttemptOutcome.CORRECT,
             AttemptOutcome.SUPPORTIVE_RETRY,
-            AttemptOutcome.UNSCORED_SKIP
+            AttemptOutcome.UNSCORED_SKIP,
+            AttemptOutcome.PRACTISED
         )
     }
 

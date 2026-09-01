@@ -1,5 +1,6 @@
 package com.nphkhiem.englishforyourchildren.domain.session
 
+import com.nphkhiem.englishforyourchildren.domain.model.ActivityContent
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityInstanceId
 import com.nphkhiem.englishforyourchildren.domain.model.AttemptOutcome
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
@@ -48,6 +49,8 @@ class LessonReducer {
             is LessonAction.PromptReplayRequested -> replay(state)
 
             is LessonAction.MediaUnavailable -> unchanged(state.copy(audioAvailable = false))
+
+            is LessonAction.RepetitionFinished -> finishRepetition(state, action)
 
             is LessonAction.SkipRequested -> skip(state, action)
 
@@ -107,6 +110,25 @@ class LessonReducer {
         if (state.phase == LessonPhase.AwaitingCheckpoint) return unchanged(state)
 
         return record(state, AttemptOutcome.UNSCORED_SKIP, action.at)
+    }
+
+    /**
+     * Saying it with Pip, finished.
+     *
+     * Refused on anything else, because every other family is answered rather than worked through,
+     * and a press arriving from the wrong screen must not record a child as having practised
+     * something they were being asked to choose.
+     */
+    private fun finishRepetition(
+        state: LessonSessionState,
+        action: LessonAction.RepetitionFinished
+    ): LessonReduction {
+        if (state.phase == LessonPhase.AwaitingCheckpoint) return unchanged(state)
+        if (state.currentActivity.content !is ActivityContent.GuidedRepetition) {
+            return unchanged(state)
+        }
+
+        return record(state, AttemptOutcome.PRACTISED, action.at)
     }
 
     /** Ask for the write, and wait. Nothing moves the child on until storage confirms it. */

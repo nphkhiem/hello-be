@@ -338,6 +338,39 @@ class LessonViewModelTest {
             assertThat(model.unavailable.value).isTrue()
         }
 
+    @Test
+    fun givenSayingItWithPip_whenTheChildAsksToMoveOn_thenTheyDoAndItCountsAsPractised() = runTest {
+        // Say with Pip has nothing to answer, so Next is the only way past it. Before the renderer
+        // was wired it was a button that did nothing.
+        curriculum.setLesson(speakingLesson())
+        val model = started()
+
+        model.onAction(LessonUiAction.RepetitionFinished)
+
+        assertThat(model.state.value.activityNumber).isEqualTo(2)
+        assertThat(progress.persisted.single().outcome)
+            .isEqualTo(com.nphkhiem.englishforyourchildren.domain.model.AttemptOutcome.PRACTISED)
+    }
+
+    private fun speakingLesson() = Lesson(
+        id = LessonId(LESSON),
+        unitId = UnitId(UNIT),
+        ordinal = 0,
+        activities = listOf(
+            Activity(
+                id = ActivityId("$LESSON-a1"),
+                ordinal = 0,
+                family = ActivityFamily.SAY_WITH_PIP,
+                content = ActivityContent.GuidedRepetition(
+                    prompt = "Say it with me: eyes.",
+                    promptAsset = promptAsset(withAudio = false),
+                    words = choices()
+                )
+            ),
+            activity(2, ActivityFamily.LISTEN_AND_CHOOSE, withAudio = false)
+        )
+    )
+
     private fun viewModel() = LessonViewModel(
         curriculum = curriculum,
         progress = progress,

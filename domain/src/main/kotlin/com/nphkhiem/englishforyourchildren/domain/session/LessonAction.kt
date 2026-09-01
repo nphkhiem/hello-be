@@ -50,6 +50,17 @@ sealed interface LessonAction {
         LessonAction
 
     /**
+     * The child finished saying it with Pip and asked to move on.
+     *
+     * Guided repetition has nothing to be right about, so this is neither an answer nor a skip. It
+     * is the only way past that activity, because there is no answer to choose.
+     */
+    data class RepetitionFinished(
+        override val expectedActivityInstanceId: ActivityInstanceId,
+        val at: EpochMillis = EpochMillis(0)
+    ) : LessonAction
+
+    /**
      * The child took the fair way past a question that could not be asked properly.
      *
      * Only ever offered while the sound will not play, which is what makes it unscored: nobody
