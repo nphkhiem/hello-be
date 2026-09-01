@@ -46,9 +46,14 @@ class LessonReducer {
 
             is LessonAction.ContinueUnsaved -> continueUnsaved(state, action)
 
-            is LessonAction.PromptReplayRequested -> replay(state)
+            is LessonAction.PromptReplayRequested -> ask(state)
 
-            is LessonAction.MediaUnavailable -> unchanged(state.copy(audioAvailable = false))
+            is LessonAction.PromptFinished -> promptFinished(state, action)
+
+            is LessonAction.MediaUnavailable ->
+                // A lesson that has found out it is silent is not sounding anything. Leaving it set
+                // would lock the answers away with no recording left to open them.
+                unchanged(state.copy(audioAvailable = false, soundingPrompt = null))
 
             is LessonAction.RepetitionFinished -> finishRepetition(state, action)
 
@@ -71,6 +76,11 @@ class LessonReducer {
         // Already answered and waiting for the write. A second press must not record a second
         // attempt, which on a television is one button held a moment too long.
         if (state.phase == LessonPhase.AwaitingCheckpoint) return unchanged(state)
+
+        // The question is still being asked. See ADR 0004: the screen has already taken the
+        // answers out of the focus order, and this is what makes that a guarantee rather than an
+        // arrangement of controls.
+        if (state.soundingPrompt != null) return unchanged(state)
 
         if (!action.correct && state.audioAvailable) {
             // Never wrong, never a penalty: the same activity again with more help.
@@ -128,6 +138,10 @@ class LessonReducer {
             return unchanged(state)
         }
 
+        // Pip has not finished asking. This family has no answer, so ADR 0004's rule about answers
+        // does not reach it, and without this a child could finish saying a word unprompted.
+        if (state.soundingPrompt != null) return unchanged(state)
+
         return record(state, AttemptOutcome.PRACTISED, action.at)
     }
 
@@ -180,7 +194,7 @@ class LessonReducer {
             saveStatus = SaveStatus.Saved,
             supportLevel = 0
         )
-        return LessonReduction(state = moved, effects = askFor(moved))
+        return ask(moved)
     }
 
     private fun failed(state: LessonSessionState): LessonReduction {
@@ -232,12 +246,21 @@ class LessonReducer {
             phase = LessonPhase.Asking,
             supportLevel = 0
         )
-        return LessonReduction(state = moved, effects = askFor(moved))
+        return ask(moved)
     }
 
-    private fun replay(state: LessonSessionState): LessonReduction {
-        val asset = state.promptAsset ?: return unchanged(state)
-        return LessonReduction(state = state, effects = listOf(LessonEffect.Play(asset)))
+    /**
+     * The question has been asked in full.
+     *
+     * Only what the reducer actually started can end it. A recording the lesson never asked for,
+     * or the previous question's, leaves the state alone rather than opening the answers early.
+     */
+    private fun promptFinished(
+        state: LessonSessionState,
+        action: LessonAction.PromptFinished
+    ): LessonReduction {
+        if (action.assetId != state.soundingPrompt) return unchanged(state)
+        return unchanged(state.copy(soundingPrompt = null))
     }
 
     private fun unchanged(state: LessonSessionState) =
@@ -269,22 +292,30 @@ class LessonReducer {
             saveStatus = SaveStatus.Saved,
             supportLevel = 0,
             audioAvailable = true,
+            soundingPrompt = null,
             stopRequested = false
         )
             .also { require(startedAt.value >= 0) { "A lesson cannot start before the epoch" } }
-            .let { LessonReduction(state = it, effects = askFor(it)) }
+            .let { ask(it) }
 
         /**
-         * The question speaks itself.
+         * The question speaks itself, and the lesson remembers that it is speaking.
+         *
+         * The one way a prompt starts, whether the lesson asked on arrival or the child pressed
+         * replay. Both put the lesson in the same state, so there is one meaning for playing a
+         * prompt rather than two that can drift apart. See ADR 0004.
          *
          * Nothing is asked for once a lesson has found out it is running silent: it has already
          * told the child so, the words are on screen, and asking again for every remaining question
          * would only produce the same failure five more times.
          */
-        private fun askFor(state: LessonSessionState): List<LessonEffect> {
-            if (!state.audioAvailable) return emptyList()
-            val asset = state.promptAsset ?: return emptyList()
-            return listOf(LessonEffect.Play(asset))
+        private fun ask(state: LessonSessionState): LessonReduction {
+            if (!state.audioAvailable) return LessonReduction(state, emptyList())
+            val asset = state.promptAsset ?: return LessonReduction(state, emptyList())
+            return LessonReduction(
+                state = state.copy(soundingPrompt = asset),
+                effects = listOf(LessonEffect.Play(asset))
+            )
         }
     }
 }

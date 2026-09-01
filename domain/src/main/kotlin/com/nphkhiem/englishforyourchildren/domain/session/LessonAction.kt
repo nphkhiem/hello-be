@@ -1,6 +1,7 @@
 package com.nphkhiem.englishforyourchildren.domain.session
 
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityInstanceId
+import com.nphkhiem.englishforyourchildren.domain.model.AssetId
 import com.nphkhiem.englishforyourchildren.domain.model.EpochMillis
 
 /**
@@ -44,6 +45,18 @@ sealed interface LessonAction {
     /** Play the prompt again. */
     data class PromptReplayRequested(override val expectedActivityInstanceId: ActivityInstanceId) :
         LessonAction
+
+    /**
+     * A recording reached its end.
+     *
+     * [assetId] is what finished, not what the current question names. The two differ the moment a
+     * lesson plays anything besides its prompt, and comparing the wrong one would let a support
+     * phrase ending count as the question having been asked.
+     */
+    data class PromptFinished(
+        override val expectedActivityInstanceId: ActivityInstanceId,
+        val assetId: AssetId
+    ) : LessonAction
 
     /** The sound will not play. The lesson goes on without it. */
     data class MediaUnavailable(override val expectedActivityInstanceId: ActivityInstanceId) :
