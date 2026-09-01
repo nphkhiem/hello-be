@@ -15,7 +15,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.ChoiceCard
 import com.nphkhiem.englishforyourchildren.ui.tv.component.LearningObjectCard
+import com.nphkhiem.englishforyourchildren.ui.tv.component.PackagedPicture
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
+import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberPackagedPicture
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 
 /**
@@ -85,6 +87,9 @@ private fun LetterBoard(
         if (state.learningObject != null) {
             LearningObjectCard(
                 label = letterPair(state.learningObject.label),
+                // No illustration, and this is the one learning object that must never have one.
+                // It is a letter rather than a thing, so there is nothing to draw a picture of.
+                //
                 // The letter carries its own emphasis at four times the size of anything else on
                 // the stage, so the card keeps the same quiet treatment as every other learning
                 // object rather than borrowing the focus grammar's gold.
@@ -116,13 +121,18 @@ private fun RowScope.ChoiceRow(
         horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap)
     ) {
         state.answers.forEachIndexed { index, answer ->
+            val picture = rememberPackagedPicture(answer.image)
+
             ChoiceCard(
                 label = answer.label,
                 onClick = { onAction(LessonAction.AnswerChosen(answer.id)) },
                 feedback = answer.feedback,
                 availability = availability,
-                // Labels are drawn here, unlike picture matching: the prompt asks about a sound
-                // rather than naming the target, so a caption gives nothing away.
+                // The word is drawn here where picture matching withholds it, because the prompt
+                // asks about a sound rather than naming the target, so it gives nothing away. A
+                // packaged picture still takes its place, being the better thing to look at.
+                labelVisible = picture == null,
+                illustration = picture?.let { { PackagedPicture(it) } },
                 modifier = (if (index == 0) entryModifier else Modifier)
                     .weight(1f)
                     .fillMaxHeight()

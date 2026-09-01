@@ -22,7 +22,8 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class Media3PlaybackControllerTest {
     private val context = InstrumentationRegistry.getInstrumentation().context
-    private val controller = Media3PlaybackController(context, PackagedAssetLocator(context))
+    private val controller =
+        Media3PlaybackController(context, PackagedAssetLocator.forAudio(context))
 
     @After
     fun releasePlayer() {

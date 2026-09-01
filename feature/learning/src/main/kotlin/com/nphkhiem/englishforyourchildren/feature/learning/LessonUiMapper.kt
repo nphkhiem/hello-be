@@ -109,7 +109,13 @@ internal object LessonUiMapper {
         is ActivityContent.PictureMatching, is ActivityContent.LetterAndSound ->
             (content as Answerable).choices
                 .firstOrNull { it.skillId == content.correct }
-                ?.let { LearningObject(id = it.skillId.value, label = it.label) }
+                ?.let {
+                    LearningObject(
+                        id = it.skillId.value,
+                        label = it.label,
+                        image = it.image.value
+                    )
+                }
 
         else -> null
     }
@@ -119,6 +125,7 @@ internal object LessonUiMapper {
             AnswerOption(
                 id = it.skillId.value,
                 label = it.label,
+                image = it.image.value,
                 feedback = HelloBeChoiceFeedback.NEUTRAL
             )
         }
