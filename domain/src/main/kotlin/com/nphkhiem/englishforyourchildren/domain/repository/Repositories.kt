@@ -7,6 +7,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.AppSettings
 import com.nphkhiem.englishforyourchildren.domain.model.AttemptOutcome
 import com.nphkhiem.englishforyourchildren.domain.model.Attribution
 import com.nphkhiem.englishforyourchildren.domain.model.AvatarId
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.domain.model.ChildProfile
 import com.nphkhiem.englishforyourchildren.domain.model.ConfirmedCheckpoint
 import com.nphkhiem.englishforyourchildren.domain.model.Course
@@ -133,7 +134,7 @@ interface SettingsRepository {
 
     suspend fun updateSelectedProfile(profileId: ProfileId?): DomainResult<Unit>
 
-    suspend fun updateCaregiverLocale(localeTag: String): DomainResult<Unit>
+    suspend fun updateCaregiverLanguage(language: CaregiverLanguage): DomainResult<Unit>
 
     suspend fun updateVietnameseHelp(enabled: Boolean): DomainResult<Unit>
 

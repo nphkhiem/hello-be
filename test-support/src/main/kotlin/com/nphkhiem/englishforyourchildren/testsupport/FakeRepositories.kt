@@ -2,6 +2,7 @@ package com.nphkhiem.englishforyourchildren.testsupport
 
 import com.nphkhiem.englishforyourchildren.domain.model.AppSettings
 import com.nphkhiem.englishforyourchildren.domain.model.Attribution
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.domain.model.ChildProfile
 import com.nphkhiem.englishforyourchildren.domain.model.ConfirmedCheckpoint
 import com.nphkhiem.englishforyourchildren.domain.model.Course
@@ -278,8 +279,8 @@ class FakeSettingsRepository(initial: AppSettings = AppSettings.DEFAULT) : Setti
     override suspend fun updateSelectedProfile(profileId: ProfileId?): DomainResult<Unit> =
         change { it.copy(selectedProfileId = profileId) }
 
-    override suspend fun updateCaregiverLocale(localeTag: String): DomainResult<Unit> =
-        change { it.copy(caregiverLocaleTag = localeTag) }
+    override suspend fun updateCaregiverLanguage(language: CaregiverLanguage): DomainResult<Unit> =
+        change { it.copy(caregiverLanguage = language) }
 
     override suspend fun updateVietnameseHelp(enabled: Boolean): DomainResult<Unit> =
         change { it.copy(vietnameseHelpEnabled = enabled) }

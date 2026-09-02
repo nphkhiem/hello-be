@@ -7,6 +7,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.AgeBand
 import com.nphkhiem.englishforyourchildren.domain.model.AppSettings
 import com.nphkhiem.englishforyourchildren.domain.model.AttemptOutcome
 import com.nphkhiem.englishforyourchildren.domain.model.AvatarId
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.domain.model.ChildProfile
 import com.nphkhiem.englishforyourchildren.domain.model.ConfirmedCheckpoint
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
@@ -105,7 +106,7 @@ class RepositoryContractShapeTest {
         runBlocking {
             assertThat(repository.updateVietnameseHelp(enabled = true))
                 .isEqualTo(DomainResult.Success(Unit))
-            assertThat(repository.updateCaregiverLocale(localeTag = "vi"))
+            assertThat(repository.updateCaregiverLanguage(CaregiverLanguage.VIETNAMESE))
                 .isEqualTo(DomainResult.Success(Unit))
             assertThat(repository.updateCaptions(enabled = true))
                 .isEqualTo(DomainResult.Success(Unit))
@@ -220,7 +221,8 @@ class RepositoryContractShapeTest {
         override suspend fun updateSelectedProfile(profileId: ProfileId?) =
             DomainResult.Success(Unit)
 
-        override suspend fun updateCaregiverLocale(localeTag: String) = DomainResult.Success(Unit)
+        override suspend fun updateCaregiverLanguage(language: CaregiverLanguage) =
+            DomainResult.Success(Unit)
 
         override suspend fun updateVietnameseHelp(enabled: Boolean) = DomainResult.Success(Unit)
 

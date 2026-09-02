@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import com.nphkhiem.englishforyourchildren.domain.model.AppSettings
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.domain.repository.SettingsRepository
 import com.nphkhiem.englishforyourchildren.domain.result.DomainError
@@ -44,9 +45,10 @@ class DataStoreSettingsRepository @Inject constructor(private val store: DataSto
         }
     }
 
-    override suspend fun updateCaregiverLocale(localeTag: String): DomainResult<Unit> = write {
-        it[SettingsKeys.CAREGIVER_LOCALE] = localeTag
-    }
+    override suspend fun updateCaregiverLanguage(language: CaregiverLanguage): DomainResult<Unit> =
+        write {
+            it[SettingsKeys.CAREGIVER_LOCALE] = language.stored
+        }
 
     override suspend fun updateVietnameseHelp(enabled: Boolean): DomainResult<Unit> = write {
         it[SettingsKeys.VIETNAMESE_HELP] = enabled
@@ -83,7 +85,7 @@ class DataStoreSettingsRepository @Inject constructor(private val store: DataSto
         val defaults = AppSettings.DEFAULT
         return AppSettings(
             selectedProfileId = this[SettingsKeys.SELECTED_PROFILE]?.let { ProfileId(it) },
-            caregiverLocaleTag = this[SettingsKeys.CAREGIVER_LOCALE] ?: defaults.caregiverLocaleTag,
+            caregiverLanguage = CaregiverLanguage.from(this[SettingsKeys.CAREGIVER_LOCALE]),
             vietnameseHelpEnabled = this[SettingsKeys.VIETNAMESE_HELP]
                 ?: defaults.vietnameseHelpEnabled,
             captionsEnabled = this[SettingsKeys.CAPTIONS] ?: defaults.captionsEnabled,
