@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.nphkhiem.englishforyourchildren.domain.model.Activity
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityInstanceId
 import com.nphkhiem.englishforyourchildren.domain.model.Answerable
+import com.nphkhiem.englishforyourchildren.domain.model.AssetId
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.LessonCheckpoint
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
@@ -88,7 +89,10 @@ class LessonViewModel @Inject constructor(
         // already failed would never learn that this lesson is running without sound.
         viewModelScope.launch {
             playback.events.collect { event ->
-                if (event is PlaybackEvent.Failed) reportSilence()
+                when (event) {
+                    is PlaybackEvent.Failed -> reportSilence()
+                    is PlaybackEvent.Completed -> reportPromptFinished(event.assetId)
+                }
             }
         }
     }
@@ -168,6 +172,23 @@ class LessonViewModel @Inject constructor(
         val current = session ?: return@withLock
         if (!current.audioAvailable) return@withLock
         apply(reducer.reduce(current, LessonAction.MediaUnavailable(current.currentInstance)))
+    }
+
+    /**
+     * A recording reached its end.
+     *
+     * Under the same lock as everything a child does, so a recording finishing while a checkpoint
+     * is in flight queues behind that write rather than racing it. What finished travels with it:
+     * the reducer, not this, decides whether it was the question.
+     */
+    private suspend fun reportPromptFinished(assetId: AssetId) = lock.withLock {
+        val current = session ?: return@withLock
+        apply(
+            reducer.reduce(
+                current,
+                LessonAction.PromptFinished(current.currentInstance, assetId)
+            )
+        )
     }
 
     override fun onCleared() {

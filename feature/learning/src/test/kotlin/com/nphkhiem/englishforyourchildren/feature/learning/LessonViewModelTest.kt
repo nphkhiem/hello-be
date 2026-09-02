@@ -143,8 +143,11 @@ class LessonViewModelTest {
         // Says outright that this needs a recording that plays. A supportive retry only makes
         // sense for a question the child could hear: when the sound is missing the same press is
         // an unscored skip instead, which is the test below.
-        playback = FakePlaybackController()
+        val player = FakePlaybackController()
+        playback = player
         val model = started()
+        // The question has to be heard before it can be answered. See ADR 0004.
+        player.finish(PROMPT)
 
         model.onAction(LessonUiAction.AnswerChosen("word-ears", activityNumber = 1))
 
@@ -275,8 +278,10 @@ class LessonViewModelTest {
     @Test
     fun givenTheRecordingsPlay_whenTheChildMovesOn_thenTheNextQuestionIsSpokenToo() = runTest {
         // Every question asks itself, not just the first one.
-        playback = FakePlaybackController()
+        val player = FakePlaybackController()
+        playback = player
         val model = started()
+        player.finish(PROMPT)
 
         model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
 
@@ -392,6 +397,29 @@ class LessonViewModelTest {
             assertThat(model.state.value.learningObject?.image).isEqualTo("img-eyes")
         }
 
+    @Test
+    fun givenARecordingThatPlays_whenTheLessonOpens_thenTheQuestionIsStillBeingAsked() = runTest {
+        // The state ADR 0004 describes, reachable for the first time. Every recording is unmade
+        // today, so this is the lesson the packaged audio will produce rather than the one it does.
+        playback = FakePlaybackController()
+
+        val model = started()
+
+        assertThat(model.state.value.phase).isEqualTo(LessonPhase.PROMPTING)
+    }
+
+    @Test
+    fun givenAQuestionIsBeingAsked_whenItsRecordingEnds_thenTheChildMayAnswer() = runTest {
+        // PlaybackEvent.Completed has had no consumer since the playback capability was built.
+        val player = FakePlaybackController()
+        playback = player
+        val model = started()
+
+        player.finish(PROMPT)
+
+        assertThat(model.state.value.phase).isEqualTo(LessonPhase.ANSWERING)
+    }
+
     private fun viewModel() = LessonViewModel(
         curriculum = curriculum,
         progress = progress,
@@ -448,8 +476,7 @@ class LessonViewModelTest {
         }
     )
 
-    private fun promptAsset(withAudio: Boolean) =
-        if (withAudio) AssetId("aud-en-prompt-where-is") else null
+    private fun promptAsset(withAudio: Boolean) = if (withAudio) PROMPT else null
 
     private fun choices() = listOf(choice("eyes"), choice("ears"))
 
@@ -466,6 +493,7 @@ class LessonViewModelTest {
         const val UNIT = "u01-my-body"
         const val LESSON = "u01-my-body-l1"
         const val NOW = 1_756_000_000_000
+        val PROMPT = AssetId("aud-en-prompt-where-is")
         val HelloBeChoiceFeedbackNeutral =
             com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeChoiceFeedback.NEUTRAL
     }
