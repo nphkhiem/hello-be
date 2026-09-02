@@ -10,7 +10,14 @@ package com.nphkhiem.englishforyourchildren.domain.model
 data class ProfileProgress(
     val profileId: ProfileId,
     val lessonsCompleted: Set<LessonId>,
-    val skills: List<SkillProgress>,
+    /**
+     * What the child actually did, rather than what it adds up to.
+     *
+     * Storage reports attempts and the progression package concludes what they mean, so a count of
+     * how well a thing is known can never disagree with the attempts underneath it. This replaced a
+     * `skills` list that no writer ever filled and no reader ever read.
+     */
+    val attempts: List<ActivityAttempt>,
     val openCheckpoint: LessonCheckpoint?
 )
 

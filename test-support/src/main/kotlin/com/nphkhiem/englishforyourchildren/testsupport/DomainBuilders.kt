@@ -165,11 +165,13 @@ object DomainBuilders {
     fun activityAttempt(
         sessionId: SessionId = SessionId("s1"),
         activityInstance: ActivityInstanceId = ActivityInstanceId("u01-my-body-l1-a1-1"),
+        activityId: ActivityId = ActivityId("u01-my-body-l1-a1"),
         ordinal: Int = 0,
         outcome: AttemptOutcome = AttemptOutcome.CORRECT,
         at: EpochMillis = EpochMillis(NOW)
     ) = ActivityAttempt(
         sessionId = sessionId,
+        activityId = activityId,
         activityInstance = activityInstance,
         ordinal = ordinal,
         outcome = outcome,
@@ -193,12 +195,12 @@ object DomainBuilders {
     fun profileProgress(
         profileId: ProfileId = ProfileId("p1"),
         lessonsCompleted: Set<LessonId> = emptySet(),
-        skills: List<SkillProgress> = emptyList(),
+        attempts: List<ActivityAttempt> = emptyList(),
         openCheckpoint: LessonCheckpoint? = null
     ) = ProfileProgress(
         profileId = profileId,
         lessonsCompleted = lessonsCompleted,
-        skills = skills,
+        attempts = attempts,
         openCheckpoint = openCheckpoint
     )
 

@@ -180,7 +180,7 @@ class RepositoryContractShapeTest {
                 ProfileProgress(
                     profileId = profileId,
                     lessonsCompleted = emptySet(),
-                    skills = emptyList(),
+                    attempts = emptyList(),
                     openCheckpoint = null
                 )
             )

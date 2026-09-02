@@ -117,6 +117,7 @@ class ProgressTest {
     private fun attempt(outcome: AttemptOutcome = AttemptOutcome.CORRECT, ordinal: Int = 0) =
         ActivityAttempt(
             sessionId = SessionId(SESSION),
+            activityId = ActivityId(ACTIVITY),
             activityInstance = ActivityInstanceId(INSTANCE),
             ordinal = ordinal,
             outcome = outcome,
@@ -139,6 +140,7 @@ class ProgressTest {
         const val PROFILE = "p1"
         const val SESSION = "s1"
         const val LESSON = "l1"
+        const val ACTIVITY = "l1-a1"
         const val INSTANCE = "l1-a1-1"
         const val SKILL = "word-chair"
         const val VERSION = "2026.08"

@@ -41,17 +41,18 @@ class RoomProgressRepository @Inject constructor(
     override fun observeProfileProgress(profileId: ProfileId): Flow<DomainResult<ProfileProgress>> =
         combine(
             dao.observeCheckpoints(profileId.value),
-            dao.observeLessonProgress(profileId.value)
-        ) { checkpoints, lessons ->
+            dao.observeLessonProgress(profileId.value),
+            dao.observeAttempts(profileId.value)
+        ) { checkpoints, lessons, attempts ->
             DomainResult.Success(
                 ProfileProgress(
                     profileId = profileId,
                     lessonsCompleted = lessons.filter { it.completed }
                         .map { LessonId(it.lessonId) }
                         .toSet(),
-                    // Skills are written by content that knows which words an activity teaches,
-                    // and that content does not exist yet.
-                    skills = emptyList(),
+                    // What the child did, not what it adds up to. How well a thing is known is
+                    // counted from these by the progression package, which has the course as well.
+                    attempts = attempts.map { it.toDomain() },
                     openCheckpoint = checkpoints.firstOrNull()?.toDomain()
                 )
             ) as DomainResult<ProfileProgress>
