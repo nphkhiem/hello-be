@@ -17,6 +17,10 @@ import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.repository.ProfileRepository
 import com.nphkhiem.englishforyourchildren.domain.repository.ProgressRepository
 import com.nphkhiem.englishforyourchildren.domain.result.DomainResult
+import com.nphkhiem.englishforyourchildren.playback.ImageAssetLocator
+import com.nphkhiem.englishforyourchildren.playback.MediaAssetLocator
+import com.nphkhiem.englishforyourchildren.playback.PlaybackController
+import com.nphkhiem.englishforyourchildren.playback.di.PlaybackModule
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -41,8 +45,33 @@ import org.junit.Test
  * exactly as it does on a television.
  */
 @HiltAndroidTest
-@UninstallModules(DataProvidersModule::class)
+@UninstallModules(DataProvidersModule::class, PlaybackModule::class)
 class FirstLessonJourneyTest {
+
+    /**
+     * No recording plays, which is this journey's premise rather than its accident.
+     *
+     * See [TestMedia]. Unit one ships recordings now, so a journey about missing media has to say
+     * so out loud.
+     */
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object SilentMedia {
+        @Provides
+        @Singleton
+        fun audio(): MediaAssetLocator = TestMedia.silentAudio()
+
+        @Provides
+        @Singleton
+        fun images(): ImageAssetLocator = TestMedia.noPictures()
+
+        @Provides
+        @Singleton
+        fun controller(
+            @ApplicationContext context: Context,
+            locator: MediaAssetLocator
+        ): PlaybackController = TestMedia.controller(context, locator)
+    }
 
     @Module
     @InstallIn(SingletonComponent::class)

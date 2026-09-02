@@ -59,6 +59,10 @@ fun ProfilePickerScreen(
             PickerFocusTarget.FIRST_PROFILE -> firstProfileFocus
             PickerFocusTarget.ADD_PROFILE -> addFocus
         },
+        // While loading there are no cards, so there is nothing for the claim to land on and the
+        // screen would sit with nothing focused: a child pressing a direction would walk into the
+        // header and find the adult gate before their own name.
+        entryFocusReady = !state.loading,
         header = {
             StoryHeader(
                 modifier = Modifier.fillMaxWidth(),

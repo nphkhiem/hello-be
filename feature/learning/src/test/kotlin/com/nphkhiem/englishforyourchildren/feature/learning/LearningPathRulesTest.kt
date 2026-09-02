@@ -141,14 +141,33 @@ class LearningPathRulesTest {
         lessons = lessons.toList()
     )
 
-    private fun state(unit: UnitPageState?): LearningPathUiState = LearningPathUiState(
-        profileName = "Minh",
-        profileAvatar = "M",
-        unit = unit,
-        previousUnit = null,
-        nextUnit = null,
-        pendingSave = false
-    )
+    @Test
+    fun givenTheCourseIsStillBeingRead_whenRecoveryIsConsidered_thenNothingIsWrongYet() {
+        // A null unit means two things and only `loading` tells them apart. Reading it as recovery
+        // showed every child the "something went wrong" screen for a frame on the way in, and took
+        // their entry focus down with it when the real content arrived.
+        val reading = state(unit = null, loading = true)
+
+        assertThat(isRecovering(reading)).isFalse()
+    }
+
+    @Test
+    fun givenTheCourseWasReadAndHasNoUnit_whenRecoveryIsConsidered_thenItReallyIsRecovery() {
+        val empty = state(unit = null, loading = false)
+
+        assertThat(isRecovering(empty)).isTrue()
+    }
+
+    private fun state(unit: UnitPageState?, loading: Boolean = false): LearningPathUiState =
+        LearningPathUiState(
+            profileName = "Minh",
+            profileAvatar = "M",
+            unit = unit,
+            previousUnit = null,
+            nextUnit = null,
+            pendingSave = false,
+            loading = loading
+        )
 
     private companion object {
         const val FIRST = "eyes-and-ears"

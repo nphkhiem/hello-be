@@ -102,4 +102,5 @@
     <string name="recovery_empty_body">Words you meet in lessons will appear here for free play.</string>
     <string name="recovery_empty_action">Find an adventure</string>
     <string name="recovery_pip">Pip is here to help</string>
+    <string name="path_loading">Finding your adventures</string>
 </resources>

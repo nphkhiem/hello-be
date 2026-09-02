@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -17,8 +19,10 @@ import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.assertIsNotFocused
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performKeyInput
@@ -29,6 +33,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
+import kotlinx.coroutines.delay
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -100,6 +105,51 @@ class StorybookScaffoldTest {
         }
 
         composeTestRule.onNodeWithText(SAFE).assertIsFocused()
+    }
+
+    @Test
+    fun givenContentArrivesLate_whenTheStageOpens_thenEntryFocusWaitsForItRatherThanBeingSpent() {
+        // The defect this exists for. A screen that loads its content used to claim entry focus
+        // while the placeholder was still up, and when the real content replaced it the focused
+        // node was destroyed and focus fell back to the header. A child opening the learning path
+        // landed on the profile switcher, one press from being thrown out of their own lesson.
+        //
+        // The delay is the whole test. Content that appears in the same frame would be claimable
+        // either way, and this would pass against the very behaviour it exists to refuse.
+        composeTestRule.setContent {
+            HelloBeTheme {
+                var ready by remember { mutableStateOf(false) }
+                val entry = remember { FocusRequester() }
+
+                LaunchedEffect(Unit) {
+                    delay(CONTENT_ARRIVES_MILLIS)
+                    ready = true
+                }
+
+                StorybookScaffold(
+                    entryFocus = entry,
+                    entryFocusReady = ready,
+                    header = { HelloBeAction(label = OTHER, onClick = {}) }
+                ) {
+                    if (ready) {
+                        HelloBeAction(
+                            label = SAFE,
+                            onClick = {},
+                            modifier = Modifier.focusRequester(entry)
+                        )
+                    } else {
+                        StoryLoading(contentDescription = LOADING)
+                    }
+                }
+            }
+        }
+
+        composeTestRule.waitUntil(TIMEOUT_MILLIS) {
+            composeTestRule.onAllNodesWithText(SAFE).fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeTestRule.onNodeWithText(SAFE).assertIsFocused()
+        composeTestRule.onNodeWithText(OTHER).assertIsNotFocused()
     }
 
     /**
@@ -216,6 +266,10 @@ class StorybookScaffoldTest {
         val CRAMPED_WIDTH = androidx.compose.ui.unit.Dp(480f)
         val CRAMPED_HEIGHT = androidx.compose.ui.unit.Dp(270f)
 
+        /** Long enough that a claim made at first composition is made too early. */
+        const val CONTENT_ARRIVES_MILLIS = 300L
+        const val TIMEOUT_MILLIS = 5_000L
+        const val LOADING = "Getting ready"
         const val SAFE = "Keep learning"
         const val OTHER = "Free play"
         const val PROMPT = "attempts"

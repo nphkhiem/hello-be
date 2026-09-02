@@ -11,6 +11,10 @@ import com.nphkhiem.englishforyourchildren.MainActivity
 import com.nphkhiem.englishforyourchildren.data.di.DataProvidersModule
 import com.nphkhiem.englishforyourchildren.data.profile.ChildProfileDao
 import com.nphkhiem.englishforyourchildren.data.progress.ProgressDao
+import com.nphkhiem.englishforyourchildren.playback.ImageAssetLocator
+import com.nphkhiem.englishforyourchildren.playback.MediaAssetLocator
+import com.nphkhiem.englishforyourchildren.playback.PlaybackController
+import com.nphkhiem.englishforyourchildren.playback.di.PlaybackModule
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -47,8 +51,33 @@ import org.junit.Test
  * `ViewModelStore`, so the ViewModel is never rebuilt and the test passes while proving nothing.
  */
 @HiltAndroidTest
-@UninstallModules(DataProvidersModule::class)
+@UninstallModules(DataProvidersModule::class, PlaybackModule::class)
 class ProcessDeathJourneyTest {
+
+    /**
+     * No recording plays, which is this journey's premise rather than its accident.
+     *
+     * See [TestMedia]. Unit one ships recordings now, so a journey about missing media has to say
+     * so out loud.
+     */
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object SilentMedia {
+        @Provides
+        @Singleton
+        fun audio(): MediaAssetLocator = TestMedia.silentAudio()
+
+        @Provides
+        @Singleton
+        fun images(): ImageAssetLocator = TestMedia.noPictures()
+
+        @Provides
+        @Singleton
+        fun controller(
+            @ApplicationContext context: Context,
+            locator: MediaAssetLocator
+        ): PlaybackController = TestMedia.controller(context, locator)
+    }
 
     @Module
     @InstallIn(SingletonComponent::class)
