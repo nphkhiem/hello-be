@@ -28,6 +28,25 @@ class JourneyDriver(private val compose: ComposeTestRule) {
     }
 
     /**
+     * Select pressed twice in quick succession.
+     *
+     * Two complete key cycles with nothing between them, so the second arrives before the screen
+     * has had any chance to react to the first. Calling [press] twice would not be the same
+     * gesture: it waits for idle in between, and that gap is the whole point.
+     *
+     * Deliberately not called a hold. A held key produces system repeat, which is a different
+     * gesture that may or may not fire a click per repeat, and nothing here has established which.
+     */
+    fun doublePress(text: String) {
+        compose.onNodeWithText(text).requestFocus()
+        compose.onNodeWithText(text).performKeyInput {
+            pressKey(Key.DirectionCenter)
+            pressKey(Key.DirectionCenter)
+        }
+        compose.waitForIdle()
+    }
+
+    /**
      * Waits for the screen to actually say something, rather than for recomposition to settle.
      *
      * On failure it prints what the screen did say, because a journey that stops half way is
