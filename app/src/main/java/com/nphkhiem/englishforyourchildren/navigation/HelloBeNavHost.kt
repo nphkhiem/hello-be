@@ -146,22 +146,20 @@ fun HelloBeNavHost(
                 modifier = modifier
             )
         } else {
-            content.let {
-                CreateProfileScreen(
-                    state = it.profileCreate(),
-                    onAction = { action ->
-                        when (action) {
-                            // Creating a child replaces the entry destination with their home, so
-                            // Back leaves the app rather than returning to the form they just filled.
-                            is CreateProfileAction.CreateRequested ->
-                                replaceAll(afterProfileChosen(ProfileId(CREATED_PROFILE)))
+            CreateProfileScreen(
+                state = content.profileCreate(),
+                onAction = { action ->
+                    when (action) {
+                        // Creating a child replaces the entry destination with their home, so
+                        // Back leaves the app rather than returning to the form they just filled.
+                        is CreateProfileAction.CreateRequested ->
+                            replaceAll(afterProfileChosen(ProfileId(CREATED_PROFILE)))
 
-                            else -> Unit
-                        }
-                    },
-                    modifier = modifier
-                )
-            } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
+                        else -> Unit
+                    }
+                },
+                modifier = modifier
+            )
         }
 
         is HelloBeKey.ProfilePicker -> if (content == null) {
@@ -185,30 +183,28 @@ fun HelloBeNavHost(
                 modifier = modifier
             )
         } else {
-            content.let {
-                ProfilePickerScreen(
-                    state = it.profilePicker(key.mode),
-                    onAction = { action ->
-                        when (action) {
-                            is ProfileAction.ProfileChosen ->
-                                replaceAll(afterProfileChosen(ProfileId(action.profileId)))
+            ProfilePickerScreen(
+                state = content.profilePicker(key.mode),
+                onAction = { action ->
+                    when (action) {
+                        is ProfileAction.ProfileChosen ->
+                            replaceAll(afterProfileChosen(ProfileId(action.profileId)))
 
-                            ProfileAction.AddProfileRequested -> push(HelloBeKey.ProfileCreate)
+                        ProfileAction.AddProfileRequested -> push(HelloBeKey.ProfileCreate)
 
-                            ProfileAction.CaregiverEntryRequested -> {
-                                caregiverOrigin = ChildReturnTarget.CHILD_HOME
-                                push(
-                                    HelloBeKey.CaregiverGate(
-                                        profileId = null,
-                                        returnTarget = ChildReturnTarget.CHILD_HOME
-                                    )
+                        ProfileAction.CaregiverEntryRequested -> {
+                            caregiverOrigin = ChildReturnTarget.CHILD_HOME
+                            push(
+                                HelloBeKey.CaregiverGate(
+                                    profileId = null,
+                                    returnTarget = ChildReturnTarget.CHILD_HOME
                                 )
-                            }
+                            )
                         }
-                    },
-                    modifier = modifier
-                )
-            } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
+                    }
+                },
+                modifier = modifier
+            )
         }
 
         is HelloBeKey.ChildHome -> if (content == null) {
@@ -231,38 +227,36 @@ fun HelloBeNavHost(
                 modifier = modifier
             )
         } else {
-            content.let {
-                ChildHomeScreen(
-                    state = it.childHome(key.profileId),
-                    onAction = { action ->
-                        when (action) {
-                            ChildHomeAction.ContinueRequested,
-                            ChildHomeAction.LearningPathRequested ->
-                                push(HelloBeKey.LearningPath(profileId = key.profileId))
+            ChildHomeScreen(
+                state = content.childHome(key.profileId),
+                onAction = { action ->
+                    when (action) {
+                        ChildHomeAction.ContinueRequested,
+                        ChildHomeAction.LearningPathRequested ->
+                            push(HelloBeKey.LearningPath(profileId = key.profileId))
 
-                            ChildHomeAction.FreePlayRequested ->
-                                push(HelloBeKey.FreePlay(profileId = key.profileId))
+                        ChildHomeAction.FreePlayRequested ->
+                            push(HelloBeKey.FreePlay(profileId = key.profileId))
 
-                            ChildHomeAction.SwitchProfileRequested -> push(
-                                HelloBeKey.ProfilePicker(
-                                    mode = ProfilePickerMode.Switch(key.profileId)
+                        ChildHomeAction.SwitchProfileRequested -> push(
+                            HelloBeKey.ProfilePicker(
+                                mode = ProfilePickerMode.Switch(key.profileId)
+                            )
+                        )
+
+                        ChildHomeAction.CaregiverEntryRequested -> {
+                            caregiverOrigin = ChildReturnTarget.CHILD_HOME
+                            push(
+                                HelloBeKey.CaregiverGate(
+                                    profileId = key.profileId,
+                                    returnTarget = ChildReturnTarget.CHILD_HOME
                                 )
                             )
-
-                            ChildHomeAction.CaregiverEntryRequested -> {
-                                caregiverOrigin = ChildReturnTarget.CHILD_HOME
-                                push(
-                                    HelloBeKey.CaregiverGate(
-                                        profileId = key.profileId,
-                                        returnTarget = ChildReturnTarget.CHILD_HOME
-                                    )
-                                )
-                            }
                         }
-                    },
-                    modifier = modifier
-                )
-            } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
+                    }
+                },
+                modifier = modifier
+            )
         }
 
         is HelloBeKey.LearningPath -> if (content == null) {
@@ -283,32 +277,30 @@ fun HelloBeNavHost(
                 modifier = modifier
             )
         } else {
-            content.let {
-                LearningPathScreen(
-                    state = it.learningPath(key.profileId, key.preferredUnitId),
-                    onAction = { action ->
-                        when (action) {
-                            is LearningPathAction.LessonChosen -> push(
-                                HelloBeKey.Lesson(
-                                    profileId = key.profileId,
-                                    lessonId = LessonId(action.lessonId)
-                                )
+            LearningPathScreen(
+                state = content.learningPath(key.profileId, key.preferredUnitId),
+                onAction = { action ->
+                    when (action) {
+                        is LearningPathAction.LessonChosen -> push(
+                            HelloBeKey.Lesson(
+                                profileId = key.profileId,
+                                lessonId = LessonId(action.lessonId)
                             )
+                        )
 
-                            LearningPathAction.HomeRequested -> pop()
+                        LearningPathAction.HomeRequested -> pop()
 
-                            LearningPathAction.SwitchProfileRequested -> push(
-                                HelloBeKey.ProfilePicker(
-                                    mode = ProfilePickerMode.Switch(key.profileId)
-                                )
+                        LearningPathAction.SwitchProfileRequested -> push(
+                            HelloBeKey.ProfilePicker(
+                                mode = ProfilePickerMode.Switch(key.profileId)
                             )
+                        )
 
-                            else -> Unit
-                        }
-                    },
-                    modifier = modifier
-                )
-            } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
+                        else -> Unit
+                    }
+                },
+                modifier = modifier
+            )
         }
 
         is HelloBeKey.Lesson -> if (content == null) {
@@ -334,40 +326,38 @@ fun HelloBeNavHost(
                 modifier = modifier
             )
         } else {
-            content.let {
-                // The stop-for-now dialog is local state, not a destination. It lives here rather than
-                // on the stack so Back cannot reach it as a page, and so dismissing it never pops
-                // anything: a child answering "keep learning" stays exactly where they were.
-                var stopForNowVisible by remember(key) { mutableStateOf(false) }
+            // The stop-for-now dialog is local state, not a destination. It lives here rather than
+            // on the stack so Back cannot reach it as a page, and so dismissing it never pops
+            // anything: a child answering "keep learning" stays exactly where they were.
+            var stopForNowVisible by remember(key) { mutableStateOf(false) }
 
-                LessonActivity(
-                    state = it.lesson(key.profileId, key.lessonId)
-                        .copy(stopForNowVisible = stopForNowVisible),
-                    onAction = { action ->
-                        when (action) {
-                            LessonAction.BackRequested -> stopForNowVisible = true
+            LessonActivity(
+                state = content.lesson(key.profileId, key.lessonId)
+                    .copy(stopForNowVisible = stopForNowVisible),
+                onAction = { action ->
+                    when (action) {
+                        LessonAction.BackRequested -> stopForNowVisible = true
 
-                            LessonAction.KeepLearningRequested -> stopForNowVisible = false
+                        LessonAction.KeepLearningRequested -> stopForNowVisible = false
 
-                            LessonAction.StopForNowConfirmed -> {
-                                stopForNowVisible = false
-                                pop()
-                            }
-
-                            LessonAction.ContinueRequested -> replaceAll(
-                                resolved.dropLast(1) + HelloBeKey.LessonCelebration(
-                                    profileId = key.profileId,
-                                    lessonId = key.lessonId,
-                                    returnTarget = LessonReturnTarget.LEARNING_PATH
-                                )
-                            )
-
-                            else -> Unit
+                        LessonAction.StopForNowConfirmed -> {
+                            stopForNowVisible = false
+                            pop()
                         }
-                    },
-                    modifier = modifier
-                )
-            } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
+
+                        LessonAction.ContinueRequested -> replaceAll(
+                            resolved.dropLast(1) + HelloBeKey.LessonCelebration(
+                                profileId = key.profileId,
+                                lessonId = key.lessonId,
+                                returnTarget = LessonReturnTarget.LEARNING_PATH
+                            )
+                        )
+
+                        else -> Unit
+                    }
+                },
+                modifier = modifier
+            )
         }
 
         is HelloBeKey.LessonCelebration -> if (content == null) {
