@@ -7,12 +7,43 @@ package com.nphkhiem.englishforyourchildren.domain.model
  * a profile, and neither can be handed a bare string that happens to look right. They validate in an
  * `init` block rather than behind a factory returning a result type: every value constructed today
  * is a literal or a copy of a known-good one, so a blank id here is a programmer error and is
- * reported as one. Untrusted input, when curriculum parsing and Room arrive, gets a parse helper at
- * that boundary with this check still underneath it. See ADR 0011.
+ * reported as one. A value arriving from outside is not, and reads itself through
+ * [readIdentifier] instead, with this check still underneath it. See ADR 0011.
  */
 private fun requireIdentifier(value: String, name: String) {
     require(value.isNotBlank()) { "$name cannot be blank" }
 }
+
+/**
+ * A value from outside, read as an identifier or refused with a reason.
+ *
+ * The parse helper ADR 0011 said had to arrive with the first parser rather than after it. Packaged
+ * curriculum is written by hand, so a name that is missing or empty is somebody's typing rather
+ * than a programmer error, and throwing out of the middle of a parse loses the only thing the
+ * person who has to fix it needs: which field, in which activity, held nothing.
+ *
+ * [Unusable.reason] is the whole of the failure, in words that can be shown to whoever wrote the
+ * file. Nothing is thrown, because a boundary reporting one problem at a time makes a content
+ * author fix a bundle one run at a time.
+ */
+sealed interface IdentifierRead<out T> {
+    data class Usable<T>(val id: T) : IdentifierRead<T>
+
+    data class Unusable(val reason: String) : IdentifierRead<Nothing>
+}
+
+/**
+ * Reads [value] as the identifier [into] builds, or says why it is not one.
+ *
+ * [field] names the value as the file names it, so "lesson id" reads back the way a content author
+ * wrote it rather than the way this code spells the type.
+ */
+fun <T> readIdentifier(value: String?, field: String, into: (String) -> T): IdentifierRead<T> =
+    when {
+        value == null -> IdentifierRead.Unusable("$field is missing")
+        value.isBlank() -> IdentifierRead.Unusable("$field is blank")
+        else -> IdentifierRead.Usable(into(value))
+    }
 
 /**
  * A profile's identity, and nothing about the child.
