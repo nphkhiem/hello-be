@@ -3,6 +3,9 @@
 What the Phase 2 exit gate asks for, and what actually stands behind each line. Written at the close
 of P2-T10.
 
+Updated 2 September 2026 where a line has since been closed; the measurements below are the
+P2-T10 ones and are not restated.
+
 Measured on Television_4K (Android TV, API 36) with 402 unit tests and 201 instrumented tests:
 `:feature:learning` 135, `:app` 30, `:data` 29, `:playback` 7.
 
@@ -16,7 +19,7 @@ Measured on Television_4K (Android TV, API 36) with 402 unit tests and 201 instr
 | Playback fallback journey | `Media3PlaybackControllerTest` for the missing-asset failure, and `FirstLessonJourneyTest`, which walks the whole lesson on the unscored skip because no recording exists. That is the fallback, exercised end to end rather than simulated | Met |
 | Back journey | `LessonRecoveryJourneyTest`: Back opens the stop question, and "Keep learning" returns to the same activity | Met |
 | Resume journey | `LessonRecoveryJourneyTest`: stopping part way and reopening lands on the next question, not the first. Behaviour added in #47 | Met |
-| Process-death journey | None | **Not met.** See below |
+| Process-death journey | `ProcessDeathJourneyTest`: a confirmed checkpoint survives the Activity, its ViewModels and the open database all going away; a refused write does not | **Met, with one limit named below** |
 | Unsaved-state journey | `LessonSaveFailureJourneyTest`: a refused write says "Not saved yet" and does not move the child on. The refusal is injected at the DAO, so the repository, reducer and screen are all production code | Met |
 | Repeated-input journey | `LessonReducerTest` and `LessonViewModelTest` both cover a duplicate press being answered once. There is no journey-level equivalent | **Partial.** Covered below the UI, not through it |
 | API 28 and current TV device matrix | Current TV met on Television_4K at API 36. API 28 not met | **Partial.** ADR 0013 |
@@ -24,15 +27,23 @@ Measured on Television_4K (Android TV, API 36) with 402 unit tests and 201 instr
 
 ## The two gaps, stated plainly
 
-**Process death.** Journeys run against an in-memory database so each test starts on a television
-with nothing on it. An in-memory database dies with the process, so the one thing a process-death
-test needs to survive is the thing this setup destroys. Doing it properly means on-disk storage with
-a file per test and a teardown, and a way to drop the whole object graph rather than recreating an
-activity, which keeps its ViewModels. It was left undone rather than approximated with
-`ActivityScenario.recreate()`, which would have passed while proving nothing.
+**Process death.** Closed on 2 September 2026. What the original entry asked for is what was
+built: on-disk storage with a file per test and a teardown, and a drop that takes the whole Activity
+and its ViewModels rather than recreating one. `ActivityScenario.recreate()` is still not used, for
+the reason first written here: it hands the new Activity the same `ViewModelStore`, so it would have
+passed while proving nothing.
 
-The behaviour underneath it is not untested: resume reads the checkpoint back from storage and is
-covered at every level below the journey.
+Two tests, because the milestone's claim has two halves. Confirmed work comes back: a question
+answered and written down leaves the child on the next one after everything holding their position
+in memory has gone. Pending work does not: a write `RefusingProgressDao` refuses leaves them on the
+question they had already answered, so nothing resurrects progress the screen said was not saved.
+
+**The limit, stated rather than left implied.** True process death cannot be exercised from an
+instrumented test, because the runner lives in the process and dies with it. The Hilt component and
+its singletons therefore survive the drop. That makes this stricter rather than weaker in the place
+that matters: the repositories are bound `@Singleton`, so one caching the child's position would
+pass a test that rebuilt everything and fails this one. What it does not cover is a genuinely cold
+start with an empty process.
 
 **API 28.** Not installable on this hardware. ADR 0013 has the detail.
 
