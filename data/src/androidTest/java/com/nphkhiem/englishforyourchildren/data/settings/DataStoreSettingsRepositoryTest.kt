@@ -105,7 +105,7 @@ class DataStoreSettingsRepositoryTest {
     fun givenOneSettingWasNeverWritten_whenSettingsAreRead_thenTheOthersAreStillWhatWasChosen() {
         // Each absent value falls back on its own, not to a whole default object, so a store
         // written before a setting existed keeps every choice a caregiver did make.
-        runBlocking { repository.updateCaregiverLanguage(localeTag = "en") }
+        runBlocking { repository.updateCaregiverLanguage(CaregiverLanguage.ENGLISH) }
 
         val settings = runBlocking { repository.observeSettings().first() }
             .let { (it as DomainResult.Success).value }
