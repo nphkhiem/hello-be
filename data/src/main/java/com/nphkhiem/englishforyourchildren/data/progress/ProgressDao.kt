@@ -28,6 +28,15 @@ interface ProgressDao {
     @Query("SELECT * FROM activity_attempt WHERE profileId = :profileId")
     suspend fun attemptsFor(profileId: String): List<ActivityAttemptEntity>
 
+    /**
+     * Everything one child has done, as it changes.
+     *
+     * How well a thing is known is counted from these rather than stored beside them, so the path
+     * has to watch them rather than ask once.
+     */
+    @Query("SELECT * FROM activity_attempt WHERE profileId = :profileId")
+    fun observeAttempts(profileId: String): Flow<List<ActivityAttemptEntity>>
+
     @Query("SELECT * FROM lesson_checkpoint WHERE profileId = :profileId")
     fun observeCheckpoints(profileId: String): Flow<List<LessonCheckpointEntity>>
 

@@ -84,6 +84,14 @@ data class LessonCheckpoint(
  */
 data class ActivityAttempt(
     val sessionId: SessionId,
+    /**
+     * Which activity this was, beside which encounter with it.
+     *
+     * Carried rather than read off the instance id. The occurrence is a suffix on that id and
+     * trimming it back would be code parsing an identifier, which `CONTENT_ID_REGISTRY.md` rule 3
+     * forbids and which storage has no need of anyway: it already holds both.
+     */
+    val activityId: ActivityId,
     val activityInstance: ActivityInstanceId,
     val ordinal: Int,
     val outcome: AttemptOutcome,

@@ -79,6 +79,9 @@ private class ForwardingProgressDao(private val current: () -> ProgressDao) : Pr
     override suspend fun attemptsFor(profileId: String): List<ActivityAttemptEntity> =
         current().attemptsFor(profileId)
 
+    override fun observeAttempts(profileId: String): Flow<List<ActivityAttemptEntity>> =
+        current().observeAttempts(profileId)
+
     override fun observeCheckpoints(profileId: String): Flow<List<LessonCheckpointEntity>> =
         current().observeCheckpoints(profileId)
 

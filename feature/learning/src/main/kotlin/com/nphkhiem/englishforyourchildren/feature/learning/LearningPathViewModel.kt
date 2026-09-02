@@ -9,7 +9,9 @@ import com.nphkhiem.englishforyourchildren.domain.model.CourseUnit
 import com.nphkhiem.englishforyourchildren.domain.model.Lesson
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
-import com.nphkhiem.englishforyourchildren.domain.model.ProfileProgress
+import com.nphkhiem.englishforyourchildren.domain.progression.LearningPath
+import com.nphkhiem.englishforyourchildren.domain.progression.LessonStanding
+import com.nphkhiem.englishforyourchildren.domain.progression.ObserveLearningPathUseCase
 import com.nphkhiem.englishforyourchildren.domain.repository.CurriculumRepository
 import com.nphkhiem.englishforyourchildren.domain.repository.ProfileRepository
 import com.nphkhiem.englishforyourchildren.domain.repository.ProgressRepository
@@ -25,9 +27,10 @@ import kotlinx.coroutines.launch
 /**
  * The course as one child's path through it.
  *
- * Which lesson is recommended is the only judgement here: the first one they have not finished. It
- * is a rule about a child's progress rather than about content, which is why it lives with the
- * progress it reads rather than in the packaged course.
+ * No judgement is made here any more. Which lessons are open, which one is the offer and what wants
+ * reviewing are rules about a child rather than about a screen, so they live in `:domain` where
+ * they can be written down as a table and checked without a television. What is left is the part a
+ * screen is actually for: turning that into words and shapes.
  */
 @HiltViewModel
 class LearningPathViewModel @Inject constructor(
@@ -42,15 +45,17 @@ class LearningPathViewModel @Inject constructor(
     private val _unavailable = MutableStateFlow(false)
     val unavailable: StateFlow<Boolean> = _unavailable.asStateFlow()
 
+    private val learningPath = ObserveLearningPathUseCase(curriculum, progress)
+
     fun start(profileId: ProfileId) {
         viewModelScope.launch {
             combine(
                 curriculum.observeCourse(),
-                progress.observeProfileProgress(profileId),
+                learningPath(profileId),
                 profiles.observeProfiles()
-            ) { course, done, people ->
-                Triple(course, done, people)
-            }.collect { (course, done, people) ->
+            ) { course, path, people ->
+                Triple(course, path, people)
+            }.collect { (course, path, people) ->
                 if (course !is DomainResult.Success) {
                     _unavailable.value = true
                     return@collect
@@ -60,7 +65,7 @@ class LearningPathViewModel @Inject constructor(
                     ?.firstOrNull { it.id == profileId }
                 _state.value = map(
                     course = course.value,
-                    progress = (done as? DomainResult.Success)?.value,
+                    path = (path as? DomainResult.Success)?.value,
                     child = child
                 )
             }
@@ -69,54 +74,42 @@ class LearningPathViewModel @Inject constructor(
 
     private fun map(
         course: Course,
-        progress: ProfileProgress?,
+        path: LearningPath?,
         child: ChildProfile?
     ): LearningPathUiState {
         val unit = course.units.firstOrNull() ?: return EMPTY
-        val finished = progress?.lessonsCompleted.orEmpty()
         return LearningPathUiState(
             profileName = child?.nickname.orEmpty(),
             profileAvatar = child?.avatarId?.value.orEmpty(),
-            unit = unit.toPage(course.units.size, finished),
+            unit = unit.toPage(course.units.size, path),
             previousUnit = null,
             nextUnit = null,
             pendingSave = false
         )
     }
 
-    private fun CourseUnit.toPage(unitCount: Int, finished: Set<LessonId>) = UnitPageState(
+    private fun CourseUnit.toPage(unitCount: Int, path: LearningPath?) = UnitPageState(
         unitId = id.value,
         unitNumber = ordinal + 1,
         unitCount = unitCount,
         theme = theme,
         objective = "",
-        lessons = lessons.map { lesson ->
-            lesson.toNode(finished, recommendedOrdinal = recommendedOrdinal(finished))
-        }
+        lessons = lessons.map { it.toNode(path) }
     )
 
     /**
-     * The first lesson not yet finished.
+     * Storage that cannot say what a child has done shows the path as untouched.
      *
-     * Null once a unit is complete, which is what stops the path pointing at a lesson a child has
-     * already done as though it were new.
+     * Everything is later and nothing is offered, which is honest: with no history to read, this
+     * screen cannot say a lesson is finished and must not guess that one is.
      */
-    private fun CourseUnit.recommendedOrdinal(finished: Set<LessonId>): Int? =
-        lessons.firstOrNull { it.id !in finished }?.ordinal
-
-    private fun Lesson.toNode(finished: Set<LessonId>, recommendedOrdinal: Int?) = LessonNodeState(
+    private fun Lesson.toNode(path: LearningPath?) = LessonNodeState(
         id = id.value,
         title = title(),
-        progress = when {
-            id in finished -> LessonProgress.COMPLETED
-
-            ordinal == recommendedOrdinal -> LessonProgress.RECOMMENDED
-
-            // Everything past the recommended one is later. A path a child can wander into the
-            // middle of is a path with no shape to it.
-            recommendedOrdinal != null && ordinal > recommendedOrdinal -> LessonProgress.FUTURE
-
-            else -> LessonProgress.AVAILABLE
+        progress = when (path?.standingOf(id)) {
+            LessonStanding.COMPLETED -> LessonProgress.COMPLETED
+            LessonStanding.RECOMMENDED -> LessonProgress.RECOMMENDED
+            LessonStanding.FUTURE, null -> LessonProgress.FUTURE
         },
         kind = if (activities.all { it.family == ActivityFamily.REVIEW }) {
             LessonKind.REVIEW
