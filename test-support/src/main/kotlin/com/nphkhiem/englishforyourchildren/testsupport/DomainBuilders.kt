@@ -9,6 +9,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.AgeBand
 import com.nphkhiem.englishforyourchildren.domain.model.AppSettings
 import com.nphkhiem.englishforyourchildren.domain.model.AttemptOutcome
 import com.nphkhiem.englishforyourchildren.domain.model.AvatarId
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.domain.model.ChildProfile
 import com.nphkhiem.englishforyourchildren.domain.model.Course
 import com.nphkhiem.englishforyourchildren.domain.model.CourseId
@@ -206,7 +207,7 @@ object DomainBuilders {
 
     fun appSettings(
         selectedProfileId: ProfileId? = ProfileId("p1"),
-        caregiverLocaleTag: String = "vi",
+        caregiverLanguage: CaregiverLanguage = CaregiverLanguage.BOTH,
         vietnameseHelpEnabled: Boolean = true,
         captionsEnabled: Boolean = true,
         reducedMotionEnabled: Boolean = false,
@@ -214,7 +215,7 @@ object DomainBuilders {
         backgroundMusicEnabled: Boolean = true
     ) = AppSettings(
         selectedProfileId = selectedProfileId,
-        caregiverLocaleTag = caregiverLocaleTag,
+        caregiverLanguage = caregiverLanguage,
         vietnameseHelpEnabled = vietnameseHelpEnabled,
         captionsEnabled = captionsEnabled,
         reducedMotionEnabled = reducedMotionEnabled,

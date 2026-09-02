@@ -7,6 +7,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.domain.model.AppSettings
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.domain.result.DomainResult
 import java.io.File
@@ -104,12 +105,12 @@ class DataStoreSettingsRepositoryTest {
     fun givenOneSettingWasNeverWritten_whenSettingsAreRead_thenTheOthersAreStillWhatWasChosen() {
         // Each absent value falls back on its own, not to a whole default object, so a store
         // written before a setting existed keeps every choice a caregiver did make.
-        runBlocking { repository.updateCaregiverLocale(localeTag = "en") }
+        runBlocking { repository.updateCaregiverLanguage(localeTag = "en") }
 
         val settings = runBlocking { repository.observeSettings().first() }
             .let { (it as DomainResult.Success).value }
 
-        assertThat(settings.caregiverLocaleTag).isEqualTo("en")
+        assertThat(settings.caregiverLanguage).isEqualTo(CaregiverLanguage.ENGLISH)
         assertThat(settings.captionsEnabled).isEqualTo(AppSettings.DEFAULT.captionsEnabled)
     }
 

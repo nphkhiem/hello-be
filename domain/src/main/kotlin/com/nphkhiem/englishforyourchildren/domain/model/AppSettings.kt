@@ -1,29 +1,54 @@
 package com.nphkhiem.englishforyourchildren.domain.model
 
 /**
+ * Which language the caregiver area speaks.
+ *
+ * Three modes rather than a locale tag, because the approved settings screen offers three and the
+ * third is both languages at once, which no locale names. [stored] is what goes in the preferences
+ * file; [from] reads back the two single-language tags earlier builds wrote, so a television that
+ * was already set to Vietnamese stays set to it.
+ *
+ * This is the caregiver's own language and never the child's. Child mode is English-led whatever
+ * this says.
+ */
+enum class CaregiverLanguage(val stored: String) {
+    ENGLISH("en"),
+    VIETNAMESE("vi"),
+    BOTH("en+vi");
+
+    companion object {
+        /**
+         * Anything unrecognised, including nothing at all, reads as [BOTH].
+         *
+         * A preference is not a child's work, so one that will not read falls back to a usable
+         * default rather than failing, which is the choice the settings file's corruption handler
+         * already made. [BOTH] is the fallback because it is the only mode that cannot strand a
+         * caregiver who reads just one of the two languages.
+         */
+        fun from(stored: String?): CaregiverLanguage =
+            entries.firstOrNull { it.stored == stored } ?: BOTH
+    }
+}
+
+/**
  * Everything a caregiver can change, and the profile the television is currently on.
  *
  * The six switches are exactly the six the built caregiver settings screen offers. A setting that
  * a caregiver can change with nowhere to persist it is a setting that silently forgets itself, so
  * this model and that screen have to be read together.
  *
- * [caregiverLocaleTag] is the caregiver's own language, not the child's. Child mode is English-led
- * whatever this says; the tag decides which language the caregiver area speaks and which language
- * the third rung of the support ladder uses.
+ * [caregiverLanguage] is the caregiver's own language, not the child's. Child mode is English-led
+ * whatever this says.
  */
 data class AppSettings(
     val selectedProfileId: ProfileId?,
-    val caregiverLocaleTag: String,
+    val caregiverLanguage: CaregiverLanguage,
     val vietnameseHelpEnabled: Boolean,
     val captionsEnabled: Boolean,
     val reducedMotionEnabled: Boolean,
     val highContrastEnabled: Boolean,
     val backgroundMusicEnabled: Boolean
 ) {
-    init {
-        require(caregiverLocaleTag.isNotBlank()) { "A caregiver locale tag cannot be blank" }
-    }
-
     companion object {
         /**
          * What a television that has never been configured looks like.
@@ -35,7 +60,7 @@ data class AppSettings(
          */
         val DEFAULT = AppSettings(
             selectedProfileId = null,
-            caregiverLocaleTag = "vi",
+            caregiverLanguage = CaregiverLanguage.BOTH,
             vietnameseHelpEnabled = true,
             captionsEnabled = true,
             reducedMotionEnabled = false,
