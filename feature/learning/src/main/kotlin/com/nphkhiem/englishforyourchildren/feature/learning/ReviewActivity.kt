@@ -19,7 +19,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.ChoiceCard
 import com.nphkhiem.englishforyourchildren.ui.tv.component.LearningObjectCard
+import com.nphkhiem.englishforyourchildren.ui.tv.component.PackagedPicture
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
+import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberPackagedPicture
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeShapes
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 
@@ -115,8 +117,12 @@ private fun RecallBoard(
         // Present only for the recall items that bring an object back with them. This is the whole
         // of "mixed recall": the same row, sometimes with a reminder beside it.
         if (state.learningObject != null) {
+            val subject = rememberPackagedPicture(state.learningObject.image)
+
             LearningObjectCard(
                 label = state.learningObject.label,
+                labelVisible = subject == null,
+                illustration = subject?.let { { PackagedPicture(it) } },
                 modifier = Modifier.weight(OBJECT_WEIGHT).fillMaxHeight()
             )
         }
@@ -141,14 +147,18 @@ private fun RowScope.RecallRow(
         horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap)
     ) {
         state.answers.forEachIndexed { index, answer ->
+            val picture = rememberPackagedPicture(answer.image)
+
             ChoiceCard(
                 label = answer.label,
                 onClick = { onAction(LessonAction.AnswerChosen(answer.id)) },
                 feedback = answer.feedback,
                 availability = availability,
                 // Review is recall. A captioned answer would let a reader skip the remembering,
-                // which is the only thing this activity is asking for.
+                // which is the only thing this activity is asking for, drawn or undrawn. Same
+                // reason picture matching does not fall back to the word either.
                 labelVisible = false,
+                illustration = picture?.let { { PackagedPicture(it) } },
                 modifier = (if (index == 0) entryModifier else Modifier)
                     .weight(1f)
                     .fillMaxHeight()

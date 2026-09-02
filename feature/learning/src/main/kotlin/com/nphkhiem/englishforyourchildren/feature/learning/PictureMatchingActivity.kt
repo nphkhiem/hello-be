@@ -17,7 +17,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.ChoiceCard
 import com.nphkhiem.englishforyourchildren.ui.tv.component.LearningObjectCard
+import com.nphkhiem.englishforyourchildren.ui.tv.component.PackagedPicture
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
+import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberPackagedPicture
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 
 /**
@@ -92,8 +94,13 @@ private fun MatchBoard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (state.learningObject != null) {
+            val source = rememberPackagedPicture(state.learningObject.image)
+
             LearningObjectCard(
                 label = state.learningObject.label,
+                // The source is the question. Its word stands in only until its picture is drawn.
+                labelVisible = source == null,
+                illustration = source?.let { { PackagedPicture(it) } },
                 modifier = Modifier.weight(SOURCE_WEIGHT).fillMaxHeight()
             )
             // The arrow goes with the source. An activity that arrives without one must not be
@@ -134,14 +141,20 @@ private fun RowScope.DestinationRow(
         horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap)
     ) {
         state.answers.forEachIndexed { index, answer ->
+            val picture = rememberPackagedPicture(answer.image)
+
             ChoiceCard(
                 label = answer.label,
                 onClick = { onAction(LessonAction.AnswerChosen(answer.id)) },
                 feedback = answer.feedback,
                 availability = availability,
                 // The prompt already names the target, so a captioned answer would make the
-                // question solvable by reading instead of by looking.
+                // question solvable by reading instead of by looking. That holds whether or not a
+                // picture has been drawn yet, which is why this one does not fall back to the word
+                // as listen-and-choose does. Until the pictures exist these cards say nothing on
+                // screen, though each still announces its word to a screen reader.
                 labelVisible = false,
+                illustration = picture?.let { { PackagedPicture(it) } },
                 // Entry focus goes to the first destination by position, never by which one is
                 // correct, because this screen is not told which one that is.
                 modifier = (if (index == 0) entryModifier else Modifier)

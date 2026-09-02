@@ -377,6 +377,27 @@ class LessonViewModelTest {
     )
 
     @Test
+    fun givenContentThatNamesPictures_whenALessonOpens_thenEachAnswerCarriesItsOwn() = runTest {
+        // The content has named a picture per choice since the course was packaged. The mapper
+        // dropped it, so a pre-reader was shown the word instead.
+        val model = started()
+
+        assertThat(model.state.value.answers.map { it.image })
+            .containsExactly("img-eyes", "img-ears")
+            .inOrder()
+    }
+
+    @Test
+    fun givenAPictureMatchingQuestion_whenItArrives_thenItsLearningObjectCarriesItsPicture() =
+        runTest {
+            val model = started()
+
+            model.onAction(LessonUiAction.SkipRequested)
+
+            assertThat(model.state.value.learningObject?.image).isEqualTo("img-eyes")
+        }
+
+    @Test
     fun givenARecordingThatPlays_whenTheLessonOpens_thenTheQuestionIsStillBeingAsked() = runTest {
         // The state ADR 0004 describes, reachable for the first time. Every recording is unmade
         // today, so this is the lesson the packaged audio will produce rather than the one it does.

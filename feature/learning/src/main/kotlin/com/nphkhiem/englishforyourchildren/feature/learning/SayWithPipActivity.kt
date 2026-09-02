@@ -18,7 +18,9 @@ import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
 import com.nphkhiem.englishforyourchildren.ui.tv.component.LearningObjectCard
+import com.nphkhiem.englishforyourchildren.ui.tv.component.PackagedPicture
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
+import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberPackagedPicture
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeShapes
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 
@@ -84,8 +86,13 @@ private fun SpeakBoard(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (state.learningObject != null) {
+            val target = rememberPackagedPicture(state.learningObject.image)
+
             LearningObjectCard(
                 label = state.learningObject.label,
+                // A child saying a word aloud should be looking at the thing, not at its spelling.
+                labelVisible = target == null,
+                illustration = target?.let { { PackagedPicture(it) } },
                 modifier = Modifier.weight(TARGET_WEIGHT).fillMaxHeight()
             )
         }
