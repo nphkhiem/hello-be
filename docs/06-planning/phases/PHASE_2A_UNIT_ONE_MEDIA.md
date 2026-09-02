@@ -76,23 +76,42 @@ television. Everything else in this phase is repetition; this is the part that c
 
 **Scope:** M
 **Dependencies:** P2A-T1
+**Status: already built.** Checked on 2 September 2026 and found complete, with a test behind every
+clause. The ticket was written believing ADR 0004 was approved and unbuilt. It was approved and
+built, in pieces, across the design-build series and P2-T7, and nobody closed the ticket.
 
-Code, not content, and the reason it is in this phase: the day prompts play, a child can answer
-before hearing the question, and ADR 0004 is approved and unbuilt. Landing thirty-one recordings
-first would ship that violation deliberately.
+Tracked as issue 01 from the P2-T7 branch series. That issue is closed by this finding, not by a
+change.
 
-Tracked as issue 01 from the P2-T7 branch series.
-
-- [ ] `LessonSessionState` can say a prompt is sounding; the reducer's table pins when it starts and
-      stops.
-- [ ] `LessonViewModel` routes `PlaybackEvent.Completed`, which has had no consumer since P2-T7.
-- [ ] While a prompt sounds, answers leave the focus order and focus rests on replay. When it ends,
-      focus stays where it is.
+- [x] `LessonSessionState.soundingPrompt` says which recording is sounding, and null is silence
+      rather than a flag beside the asset. `LessonReducer` starts it in `ask` and clears it in
+      `promptFinished`, which compares what actually ended against what is sounding so a support
+      phrase cannot answer for the question.
+- [x] `LessonViewModel` routes `PlaybackEvent.Completed` to `reportPromptFinished`.
+- [x] `answerAvailability` returns `DISABLED` while the phase is `PROMPTING`, and
+      `HelloBeAvailability.isFocusable` is `this != DISABLED`, so the answers leave the focus order
+      rather than sitting there inert. `lessonFocusTarget` rests focus on replay.
+- [x] Focus stays where it is when the prompt ends. `StorybookScaffold` claims entry focus in a
+      `LaunchedEffect(Unit)` keyed to the composition, so a state change mid-activity cannot reclaim
+      it. This is the alternative ADR 0004 rejected, and it is refused by construction.
 
 **Acceptance criteria:**
 
-- [ ] A test proves a child cannot answer before the prompt has finished.
-- [ ] Reduced motion and the audio-unavailable path are unchanged.
+- [x] A test proves a child cannot answer before the prompt has finished:
+      `LessonReducerTest.givenTheQuestionIsStillSounding_whenTheChildAnswers_thenNothingIsRecorded`,
+      with `givenPipIsStillAskingForTheWord_whenTheChildSaysTheyHaveFinished_thenNothingIsRecorded`
+      covering the one family that has no answer to choose. Above it,
+      `LessonRulesTest.givenThePromptIsPlaying_whenAnswerAvailabilityIsRead_thenAnswersAreOutOfTheFocusOrder`
+      and `LessonScaffoldTest.givenThePromptIsPlaying_whenTheStageAppears_thenFocusRestsOnReplay`
+      prove the child is never offered the press in the first place, and
+      `StorybookScaffoldTest.givenChildMovedFocus_whenStageStateChanges_thenEntryFocusIsNotReclaimed`
+      proves focus is not yanked when the prompt ends.
+- [x] Reduced motion and the audio-unavailable path are unchanged. The unavailable path has its own
+      tests, including `givenAQuestionIsSounding_whenTheLessonLearnsItHasNoSound_thenNothingIsSoundingAnyMore`.
+
+**What this changes for the rest of the phase.** P2A-T3 lists T2 as its dependency, so recordings
+are no longer blocked. The reason T2 was placed before the audio still holds and is now satisfied:
+the day prompts play, a child cannot answer before hearing the question.
 
 ---
 
