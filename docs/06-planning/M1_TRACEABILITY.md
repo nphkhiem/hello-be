@@ -21,7 +21,7 @@ Measured on Television_4K (Android TV, API 36) with 402 unit tests and 201 instr
 | Resume journey | `LessonRecoveryJourneyTest`: stopping part way and reopening lands on the next question, not the first. Behaviour added in #47 | Met |
 | Process-death journey | `ProcessDeathJourneyTest`: a confirmed checkpoint survives the Activity, its ViewModels and the open database all going away; a refused write does not | **Met, with one limit named below** |
 | Unsaved-state journey | `LessonSaveFailureJourneyTest`: a refused write says "Not saved yet" and does not move the child on. The refusal is injected at the DAO, so the repository, reducer and screen are all production code | Met |
-| Repeated-input journey | `LessonReducerTest` and `LessonViewModelTest` both cover a duplicate press being answered once. There is no journey-level equivalent | **Partial.** Covered below the UI, not through it |
+| Repeated-input journey | `RepeatedInputJourneyTest`: two presses landing while the first answer is still being written down record one attempt and move the child one question | **Met for a duplicate on the same question. A separate defect was found, below** |
 | API 28 and current TV device matrix | Current TV met on Television_4K at API 36. API 28 not met | **Partial.** ADR 0013 |
 | Full phase quality gate | `spotlessCheck`, `build`, `lint` green with no new warnings | Met |
 
@@ -46,6 +46,24 @@ pass a test that rebuilt everything and fails this one. What it does not cover i
 start with an empty process.
 
 **API 28.** Not installable on this hardware. ADR 0013 has the detail.
+
+## What writing the repeated-input journey found
+
+Two rapid Select presses on an answer record two attempts, on two different activities, and move the
+child two questions on. Their stored history then says they answered a question that was never put
+to them.
+
+The guard that exists is not broken. `LessonUiAction.AnswerChosen` carries the activity number the
+screen was showing, and a press whose lambda predates the advance is rejected. But the first press
+advances the lesson, recomposition runs, and the second press arrives through the new card's own
+lambda carrying the new number, which is a legitimate answer for the new question by every check the
+app has. The guard works as designed and the design does not reach this case, which is exactly what
+that field's own comment says it exists to prevent.
+
+It is filed separately rather than fixed here, because it is production behaviour and deserves its
+own design pass. One thing to settle first: the reproduction is a rapid double-press, two complete
+key cycles. A held key produces system repeat, and whether that fires the click once or many times
+is untested, which decides how large the hazard on a real remote actually is.
 
 ## Not part of the gate, but true of the build M1 ships
 
