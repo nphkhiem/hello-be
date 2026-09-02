@@ -80,13 +80,17 @@ internal object LessonUiMapper {
         }
 
     private fun phase(state: LessonSessionState) = when (state.phase) {
-        DomainPhase.Asking ->
-            if (state.currentActivity.family == ActivityFamilySpeaking) {
-                LessonPhase.RESPONDING
-            } else {
-                LessonPhase.ANSWERING
-            }
+        DomainPhase.Asking -> when {
+            // The question is still being spoken, whichever family is asking it. See ADR 0004.
+            state.soundingPrompt != null -> LessonPhase.PROMPTING
 
+            state.currentActivity.family == ActivityFamilySpeaking -> LessonPhase.RESPONDING
+
+            else -> LessonPhase.ANSWERING
+        }
+
+        // Deliberately not PROMPTING, even while a replay sounds. Hiding the correct answer's
+        // treatment behind a prompting screen is a worse lie than not showing that a sound plays.
         DomainPhase.AwaitingCheckpoint -> LessonPhase.CORRECT
 
         DomainPhase.Finished -> LessonPhase.COMPLETED
@@ -109,7 +113,13 @@ internal object LessonUiMapper {
         is ActivityContent.PictureMatching, is ActivityContent.LetterAndSound ->
             (content as Answerable).choices
                 .firstOrNull { it.skillId == content.correct }
-                ?.let { LearningObject(id = it.skillId.value, label = it.label) }
+                ?.let {
+                    LearningObject(
+                        id = it.skillId.value,
+                        label = it.label,
+                        image = it.image.value
+                    )
+                }
 
         else -> null
     }
@@ -119,6 +129,7 @@ internal object LessonUiMapper {
             AnswerOption(
                 id = it.skillId.value,
                 label = it.label,
+                image = it.image.value,
                 feedback = HelloBeChoiceFeedback.NEUTRAL
             )
         }

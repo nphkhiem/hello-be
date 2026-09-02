@@ -18,8 +18,11 @@ data class ContentProblem(val where: String, val what: String, val kind: Kind = 
      * A missing file is work nobody has done yet. The app was designed to run without sound, and a
      * word can be shown before it can be heard, so a lesson still runs. It is a release gate, not a
      * runtime one: shipping is what these must block.
+     *
+     * An unlicensed asset is the same kind of gate seen from the other end: a file the project may
+     * not be entitled to ship, or a claim to be entitled that nothing stands behind.
      */
-    enum class Kind { BROKEN_GRAPH, MISSING_ASSET }
+    enum class Kind { BROKEN_GRAPH, MISSING_ASSET, UNLICENSED_ASSET }
 
     override fun toString() = "$where: $what"
 }

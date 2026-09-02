@@ -82,6 +82,14 @@ enum class LessonActivityKind {
 data class AnswerOption(
     val id: String,
     val label: String,
+    /**
+     * The picture for this choice, or null where no file has been drawn for it yet.
+     *
+     * A plain id rather than an [com.nphkhiem.englishforyourchildren.domain.model.AssetId], because
+     * nothing above this state may reach a domain type by following it. Turning it into a file is
+     * the job of whoever draws it.
+     */
+    val image: String? = null,
     val feedback: HelloBeChoiceFeedback = HelloBeChoiceFeedback.NEUTRAL
 )
 
@@ -93,7 +101,7 @@ data class AnswerOption(
  * reachable. Modelling those would describe states that cannot occur.
  */
 @Immutable
-data class LearningObject(val id: String, val label: String)
+data class LearningObject(val id: String, val label: String, val image: String? = null)
 
 /**
  * Everything a lesson screen needs in order to draw itself, and nothing it needs to think with.

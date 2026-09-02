@@ -68,7 +68,16 @@ data class AttributionsDto(val schemaVersion: Int, val entries: List<Attribution
 @Serializable
 data class AttributionDto(
     val assetId: String,
+    /** image, audio or font. */
+    val kind: String,
+    /** commissioned, licensed, public-domain, or development. */
+    val provenance: String,
+    /** Who made it, or where it came from. A person or organisation, not a URL alone. */
     val source: String,
+    /** The exact licence name and version, or the contract reference for commissioned work. */
     val licence: String,
+    /** Where the proof is kept: a file path, an invoice number, a signed release. */
+    val licenceEvidence: String,
+    /** The exact credit string, where the licence requires one. Null where it does not. */
     val attributionText: String? = null
 )
