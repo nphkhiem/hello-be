@@ -23,12 +23,14 @@ import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAvailability
+import com.nphkhiem.englishforyourchildren.ui.tv.component.PackagedPicture
 import com.nphkhiem.englishforyourchildren.ui.tv.component.PipGuide
 import com.nphkhiem.englishforyourchildren.ui.tv.component.PipPose
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StoryCard
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StoryHeader
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StorybookScaffold
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
+import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberPackagedPicture
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 
@@ -314,6 +316,8 @@ private fun VocabularyObjectCard(
     onAction: (FreePlayAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val picture = rememberPackagedPicture(learned.image)
+
     StoryCard(
         title = learned.label,
         onClick = { onAction(FreePlayAction.ObjectChosen(learned.id)) },
@@ -321,6 +325,9 @@ private fun VocabularyObjectCard(
         selected = speaking,
         availability = availability,
         centerContent = true,
+        // The word keeps its place beside the picture here, unlike a lesson answer. Free play asks
+        // nothing, so naming the thing gives nothing away, and a caregiver alongside can read it.
+        illustration = picture?.let { { PackagedPicture(it) } },
         stateDescription = when {
             availability == HelloBeAvailability.UNAVAILABLE ->
                 stringResource(R.string.free_play_no_sound)
