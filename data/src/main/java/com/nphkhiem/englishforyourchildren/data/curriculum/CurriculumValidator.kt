@@ -1,5 +1,14 @@
 package com.nphkhiem.englishforyourchildren.data.curriculum
 
+import com.nphkhiem.englishforyourchildren.domain.model.ActivityId
+import com.nphkhiem.englishforyourchildren.domain.model.AssetId
+import com.nphkhiem.englishforyourchildren.domain.model.CourseId
+import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
+import com.nphkhiem.englishforyourchildren.domain.model.IdentifierRead
+import com.nphkhiem.englishforyourchildren.domain.model.LessonId
+import com.nphkhiem.englishforyourchildren.domain.model.SkillId
+import com.nphkhiem.englishforyourchildren.domain.model.UnitId
+import com.nphkhiem.englishforyourchildren.domain.model.readIdentifier
 import javax.inject.Inject
 
 /**
@@ -33,6 +42,11 @@ data class ContentProblem(val where: String, val what: String, val kind: Kind = 
  * The graph checks are the ones a lesson cannot survive: an activity that names an answer it does
  * not offer, ordinals that do not match their order, an id used twice. The asset check is the one
  * that matters today, because it is the difference between a lesson that runs and a silent screen.
+ *
+ * Every name is read here before anything builds one, which is ADR 0011's parse helper at the
+ * boundary it was promised for. A blank id used to reach a value class and throw out of the middle
+ * of the mapping, and the whole bundle came back as invalid content with nothing a content author
+ * could act on.
  */
 class CurriculumValidator @Inject constructor() {
 
@@ -42,21 +56,28 @@ class CurriculumValidator @Inject constructor() {
         availableAssets: Set<String>
     ): List<ContentProblem> {
         val problems = mutableListOf<ContentProblem>()
+        val where = course.id.orUnnamed("course")
+
+        problems += named(where, "course id", course.id) { CourseId(it) }
+        problems += named(where, "course version", course.courseVersion) { CourseVersion(it) }
+        course.units.forEach { ref ->
+            problems += named(where, "declared unit id", ref.id) { UnitId(it) }
+        }
 
         if (course.schemaVersion != SUPPORTED_SCHEMA) {
             problems += ContentProblem(
-                course.id,
+                where,
                 "schema version ${course.schemaVersion} is not the $SUPPORTED_SCHEMA this app reads"
             )
         }
         if (course.supportedLocales.isEmpty()) {
-            problems += ContentProblem(course.id, "a course nobody can be spoken to in")
+            problems += ContentProblem(where, "a course nobody can be spoken to in")
         }
 
         val declared = course.units.map { it.id }
         val delivered = units.map { it.id }
         (declared - delivered.toSet()).forEach {
-            problems += ContentProblem(course.id, "unit $it is declared but its file is missing")
+            problems += ContentProblem(where, "unit $it is declared but its file is missing")
         }
 
         units.forEach { unit -> problems += validateUnit(unit, availableAssets) }
@@ -66,18 +87,27 @@ class CurriculumValidator @Inject constructor() {
 
     private fun validateUnit(unit: UnitDto, assets: Set<String>): List<ContentProblem> {
         val problems = mutableListOf<ContentProblem>()
-        problems += ordinalsInOrder(unit.lessons.map { it.ordinal }, unit.id, "lesson")
+        val where = unit.id.orUnnamed("unit")
+
+        problems += named(where, "unit id", unit.id) { UnitId(it) }
+        problems += ordinalsInOrder(unit.lessons.map { it.ordinal }, where, "lesson")
 
         unit.lessons.forEach { lesson ->
+            val lessonWhere = lesson.id.orUnnamed("lesson")
+
+            problems += named(lessonWhere, "lesson id", lesson.id) { LessonId(it) }
+            problems += lesson.teaches.flatMap { taught ->
+                named(lessonWhere, "taught skill id", taught) { SkillId(it) }
+            }
             problems += ordinalsInOrder(
                 lesson.activities.map { it.ordinal },
-                lesson.id,
+                lessonWhere,
                 "activity"
             )
             problems += duplicates(lesson.activities.map { it.id }, "activity")
 
             if (lesson.activities.isEmpty()) {
-                problems += ContentProblem(lesson.id, "a lesson with nothing in it")
+                problems += ContentProblem(lessonWhere, "a lesson with nothing in it")
             }
 
             lesson.activities.forEach { activity ->
@@ -89,28 +119,45 @@ class CurriculumValidator @Inject constructor() {
 
     private fun validateActivity(activity: ActivityDto, assets: Set<String>): List<ContentProblem> {
         val problems = mutableListOf<ContentProblem>()
+        val where = activity.id.orUnnamed("activity")
 
+        problems += named(where, "activity id", activity.id) { ActivityId(it) }
         if (activity.family !in FAMILIES) {
             problems +=
                 ContentProblem(
-                    activity.id,
+                    where,
                     "'${activity.family}' is not a family this app has a screen for"
                 )
         }
         if (activity.prompt.isBlank()) {
-            problems += ContentProblem(activity.id, "an activity that asks nothing")
+            problems += ContentProblem(where, "an activity that asks nothing")
         }
 
         // An answer that is not on offer is a question no child can get right.
         val offered = activity.choices.map { it.skillId }.toSet()
-        activity.correctSkillId?.let {
-            if (it !in offered) {
+        activity.correctSkillId?.let { correct ->
+            problems += named(where, "correct answer skill id", correct) { SkillId(it) }
+            if (correct !in offered) {
                 problems +=
-                    ContentProblem(activity.id, "the correct answer $it is not one of the choices")
+                    ContentProblem(where, "the correct answer $correct is not one of the choices")
             }
         }
         if (activity.correctSkillId == null && activity.family !in FAMILIES_WITHOUT_AN_ANSWER) {
-            problems += ContentProblem(activity.id, "a question with no right answer")
+            problems += ContentProblem(where, "a question with no right answer")
+        }
+
+        // A letter activity is the one family that names something besides its answer, and the
+        // mapping cannot build one without it.
+        if (activity.family == LETTER_AND_SOUND) {
+            problems += named(where, "letter skill id", activity.letterSkillId) { SkillId(it) }
+        }
+
+        activity.choices.forEach { choice ->
+            problems += named(where, "choice skill id", choice.skillId) { SkillId(it) }
+            // A choice is drawn and spoken, so both of its files are named rather than optional.
+            // A prompt recording may legitimately be blank: nobody has made one yet.
+            problems += named(where, "choice picture", choice.image) { AssetId(it) }
+            problems += named(where, "choice recording", choice.audio) { AssetId(it) }
         }
 
         problems += duplicates(activity.choices.map { it.skillId }, "choice")
@@ -120,11 +167,12 @@ class CurriculumValidator @Inject constructor() {
             listOfNotNull(activity.promptAsset, activity.letterAsset) +
                 activity.choices.flatMap { listOf(it.image, it.audio) }
             )
+            .filter { it.isNotBlank() }
             .distinct()
             .filterNot { it in assets }
             .forEach {
                 problems += ContentProblem(
-                    where = activity.id,
+                    where = where,
                     what = "asset $it has no file",
                     kind = ContentProblem.Kind.MISSING_ASSET
                 )
@@ -132,6 +180,25 @@ class CurriculumValidator @Inject constructor() {
 
         return problems
     }
+
+    /**
+     * One name, read before anything builds an identifier out of it.
+     *
+     * Empty when the value is a name, which is what lets every call site add its answer to the list
+     * without asking whether there was anything wrong.
+     */
+    private fun named(
+        where: String,
+        field: String,
+        value: String?,
+        into: (String) -> Any
+    ): List<ContentProblem> = when (val read = readIdentifier(value, field, into)) {
+        is IdentifierRead.Usable -> emptyList()
+        is IdentifierRead.Unusable -> listOf(ContentProblem(where, read.reason))
+    }
+
+    /** Something with no name still has to be reported as somewhere. */
+    private fun String.orUnnamed(what: String) = ifBlank { "an unnamed $what" }
 
     private fun ordinalsInOrder(ordinals: List<Int>, owner: String, kind: String) =
         ordinals.mapIndexedNotNull { index, ordinal ->
@@ -148,10 +215,11 @@ class CurriculumValidator @Inject constructor() {
 
     private companion object {
         const val SUPPORTED_SCHEMA = 2
+        const val LETTER_AND_SOUND = "LETTER_AND_SOUND"
         val FAMILIES = setOf(
             "LISTEN_AND_CHOOSE",
             "PICTURE_MATCHING",
-            "LETTER_AND_SOUND",
+            LETTER_AND_SOUND,
             "SAY_WITH_PIP",
             "REVIEW"
         )

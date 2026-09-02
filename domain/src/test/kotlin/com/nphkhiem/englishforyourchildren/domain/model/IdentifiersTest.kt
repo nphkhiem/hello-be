@@ -41,6 +41,38 @@ class IdentifiersTest {
         assertThat(EpochMillis(0).value).isEqualTo(0)
     }
 
+    @Test
+    fun givenANameFromOutside_whenItIsRead_thenTheIdentifierComesBack() {
+        val read = readIdentifier(VALUE, "lesson id") { LessonId(it) }
+
+        assertThat(read).isEqualTo(IdentifierRead.Usable(LessonId(VALUE)))
+    }
+
+    @Test
+    fun givenNothingWhereANameShouldBe_whenItIsRead_thenItSaysWhichFieldAndWhatWasWrong() {
+        // The reason is the whole of the failure, because it is what gets shown to the person who
+        // wrote the file. "lesson id" rather than "LessonId": they named the field, not the type.
+        val missing = readIdentifier(null, "lesson id") { LessonId(it) }
+        val blank = readIdentifier(" ", "lesson id") { LessonId(it) }
+
+        assertThat(missing).isEqualTo(IdentifierRead.Unusable("lesson id is missing"))
+        assertThat(blank).isEqualTo(IdentifierRead.Unusable("lesson id is blank"))
+    }
+
+    @Test
+    fun givenAnUnreadableName_whenItIsRead_thenNoIdentifierIsBuiltFromIt() {
+        // Reading is not construction with the throw caught: nothing is built at all, which is why
+        // the `init` check underneath stays the last guarantee rather than the reporting one.
+        var built = 0
+
+        readIdentifier("", "lesson id") {
+            built++
+            LessonId(it)
+        }
+
+        assertThat(built).isEqualTo(0)
+    }
+
     private companion object {
         const val VALUE = "my-home-lesson-1"
         val BLANKS = listOf("", " ", "\t", "\n", "   ")
@@ -56,7 +88,8 @@ class IdentifiersTest {
             "ActivityInstanceId" to { value: String -> ActivityInstanceId(value) },
             "SessionId" to { value: String -> SessionId(value) },
             "SkillId" to { value: String -> SkillId(value) },
-            "ShelfId" to { value: String -> ShelfId(value) }
+            "ShelfId" to { value: String -> ShelfId(value) },
+            "AssetId" to { value: String -> AssetId(value) }
         )
     }
 }
