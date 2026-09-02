@@ -34,6 +34,7 @@ import com.nphkhiem.englishforyourchildren.ui.tv.component.PipGuide
 import com.nphkhiem.englishforyourchildren.ui.tv.component.PipPose
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StoryCard
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StoryHeader
+import com.nphkhiem.englishforyourchildren.ui.tv.component.StoryLoading
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StorybookScaffold
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
@@ -70,6 +71,9 @@ fun LearningPathScreen(
             PathFocusTarget.UNIT_STEPPER -> stepperFocus
             PathFocusTarget.RECOVERY -> recoveryFocus
         },
+        // Nothing here can take focus until the course has been read, and spending the one claim on
+        // the view that is about to be replaced is what left a child focused on the profile chip.
+        entryFocusReady = !state.loading,
         header = {
             StoryHeader(
                 modifier = Modifier.fillMaxWidth(),
@@ -85,7 +89,13 @@ fun LearningPathScreen(
             )
         }
     ) {
-        if (unit == null) {
+        if (state.loading) {
+            // Still reading the course. Not the recovery screen, which says something is wrong.
+            StoryLoading(
+                contentDescription = stringResource(R.string.path_loading),
+                modifier = Modifier.fillMaxSize()
+            )
+        } else if (unit == null) {
             UnitRecovery(onAction = onAction, recoveryFocus = recoveryFocus)
         } else {
             UnitPage(

@@ -40,7 +40,8 @@ internal fun visibleUnit(state: LearningPathUiState): UnitPageState? =
     state.unit?.takeIf { it.lessons.isNotEmpty() }
 
 /** True when there is no unit worth drawing and the child needs a way back instead. */
-internal fun isRecovering(state: LearningPathUiState): Boolean = visibleUnit(state) == null
+internal fun isRecovering(state: LearningPathUiState): Boolean =
+    !state.loading && visibleUnit(state) == null
 
 /**
  * The lesson Pip points at and focus opens on.

@@ -123,13 +123,20 @@ class LearningPathViewModel @Inject constructor(
     private fun Lesson.title() = "Lesson ${ordinal + 1}"
 
     private companion object {
+        /**
+         * Before the course has been read.
+         *
+         * [LearningPathUiState.loading] rather than a null unit alone, because a null unit also
+         * means the recovery case and a child must not be shown that while nothing is wrong yet.
+         */
         val EMPTY = LearningPathUiState(
             profileName = "",
             profileAvatar = "",
             unit = null,
             previousUnit = null,
             nextUnit = null,
-            pendingSave = false
+            pendingSave = false,
+            loading = true
         )
     }
 }

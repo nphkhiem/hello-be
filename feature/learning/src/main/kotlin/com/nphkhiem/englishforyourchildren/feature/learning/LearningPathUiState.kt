@@ -67,7 +67,10 @@ data class UnitPageState(
  * architecture asks for previous/next context "displayed only when reachable", and a nullable
  * summary makes that a property of the state rather than a condition every caller must remember.
  *
- * [unit] is null when the course has no unit to show, which is the recovery case.
+ * [unit] is null in two different situations and [loading] is what tells them apart: the course is
+ * still being read, or it has no unit to show and this is the recovery case. They used to be the
+ * same value, so every child opening the path was shown the recovery screen for a frame and then
+ * had it pulled out from under them, taking their focus with it.
  */
 @Immutable
 data class LearningPathUiState(
@@ -76,7 +79,8 @@ data class LearningPathUiState(
     val unit: UnitPageState?,
     val previousUnit: UnitSummary?,
     val nextUnit: UnitSummary?,
-    val pendingSave: Boolean
+    val pendingSave: Boolean,
+    val loading: Boolean = false
 )
 
 /** What the learning path reports upward. */

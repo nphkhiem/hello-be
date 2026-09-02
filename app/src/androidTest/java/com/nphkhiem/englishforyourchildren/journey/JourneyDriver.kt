@@ -2,6 +2,8 @@ package com.nphkhiem.englishforyourchildren.journey
 
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.ComposeTimeoutException
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
@@ -22,6 +24,7 @@ class JourneyDriver(private val compose: ComposeTestRule) {
      * unchosen, because every control is driven by the D-pad rather than by a tap.
      */
     fun press(text: String) {
+        awaitReachable(text)
         compose.onNodeWithText(text).requestFocus()
         lookAtIt()
         compose.onNodeWithText(text).performKeyInput { pressKey(Key.DirectionCenter) }
@@ -39,6 +42,7 @@ class JourneyDriver(private val compose: ComposeTestRule) {
      * gesture that may or may not fire a click per repeat, and nothing here has established which.
      */
     fun doublePress(text: String) {
+        awaitReachable(text)
         compose.onNodeWithText(text).requestFocus()
         lookAtIt()
         compose.onNodeWithText(text).performKeyInput {
@@ -46,6 +50,28 @@ class JourneyDriver(private val compose: ComposeTestRule) {
             pressKey(Key.DirectionCenter)
         }
         compose.waitForIdle()
+    }
+
+    /**
+     * Waits until the control will actually take focus.
+     *
+     * Now that lessons speak, an answer is out of the focus order for as long as its question is
+     * sounding: that is ADR 0004, and it is the point rather than a delay to work around. A driver
+     * that focused regardless was asking for something the screen is deliberately refusing, and
+     * failed with "Failed to perform RequestFocus action" the moment real recordings shipped.
+     *
+     * Waiting here is what a child does. It is not a sleep: it ends as soon as the control is
+     * enabled, so a screen with nothing sounding is not slowed down at all.
+     */
+    private fun awaitReachable(text: String) {
+        try {
+            compose.waitUntil(TIMEOUT_MILLIS) {
+                compose.onAllNodes(hasText(text) and isEnabled()).fetchSemanticsNodes().isNotEmpty()
+            }
+        } catch (_: ComposeTimeoutException) {
+            compose.onRoot().printToLog("hello-be-journey")
+            throw AssertionError("\"$text\" never became something a child could press")
+        }
     }
 
     /**
