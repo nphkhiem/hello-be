@@ -311,10 +311,14 @@ class LessonReducer {
          */
         private fun ask(state: LessonSessionState): LessonReduction {
             if (!state.audioAvailable) return LessonReduction(state, emptyList())
-            val asset = state.promptAsset ?: return LessonReduction(state, emptyList())
+            val spoken = state.spokenPrompt
+            if (spoken.isEmpty()) return LessonReduction(state, emptyList())
             return LessonReduction(
-                state = state.copy(soundingPrompt = asset),
-                effects = listOf(LessonEffect.Play(asset))
+                // The last clip, not the first. A question is asked when the thing it is about has
+                // been said, so the stem finishing means nothing and the word finishing is the
+                // moment the answers may be reached.
+                state = state.copy(soundingPrompt = spoken.last()),
+                effects = listOf(LessonEffect.Play(spoken))
             )
         }
     }

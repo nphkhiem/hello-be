@@ -22,15 +22,23 @@ class FakePlaybackController(private val failWith: PlaybackFailureCode? = null) 
 
     override val events: Flow<PlaybackEvent> = emitted
 
-    val played = mutableListOf<AssetId>()
+    /**
+     * One entry per thing said, each holding the clips it was said in.
+     *
+     * A list of lists rather than a flat one, because asking a question plays two recordings and a
+     * flat list could not tell that apart from asking twice.
+     */
+    val spoken = mutableListOf<List<AssetId>>()
     var paused = false
         private set
     var stopped = false
         private set
 
-    override suspend fun play(assetId: AssetId) {
-        played += assetId
-        failWith?.let { emitted.tryEmit(PlaybackEvent.Failed(assetId, it)) }
+    override suspend fun play(assets: List<AssetId>) {
+        spoken += assets
+        // The first one, matching the real controller: it looks for every part before playing any
+        // of them, so the first one it cannot find is the one it reports.
+        failWith?.let { emitted.tryEmit(PlaybackEvent.Failed(assets.first(), it)) }
     }
 
     /** A recording reaching its end, which is the one thing [failWith] can never produce. */

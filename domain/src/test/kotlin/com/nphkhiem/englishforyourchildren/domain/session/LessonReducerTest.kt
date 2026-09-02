@@ -313,7 +313,7 @@ class LessonReducerTest {
         // than leaving whoever holds the reducer to remember to.
         val begun = started(withAudio = true)
 
-        assertThat(begun.effects).contains(LessonEffect.Play(asset(1)))
+        assertThat(begun.effects).contains(LessonEffect.Play(spoken(1)))
     }
 
     @Test
@@ -324,7 +324,7 @@ class LessonReducerTest {
         // one now goes through its recording ending. See ADR 0004.
         val heard = reducer.reduce(
             start(withAudio = true),
-            LessonAction.PromptFinished(instance(FIRST_INSTANCE), asset(1))
+            LessonAction.PromptFinished(instance(FIRST_INSTANCE), word())
         ).state
         val awaiting = reducer.reduce(heard, answer(correct = true)).state
 
@@ -333,8 +333,8 @@ class LessonReducerTest {
             LessonAction.CheckpointConfirmed(instance(FIRST_INSTANCE), instance(SECOND_INSTANCE))
         )
 
-        assertThat(moved.effects).contains(LessonEffect.Play(asset(2)))
-        assertThat(moved.effects).doesNotContain(LessonEffect.Play(asset(1)))
+        assertThat(moved.effects).contains(LessonEffect.Play(spoken(2)))
+        assertThat(moved.effects).doesNotContain(LessonEffect.Play(spoken(1)))
     }
 
     @Test
@@ -356,6 +356,64 @@ class LessonReducerTest {
     }
 
     @Test
+    fun givenAQuestionIsAsked_whenItSpeaks_thenTheStemIsFollowedByTheWordItIsAbout() {
+        // The whole reason a prompt recording is a stem. Four prompt files cover ten sentences
+        // only if what names the target is a separate recording spoken after them, and if it is
+        // not, a child hears "Where is the" and is asked to guess.
+        val begun = started(withAudio = true)
+
+        val spoken = begun.effects.filterIsInstance<LessonEffect.Play>().single().assets
+
+        assertThat(spoken).containsExactly(asset(1), word()).inOrder()
+    }
+
+    @Test
+    fun givenAQuestionIsAsked_whenItSpeaks_thenItIsTheWordThatEndsIt() {
+        // Which clip the lesson listens for the end of, and it must be the last one. If the stem
+        // ended the question, ADR 0004 would open the answers while the word was still being said.
+        val begun = started(withAudio = true)
+
+        assertThat(begun.state.soundingPrompt).isEqualTo(word())
+    }
+
+    @Test
+    fun givenALetterQuestion_whenItSpeaks_thenTheLetterFollowsTheStemRatherThanAWord() {
+        // A letter activity asks about a letter. Completing "which one starts with" with a word
+        // would name one of the choices, which is the answer rather than the question.
+        val begun = LessonReducer.start(
+            sessionId = SessionId(SESSION),
+            profileId = ProfileId(PROFILE),
+            courseVersion = CourseVersion(VERSION),
+            lesson = letterLesson(),
+            activityIndex = 0,
+            currentInstance = ActivityInstanceId(FIRST_INSTANCE),
+            startedAt = EpochMillis(NOW)
+        )
+
+        val spoken = begun.effects.filterIsInstance<LessonEffect.Play>().single().assets
+
+        assertThat(spoken).containsExactly(asset(1), AssetId("aud-en-letter-e")).inOrder()
+    }
+
+    @Test
+    fun givenAStemWithNoRecordingForItsWord_whenTheLessonOpens_thenNothingIsAskedAtAll() {
+        // Half a question is worse than a silent one, so an unrecorded target silences the stem
+        // too rather than playing an opening that goes nowhere.
+        val begun = LessonReducer.start(
+            sessionId = SessionId(SESSION),
+            profileId = ProfileId(PROFILE),
+            courseVersion = CourseVersion(VERSION),
+            lesson = letterLesson(letterAsset = null),
+            activityIndex = 0,
+            currentInstance = ActivityInstanceId(FIRST_INSTANCE),
+            startedAt = EpochMillis(NOW)
+        )
+
+        assertThat(begun.effects).isEmpty()
+        assertThat(begun.state.soundingPrompt).isNull()
+    }
+
+    @Test
     fun givenALessonWhoseRecordingsAreAllUnmade_whenItStarts_thenNothingIsAsked() {
         assertThat(started().effects).isEmpty()
     }
@@ -369,7 +427,7 @@ class LessonReducerTest {
 
         assertThat(resumed.state.activityIndex).isEqualTo(1)
         assertThat(resumed.state.currentInstance).isEqualTo(instance(SECOND_INSTANCE))
-        assertThat(resumed.effects).contains(LessonEffect.Play(asset(2)))
+        assertThat(resumed.effects).contains(LessonEffect.Play(spoken(2)))
     }
 
     @Test
@@ -407,7 +465,7 @@ class LessonReducerTest {
         // sounding. Without it a child can answer over the question.
         val begun = started(withAudio = true)
 
-        assertThat(begun.state.soundingPrompt).isEqualTo(asset(1))
+        assertThat(begun.state.soundingPrompt).isEqualTo(word())
     }
 
     @Test
@@ -416,7 +474,7 @@ class LessonReducerTest {
 
         val heard = reducer.reduce(
             sounding,
-            LessonAction.PromptFinished(instance(FIRST_INSTANCE), asset(1))
+            LessonAction.PromptFinished(instance(FIRST_INSTANCE), word())
         )
 
         assertThat(heard.state.soundingPrompt).isNull()
@@ -436,7 +494,7 @@ class LessonReducerTest {
     fun givenTheQuestionHasBeenAsked_whenTheChildAnswers_thenItCounts() {
         val heard = reducer.reduce(
             start(withAudio = true),
-            LessonAction.PromptFinished(instance(FIRST_INSTANCE), asset(1))
+            LessonAction.PromptFinished(instance(FIRST_INSTANCE), word())
         ).state
 
         val pressed = reducer.reduce(heard, answer(correct = true))
@@ -468,7 +526,7 @@ class LessonReducerTest {
             LessonAction.PromptFinished(instance(FIRST_INSTANCE), AssetId("aud-vi-help-look"))
         )
 
-        assertThat(other.state.soundingPrompt).isEqualTo(asset(1))
+        assertThat(other.state.soundingPrompt).isEqualTo(word())
     }
 
     @Test
@@ -490,7 +548,7 @@ class LessonReducerTest {
         // sounding in the first place.
         val heard = reducer.reduce(
             startMixed(),
-            LessonAction.PromptFinished(instance(FIRST_INSTANCE), asset(1))
+            LessonAction.PromptFinished(instance(FIRST_INSTANCE), word())
         ).state
         val awaiting = reducer.reduce(heard, answer(correct = true)).state
 
@@ -510,7 +568,7 @@ class LessonReducerTest {
         // meaning for playing a prompt, whoever asked for it.
         val heard = reducer.reduce(
             start(withAudio = true),
-            LessonAction.PromptFinished(instance(FIRST_INSTANCE), asset(1))
+            LessonAction.PromptFinished(instance(FIRST_INSTANCE), word())
         ).state
 
         val again = reducer.reduce(
@@ -518,7 +576,7 @@ class LessonReducerTest {
             LessonAction.PromptReplayRequested(instance(FIRST_INSTANCE))
         )
 
-        assertThat(again.state.soundingPrompt).isEqualTo(asset(1))
+        assertThat(again.state.soundingPrompt).isEqualTo(word())
         assertThat(reducer.reduce(again.state, answer(correct = true)).effects).isEmpty()
     }
 
@@ -536,7 +594,7 @@ class LessonReducerTest {
             LessonAction.KeepLearningRequested(instance(FIRST_INSTANCE))
         )
 
-        assertThat(stayed.state.soundingPrompt).isEqualTo(asset(1))
+        assertThat(stayed.state.soundingPrompt).isEqualTo(word())
     }
 
     private fun start(activities: Int = 3, withAudio: Boolean = false) =
@@ -666,7 +724,45 @@ class LessonReducerTest {
         startedAt = EpochMillis(NOW)
     ).state
 
+    private fun letterLesson(letterAsset: AssetId? = AssetId("aud-en-letter-e")) = Lesson(
+        id = LessonId(LESSON),
+        unitId = UnitId(UNIT),
+        ordinal = 0,
+        activities = listOf(
+            Activity(
+                id = ActivityId("$LESSON-a1"),
+                ordinal = 0,
+                family = ActivityFamily.LETTER_AND_SOUND,
+                content = ActivityContent.LetterAndSound(
+                    prompt = "Which one starts with E?",
+                    promptAsset = asset(1),
+                    choices = listOf(choice("eyes"), choice("mouth")),
+                    correct = SkillId("word-eyes"),
+                    letter = SkillId("letter-e"),
+                    letterAsset = letterAsset
+                )
+            )
+        )
+    )
+
     private fun asset(n: Int) = AssetId("aud-en-prompt-a$n")
+
+    /**
+     * A question as it is actually spoken: the stem, then the word it is about.
+     *
+     * Both fixture activities ask about the eyes, so the second half is the same either way. What
+     * differs between question one and question two is the stem, which is the whole point of a stem
+     * being a separate recording.
+     */
+    private fun spoken(n: Int) = listOf(asset(n), word())
+
+    /**
+     * The recording that ends a question here, which is the word rather than the stem.
+     *
+     * Both fixture questions are about the eyes, so this is what the lesson listens for the end of
+     * in every one of these tests. Naming it says which half of the sentence that is.
+     */
+    private fun word() = AssetId("aud-en-eyes")
 
     private fun choice(word: String) = AnswerChoice(
         skillId = SkillId("word-$word"),
