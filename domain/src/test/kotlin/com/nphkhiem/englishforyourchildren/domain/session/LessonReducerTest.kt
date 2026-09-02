@@ -320,7 +320,13 @@ class LessonReducerTest {
     fun givenTheFirstActivityIsConfirmed_whenTheSecondAppears_thenItAsksForItsOwnRecording() {
         // The bug this test exists for: the prompt used to be a field set once at the start, so
         // every later question asked for the first question's recording.
-        val awaiting = reducer.reduce(start(withAudio = true), answer(correct = true)).state
+        // The first question has to be heard before it can be answered, so getting to the second
+        // one now goes through its recording ending. See ADR 0004.
+        val heard = reducer.reduce(
+            start(withAudio = true),
+            LessonAction.PromptFinished(instance(FIRST_INSTANCE), asset(1))
+        ).state
+        val awaiting = reducer.reduce(heard, answer(correct = true)).state
 
         val moved = reducer.reduce(
             awaiting,
@@ -395,6 +401,144 @@ class LessonReducerTest {
         assertThat(ignored.state.phase).isEqualTo(LessonPhase.Asking)
     }
 
+    @Test
+    fun givenALessonWithARecording_whenItStarts_thenItsQuestionIsStillBeingAsked() {
+        // The state ADR 0004 has needed since it was approved: a lesson that can say a prompt is
+        // sounding. Without it a child can answer over the question.
+        val begun = started(withAudio = true)
+
+        assertThat(begun.state.soundingPrompt).isEqualTo(asset(1))
+    }
+
+    @Test
+    fun givenAQuestionIsStillSounding_whenItsRecordingEnds_thenTheQuestionHasBeenAsked() {
+        val sounding = start(withAudio = true)
+
+        val heard = reducer.reduce(
+            sounding,
+            LessonAction.PromptFinished(instance(FIRST_INSTANCE), asset(1))
+        )
+
+        assertThat(heard.state.soundingPrompt).isNull()
+    }
+
+    @Test
+    fun givenTheQuestionIsStillSounding_whenTheChildAnswers_thenNothingIsRecorded() {
+        // The whole of ADR 0004. The screen takes the answers out of the focus order; this is what
+        // makes it a guarantee rather than an arrangement of controls.
+        val pressed = reducer.reduce(start(withAudio = true), answer(correct = true))
+
+        assertThat(pressed.effects).isEmpty()
+        assertThat(pressed.state.phase).isEqualTo(LessonPhase.Asking)
+    }
+
+    @Test
+    fun givenTheQuestionHasBeenAsked_whenTheChildAnswers_thenItCounts() {
+        val heard = reducer.reduce(
+            start(withAudio = true),
+            LessonAction.PromptFinished(instance(FIRST_INSTANCE), asset(1))
+        ).state
+
+        val pressed = reducer.reduce(heard, answer(correct = true))
+
+        assertThat(pressed.state.phase).isEqualTo(LessonPhase.AwaitingCheckpoint)
+    }
+
+    @Test
+    fun givenPipIsStillAskingForTheWord_whenTheChildSaysTheyHaveFinished_thenNothingIsRecorded() {
+        // Say with Pip has no answer, so the rule about answers does not reach it. Without this a
+        // child could finish saying a word before Pip had asked for it.
+        val finished = reducer.reduce(
+            startSpeaking(withAudio = true),
+            LessonAction.RepetitionFinished(instance(FIRST_INSTANCE))
+        )
+
+        assertThat(finished.effects).isEmpty()
+        assertThat(finished.state.phase).isEqualTo(LessonPhase.Asking)
+    }
+
+    @Test
+    fun givenAQuestionIsSounding_whenADifferentRecordingEnds_thenItIsStillBeingAsked() {
+        // A support phrase or a word, not the question. Unit one has four prompt recordings for six
+        // activities, so what finished has to be checked rather than assumed.
+        val sounding = start(withAudio = true)
+
+        val other = reducer.reduce(
+            sounding,
+            LessonAction.PromptFinished(instance(FIRST_INSTANCE), AssetId("aud-vi-help-look"))
+        )
+
+        assertThat(other.state.soundingPrompt).isEqualTo(asset(1))
+    }
+
+    @Test
+    fun givenAQuestionIsSounding_whenTheLessonLearnsItHasNoSound_thenNothingIsSoundingAnyMore() {
+        // A lesson that has found out it is silent is not sounding anything. Leaving the field set
+        // would lock the answers away with no recording left to unlock them.
+        val quiet = reducer.reduce(
+            start(withAudio = true),
+            LessonAction.MediaUnavailable(instance(FIRST_INSTANCE))
+        )
+
+        assertThat(quiet.state.soundingPrompt).isNull()
+    }
+
+    @Test
+    fun givenTheNextQuestionNamesNoRecording_whenItArrives_thenItCanBeAnsweredStraightAway() {
+        // A question with nothing to play has nothing to wait for. Moving on cannot carry the last
+        // recording forward, because a child cannot answer their way off a question that is still
+        // sounding in the first place.
+        val heard = reducer.reduce(
+            startMixed(),
+            LessonAction.PromptFinished(instance(FIRST_INSTANCE), asset(1))
+        ).state
+        val awaiting = reducer.reduce(heard, answer(correct = true)).state
+
+        val moved = reducer.reduce(
+            awaiting,
+            LessonAction.CheckpointConfirmed(instance(FIRST_INSTANCE), instance(SECOND_INSTANCE))
+        )
+
+        assertThat(moved.state.soundingPrompt).isNull()
+        assertThat(reducer.reduce(moved.state, answer(SECOND_INSTANCE, correct = true)).effects)
+            .isNotEmpty()
+    }
+
+    @Test
+    fun givenTheQuestionHasBeenAsked_whenReplayIsPressed_thenItIsBeingAskedAgain() {
+        // Replay starts the same recording, so it puts the lesson back in the same state. One
+        // meaning for playing a prompt, whoever asked for it.
+        val heard = reducer.reduce(
+            start(withAudio = true),
+            LessonAction.PromptFinished(instance(FIRST_INSTANCE), asset(1))
+        ).state
+
+        val again = reducer.reduce(
+            heard,
+            LessonAction.PromptReplayRequested(instance(FIRST_INSTANCE))
+        )
+
+        assertThat(again.state.soundingPrompt).isEqualTo(asset(1))
+        assertThat(reducer.reduce(again.state, answer(correct = true)).effects).isEmpty()
+    }
+
+    @Test
+    fun givenAQuestionIsSounding_whenTheChildLeavesAndComesBack_thenItIsStillBeingAsked() {
+        // Back pauses the recording and "keep learning" deliberately never restarts one, so the
+        // question stays unasked. Focus is resting on replay, which is one press away.
+        val asked =
+            reducer.reduce(
+                start(withAudio = true),
+                LessonAction.StopRequested(instance(FIRST_INSTANCE))
+            )
+        val stayed = reducer.reduce(
+            asked.state,
+            LessonAction.KeepLearningRequested(instance(FIRST_INSTANCE))
+        )
+
+        assertThat(stayed.state.soundingPrompt).isEqualTo(asset(1))
+    }
+
     private fun start(activities: Int = 3, withAudio: Boolean = false) =
         started(activities, withAudio).state
 
@@ -441,29 +585,49 @@ class LessonReducerTest {
      * Activities that carry their own content, because that is what a real lesson holds and what
      * makes "the second question asks for its own recording" a thing a test can tell apart.
      */
-    private fun lesson(activities: Int, withAudio: Boolean = false): Lesson {
-        val steps = (0 until activities).map { index ->
-            Activity(
-                id = ActivityId("$LESSON-a${index + 1}"),
-                ordinal = index,
-                family = ActivityFamily.LISTEN_AND_CHOOSE,
-                content = ActivityContent.ListeningSelection(
-                    prompt = "Where are the eyes?",
-                    promptAsset = if (withAudio) asset(index + 1) else null,
-                    choices = listOf(choice("eyes"), choice("ears")),
-                    correct = SkillId("word-eyes")
-                )
-            )
+    private fun lesson(activities: Int, withAudio: Boolean = false) = Lesson(
+        id = LessonId(LESSON),
+        unitId = UnitId(UNIT),
+        ordinal = 0,
+        activities = (0 until activities).map { index ->
+            listening(index, if (withAudio) asset(index + 1) else null)
         }
-        return Lesson(
-            id = LessonId(LESSON),
-            unitId = UnitId(UNIT),
-            ordinal = 0,
-            activities = steps
-        )
-    }
+    )
 
-    private fun speakingLesson() = Lesson(
+    private fun startMixed() = LessonReducer.start(
+        sessionId = SessionId(SESSION),
+        profileId = ProfileId(PROFILE),
+        courseVersion = CourseVersion(VERSION),
+        lesson = mixedLesson(),
+        activityIndex = 0,
+        currentInstance = ActivityInstanceId(FIRST_INSTANCE),
+        startedAt = EpochMillis(NOW)
+    ).state
+
+    /** A lesson whose first question has a recording and whose second does not. */
+    private fun mixedLesson() = Lesson(
+        id = LessonId(LESSON),
+        unitId = UnitId(UNIT),
+        ordinal = 0,
+        activities = listOf(
+            listening(index = 0, asset = asset(1)),
+            listening(index = 1, asset = null)
+        )
+    )
+
+    private fun listening(index: Int, asset: AssetId?) = Activity(
+        id = ActivityId("$LESSON-a${index + 1}"),
+        ordinal = index,
+        family = ActivityFamily.LISTEN_AND_CHOOSE,
+        content = ActivityContent.ListeningSelection(
+            prompt = "Where are the eyes?",
+            promptAsset = asset,
+            choices = listOf(choice("eyes"), choice("ears")),
+            correct = SkillId("word-eyes")
+        )
+    )
+
+    private fun speakingLesson(withAudio: Boolean = false) = Lesson(
         id = LessonId(LESSON),
         unitId = UnitId(UNIT),
         ordinal = 0,
@@ -474,7 +638,7 @@ class LessonReducerTest {
                 family = ActivityFamily.SAY_WITH_PIP,
                 content = ActivityContent.GuidedRepetition(
                     prompt = "Say it with me: eyes.",
-                    promptAsset = null,
+                    promptAsset = if (withAudio) asset(1) else null,
                     words = listOf(choice("eyes"))
                 )
             ),
@@ -492,11 +656,11 @@ class LessonReducerTest {
         )
     )
 
-    private fun startSpeaking() = LessonReducer.start(
+    private fun startSpeaking(withAudio: Boolean = false) = LessonReducer.start(
         sessionId = SessionId(SESSION),
         profileId = ProfileId(PROFILE),
         courseVersion = CourseVersion(VERSION),
-        lesson = speakingLesson(),
+        lesson = speakingLesson(withAudio),
         activityIndex = 0,
         currentInstance = ActivityInstanceId(FIRST_INSTANCE),
         startedAt = EpochMillis(NOW)

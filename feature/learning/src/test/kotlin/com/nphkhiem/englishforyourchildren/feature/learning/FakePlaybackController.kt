@@ -33,6 +33,11 @@ class FakePlaybackController(private val failWith: PlaybackFailureCode? = null) 
         failWith?.let { emitted.tryEmit(PlaybackEvent.Failed(assetId, it)) }
     }
 
+    /** A recording reaching its end, which is the one thing [failWith] can never produce. */
+    fun finish(assetId: AssetId) {
+        emitted.tryEmit(PlaybackEvent.Completed(assetId))
+    }
+
     override fun pause() {
         paused = true
     }

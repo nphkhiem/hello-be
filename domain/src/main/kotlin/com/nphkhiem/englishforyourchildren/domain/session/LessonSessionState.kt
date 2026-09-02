@@ -46,6 +46,14 @@ data class LessonSessionState(
     /** How much help Pip is giving, from none to the last rung. Reset by moving on. */
     val supportLevel: Int,
     val audioAvailable: Boolean,
+    /**
+     * The recording being spoken right now, or null for silence.
+     *
+     * Null is silence rather than a flag beside the asset, so a lesson cannot claim to be sounding
+     * something it never started. What ends it is compared against this rather than against
+     * [promptAsset], so a support phrase or a word finishing cannot answer for the question.
+     */
+    val soundingPrompt: AssetId?,
     val stopRequested: Boolean
 ) {
     init {
