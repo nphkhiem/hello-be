@@ -179,7 +179,7 @@ class LessonViewModelTest {
         playback = player
         val model = started()
         // The question has to be heard before it can be answered. See ADR 0004.
-        player.finish(PROMPT)
+        player.finish(QUESTION_END)
 
         model.press(LessonUiAction.AnswerChosen("word-ears", activityNumber = 1))
 
@@ -256,7 +256,11 @@ class LessonViewModelTest {
     fun givenAPromptThatNamesARecording_whenTheLessonStarts_thenTheQuestionIsSpoken() = runTest {
         started()
 
-        assertThat(playback.played).containsExactly(AssetId("aud-en-prompt-where-is"))
+        // The stem and then the word it is about, as one thing said once. A question that played
+        // only its stem would ask the child to guess which body part it meant.
+        assertThat(playback.spoken).containsExactly(
+            listOf(AssetId("aud-en-prompt-where-is"), AssetId("aud-en-eyes"))
+        )
     }
 
     @Test
@@ -313,12 +317,12 @@ class LessonViewModelTest {
         val player = FakePlaybackController()
         playback = player
         val model = started()
-        player.finish(PROMPT)
+        player.finish(QUESTION_END)
 
         model.press(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
 
         assertThat(model.state.value.activityNumber).isEqualTo(2)
-        assertThat(playback.played).hasSize(2)
+        assertThat(playback.spoken).hasSize(2)
     }
 
     @Test
@@ -330,7 +334,7 @@ class LessonViewModelTest {
         model.press(LessonUiAction.SkipRequested)
 
         assertThat(model.state.value.activityNumber).isEqualTo(2)
-        assertThat(playback.played).hasSize(1)
+        assertThat(playback.spoken).hasSize(1)
     }
 
     @Test
@@ -447,7 +451,7 @@ class LessonViewModelTest {
         playback = player
         val model = started()
 
-        player.finish(PROMPT)
+        player.finish(QUESTION_END)
 
         assertThat(model.state.value.phase).isEqualTo(LessonPhase.ANSWERING)
     }
@@ -542,6 +546,15 @@ class LessonViewModelTest {
         /** Longer than a lesson's own window, which is what makes a press a considered one. */
         const val LOOKED_AT_IT_MILLIS = 400L
         val PROMPT = AssetId("aud-en-prompt-where-is")
+
+        /**
+         * The clip whose ending means the question has been asked.
+         *
+         * Not [PROMPT]. A question is its stem and then the word it is about, so it is the word
+         * finishing that opens the answers. Ending the stem here would mean nothing, which is the
+         * point of the reducer comparing against what is actually sounding.
+         */
+        val QUESTION_END = AssetId("aud-en-eyes")
         val HelloBeChoiceFeedbackNeutral =
             com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeChoiceFeedback.NEUTRAL
     }

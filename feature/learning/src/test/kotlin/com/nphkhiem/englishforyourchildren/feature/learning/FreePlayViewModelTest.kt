@@ -111,7 +111,8 @@ class FreePlayViewModelTest {
 
         model.onAction(FreePlayAction.ObjectChosen(EYES))
 
-        assertThat(playback.played.map { it.value }).containsExactly("aud-en-eyes")
+        assertThat(playback.spoken.map { said -> said.map { it.value } })
+            .containsExactly(listOf("aud-en-eyes"))
     }
 
     @Test

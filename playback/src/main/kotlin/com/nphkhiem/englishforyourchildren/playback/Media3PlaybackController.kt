@@ -60,20 +60,31 @@ class Media3PlaybackController @Inject constructor(
         }
     }
 
-    override suspend fun play(assetId: AssetId) = withContext(Dispatchers.Main.immediate) {
-        val uri = locator.locate(assetId)
-        if (uri == null) {
-            // Whatever was sounding is superseded and says nothing on its way out.
-            player?.stop()
-            emitted.tryEmit(PlaybackEvent.Failed(assetId, PlaybackFailureCode.MISSING))
-            return@withContext
+    override suspend fun play(assets: List<AssetId>) = withContext(Dispatchers.Main.immediate) {
+        if (assets.isEmpty()) return@withContext
+
+        // Every part is found before any of it plays. Starting a stem and discovering half a
+        // second later that the word after it was never recorded would leave a child listening to
+        // a question that stops in the middle, which is the one outcome worse than silence.
+        val items = ArrayList<MediaItem>(assets.size)
+        for (asset in assets) {
+            val uri = locator.locate(asset)
+            if (uri == null) {
+                // Whatever was sounding is superseded and says nothing on its way out.
+                player?.stop()
+                emitted.tryEmit(PlaybackEvent.Failed(asset, PlaybackFailureCode.MISSING))
+                return@withContext
+            }
+            // The id travels on the item rather than in a field here, so an event is always read
+            // off what the player is actually holding. A recording replaced mid-sentence cannot
+            // then be reported under the name of the one that replaced it.
+            items += MediaItem.Builder().setUri(uri).setMediaId(asset.value).build()
         }
 
         val exo = player ?: buildPlayer().also { player = it }
-        // The id travels on the item rather than in a field here, so an event is always read off
-        // what the player is actually holding. A recording replaced mid-sentence cannot then be
-        // reported under the name of the one that replaced it.
-        exo.setMediaItem(MediaItem.Builder().setUri(uri).setMediaId(assetId.value).build())
+        // A playlist rather than repeated calls, so the parts cannot be interleaved with anything
+        // and STATE_ENDED arrives once, at the end of the last one.
+        exo.setMediaItems(items)
         exo.prepare()
         exo.play()
     }

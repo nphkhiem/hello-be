@@ -139,7 +139,7 @@ class FreePlayViewModel @Inject constructor(
     private fun say(objectId: String) {
         val recording = recordings[SkillId(objectId)] ?: return
         _state.value = _state.value.copy(speakingObjectId = objectId)
-        viewModelScope.launch { playback.play(recording) }
+        viewModelScope.launch { playback.play(listOf(recording)) }
     }
 
     private fun FreePlayUiState.withLibrary(

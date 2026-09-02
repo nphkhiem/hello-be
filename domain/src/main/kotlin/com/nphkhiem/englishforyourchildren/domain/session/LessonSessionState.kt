@@ -6,6 +6,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.Lesson
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.domain.model.SessionId
+import com.nphkhiem.englishforyourchildren.domain.model.spokenPrompt
 import com.nphkhiem.englishforyourchildren.domain.repository.PersistCheckpoint
 
 /** Where a lesson is: asking something, waiting for a write, or over. */
@@ -73,6 +74,16 @@ data class LessonSessionState(
      * first one's recording.
      */
     val promptAsset: AssetId? get() = currentActivity.content?.promptAsset
+
+    /**
+     * Everything spoken to ask the question in front of the child, in order.
+     *
+     * Empty means the question cannot be asked aloud, whether because nothing names its stem or
+     * because nothing names its target. Both are the same thing to a lesson: it is running silent
+     * and must say so.
+     */
+    val spokenPrompt: List<AssetId>
+        get() = currentActivity.content?.spokenPrompt.orEmpty()
 
     val isLastActivity get() = activityIndex == lesson.activities.lastIndex
 

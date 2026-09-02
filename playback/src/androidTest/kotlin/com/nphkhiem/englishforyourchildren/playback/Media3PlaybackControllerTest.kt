@@ -32,16 +32,36 @@ class Media3PlaybackControllerTest {
 
     @Test
     fun givenARecordingNobodyHasMade_whenItIsPlayed_thenItFailsAsMissing() {
-        val event = awaitEvent { controller.play(UNRECORDED) }
+        val event = awaitEvent { controller.play(listOf(UNRECORDED)) }
 
         assertThat(event).isEqualTo(PlaybackEvent.Failed(UNRECORDED, PlaybackFailureCode.MISSING))
     }
 
     @Test
     fun givenAPackagedRecording_whenItIsPlayed_thenItReachesItsEnd() {
-        val event = awaitEvent { controller.play(TONE) }
+        val event = awaitEvent { controller.play(listOf(TONE)) }
 
         assertThat(event).isEqualTo(PlaybackEvent.Completed(TONE))
+    }
+
+    @Test
+    fun givenASequenceMissingItsSecondHalf_whenItIsPlayed_thenNothingIsHeardAtAll() {
+        // A question is a stem and then the word it is about. Starting the stem and finding out
+        // half a second later that the word was never recorded would leave a child listening to a
+        // sentence that stops in the middle, so every part is found before any of it plays.
+        val event = awaitEvent { controller.play(listOf(TONE, UNRECORDED)) }
+
+        assertThat(event).isEqualTo(PlaybackEvent.Failed(UNRECORDED, PlaybackFailureCode.MISSING))
+    }
+
+    @Test
+    fun givenASequenceThatIsAllThere_whenItIsPlayed_thenTheEndIsReportedAgainstItsLastPart() {
+        // One question asked, not two recordings played. The first event to arrive names the word
+        // rather than the stem, so a listener cannot be told the question is over while the word
+        // it is about is still being said. See ADR 0004.
+        val event = awaitEvent { controller.play(listOf(TONE, WORD)) }
+
+        assertThat(event).isEqualTo(PlaybackEvent.Completed(WORD))
     }
 
     /**
@@ -53,7 +73,7 @@ class Media3PlaybackControllerTest {
         withSubscription { event ->
             val owner = foregroundOwner()
 
-            controller.play(TONE)
+            controller.play(listOf(TONE))
             onMain { owner.registry.currentState = Lifecycle.State.CREATED }
             onMain { owner.registry.currentState = Lifecycle.State.STARTED }
 
@@ -68,8 +88,8 @@ class Media3PlaybackControllerTest {
     @Test
     fun givenARecordingIsSounding_whenAnotherReplacesIt_thenTheOutgoingOneSaysNothing() =
         withSubscription { event ->
-            controller.play(TONE)
-            controller.play(UNRECORDED)
+            controller.play(listOf(TONE))
+            controller.play(listOf(UNRECORDED))
 
             // Never Completed(TONE): a recording a child never heard the end of did not end.
             assertThat(withTimeout(TIMEOUT_MILLIS) { event.await() })
@@ -79,7 +99,7 @@ class Media3PlaybackControllerTest {
     @Test
     fun givenARecordingIsSounding_whenPlaybackIsStopped_thenNothingMoreIsHeardFromIt() =
         withSubscription { event ->
-            controller.play(TONE)
+            controller.play(listOf(TONE))
             controller.stop()
 
             assertThat(withTimeoutOrNull(SILENCE_MILLIS) { event.await() }).isNull()
@@ -131,6 +151,9 @@ class Media3PlaybackControllerTest {
     private companion object {
         val UNRECORDED = AssetId("aud-en-prompt-where-is")
         val TONE = AssetId("aud-test-tone")
+
+        /** A second playable file, so "the last one" is a claim a test can actually fail. */
+        val WORD = AssetId("aud-test-word")
         const val TIMEOUT_MILLIS = 5_000L
 
         /** Comfortably longer than the fixture, so "still silent" means it really is paused. */

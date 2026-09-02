@@ -13,7 +13,18 @@ import com.nphkhiem.englishforyourchildren.domain.repository.PersistCheckpoint
 sealed interface LessonEffect {
     data class Persist(val command: PersistCheckpoint) : LessonEffect
 
-    data class Play(val assetId: AssetId) : LessonEffect
+    /**
+     * Say these, in this order, as one thing.
+     *
+     * A question is a stem and then what it is about, so playing it is one instruction rather than
+     * two that something else has to keep in step. The last one is what the lesson listens for the
+     * end of. See `spokenPrompt`.
+     */
+    data class Play(val assets: List<AssetId>) : LessonEffect {
+        init {
+            require(assets.isNotEmpty()) { "Playing nothing is silence, not an effect" }
+        }
+    }
 
     data object PausePlayback : LessonEffect
 

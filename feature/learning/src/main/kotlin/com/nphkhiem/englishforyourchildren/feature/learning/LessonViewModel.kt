@@ -166,9 +166,10 @@ class LessonViewModel @Inject constructor(
             startedAt = timeProvider.now()
         )
 
-        // Content that names no recording at all is quiet from the first moment. Content that
-        // names one finds out by asking, which opening the lesson has already done.
-        if (opening.state.promptAsset == null) {
+        // Content that cannot say its question at all is quiet from the first moment. Content
+        // that can finds out by asking, which opening the lesson has already done. A stem with no
+        // word after it counts as cannot: see `spokenPrompt`.
+        if (opening.state.spokenPrompt.isEmpty()) {
             opening = reducer.reduce(
                 opening.state,
                 LessonAction.MediaUnavailable(opening.state.currentInstance)
@@ -283,7 +284,7 @@ class LessonViewModel @Inject constructor(
     private suspend fun run(effect: LessonEffect) {
         when (effect) {
             is LessonEffect.Complete -> progress.completeSession(effect.command)
-            is LessonEffect.Play -> playback.play(effect.assetId)
+            is LessonEffect.Play -> playback.play(effect.assets)
             LessonEffect.PausePlayback -> playback.pause()
             is LessonEffect.Persist -> progress.persistCheckpoint(effect.command)
         }

@@ -119,21 +119,48 @@ the day prompts play, a child cannot answer before hearing the question.
 
 **Scope:** M
 **Dependencies:** P2A-T2
+**Status: twenty-eight of thirty-one done.** The three Vietnamese support phrases are held back.
 
-**Route, pending the owner's decision:** locally synthesized speech for the pilot. It is licence
-clean, needs no network, gives one consistent voice across all thirty-one files, and can be
-regenerated. It is explicitly not the shipping voice: the brief asks for warm human audio, and a
-synthetic Pip is a placeholder that must be replaced before release.
+**Route, decided by the owner on 2 September 2026:** locally synthesized speech for the pilot,
+chosen per medium rather than wholesale. The owner's rule was to self-create where that can be done
+well and to fetch from open sources where it cannot. Speech can: macOS synthesis gives one voice
+across every file, needs no network, is licence clean, and can be regenerated at will. Pictures
+cannot, and P2A-T4 records what happened when that was tried.
 
-- [ ] Generate all thirty-one to one specification: mono, AAC-LC in MP4, one loudness target.
-- [ ] Ledger rows marking every one synthesized and provisional.
-- [ ] Vietnamese support phrases reviewed by a native speaker before packaging, synthesized or not.
+It is explicitly not the shipping voice. The brief asks for warm human audio and names General
+American English, which the chosen voice satisfies, but a synthetic Pip is a placeholder.
+
+- [x] Twenty-eight generated to one specification: mono, 22050 Hz, AAC-LC in MP4, roughly 6 KB each
+      and 172 KB for the lot. Sixteen words, eight letters, four prompt stems.
+- [x] Ledger rows for every one of them.
+- [ ] Vietnamese support phrases reviewed by a native speaker before packaging. Not generated and
+      not packaged: this ticket's own rule was review before packaging, and holding them is what
+      keeping it looks like. Nothing in unit one's activities refers to them, so the lesson is whole
+      without them.
+
+**Where placeholder audio lives, and why it is not where this plan first said.** The plan said to
+mark provisional assets in the shipping ledger. `AttributionLedger` refuses that outright:
+`notDevelopment` makes a `development` row a failure in the shipping ledger, and `checkDevelopment`
+holds the debug ledger to coverage alone. So placeholder recordings are packaged into
+`content/starter/src/debug/assets`, which a release build never reads, and rowed in
+`attributions-development.json`. That is a stronger gate than the one this plan asked for: a release
+cannot ship them whatever any row claims, rather than merely being flagged.
+
+**Prompt recordings are stems, not sentences.** The content gives one prompt asset to five different
+sentences, so a recording of a whole sentence could never have worked. Each prompt file says its
+opening and the word recording that names the target follows it. This needed real code, and it is in
+this branch rather than deferred: see `spokenPrompt`.
 
 **Acceptance criteria:**
 
-- [ ] `CurriculumValidator` reports zero missing audio for unit one.
-- [ ] A lesson can be completed by listening and answering, with the unscored skip never offered.
-- [ ] Every recording is intelligible on television speakers at a normal volume.
+- [x] A lesson can be listened to and answered, with the unscored skip never offered. Verified on
+      Television_4K at API 36: the first question speaks, no answer is focusable while it sounds,
+      focus rests on replay, and the answers are reachable once it ends.
+- [x] Every recording is intelligible on television speakers at a normal volume, at the synthesized
+      voice's own quality.
+- [ ] `CurriculumValidator` reports zero missing audio for unit one **in a release build**. It does
+      for a debug build, which is where the recordings are. This stays open until real audio is
+      cleared, and it is the same open item as replacing the placeholder voice.
 
 ---
 
@@ -148,6 +175,18 @@ The hard one, and the one this plan does not pretend is cheap.
 direction. Open-licensed images are rejected as a shipping route: sixteen pictures from sixteen
 artists is precisely the inconsistency the brief names as the main risk of this visual direction,
 and for a pre-reader the picture is the content rather than the decoration.
+
+**Fetching them was tried on 2 September 2026 and did not work.** Openclipart's JSON API now
+redirects to its homepage and returns no results at all. Openverse, searched for CC0 images of a
+human eye suitable for a small child, returned Egyptian trial pieces from a museum collection, stock
+baby clipart, photographs of a single eye, and cartoon octopuses. Wikimedia Commons returned icon
+SVGs and anatomical diagrams. None of it is a picture a three-year-old reads as "eyes" without its
+label, and no sixteen of it would share an art direction.
+
+This is not a reason to lower the bar. The whole point of the picture in this app is that it is what
+a child who cannot read actually understands the question from. The recommendation above stands, and
+the pipeline is ready for the files: the image locator, its convention and its wiring all exist and
+are unused only because there is nothing to put in them.
 
 If the pilot needs pictures before a commission lands, package obviously-provisional art, ledger it
 as provisional, and treat replacing it as a release blocker rather than a nicety.
