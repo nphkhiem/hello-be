@@ -393,9 +393,19 @@ fun HelloBeNavHost(
             )
         }
 
-        is HelloBeKey.FreePlay -> content?.let {
+        is HelloBeKey.FreePlay -> if (content == null) {
+            LiveFreePlay(
+                profileId = key.profileId,
+                preferredShelfId = key.preferredShelfId?.value,
+                onHome = { pop() },
+                onSwitchProfile = {
+                    push(HelloBeKey.ProfilePicker(mode = ProfilePickerMode.Switch(key.profileId)))
+                },
+                modifier = modifier
+            )
+        } else {
             FreePlayScreen(
-                state = it.freePlay(key.profileId, key.preferredShelfId),
+                state = content.freePlay(key.profileId, key.preferredShelfId),
                 onAction = { action ->
                     when (action) {
                         FreePlayAction.HomeRequested -> pop()
@@ -411,7 +421,7 @@ fun HelloBeNavHost(
                 },
                 modifier = modifier
             )
-        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
+        }
 
         is HelloBeKey.CaregiverGate -> content?.let {
             AdultGateScreen(

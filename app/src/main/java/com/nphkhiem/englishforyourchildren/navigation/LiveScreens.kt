@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
@@ -16,6 +16,9 @@ import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeAction
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeViewModel
+import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayAction
+import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayScreen
+import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayViewModel
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathAction
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathViewModel
@@ -152,6 +155,35 @@ internal fun LiveLearningPath(
                 LearningPathAction.HomeRequested -> onHome()
                 LearningPathAction.SwitchProfileRequested -> onSwitchProfile()
                 else -> Unit
+            }
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun LiveFreePlay(
+    profileId: ProfileId,
+    preferredShelfId: String?,
+    onHome: () -> Unit,
+    onSwitchProfile: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val model: FreePlayViewModel = hiltViewModel()
+    val state by model.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(profileId) { model.start(profileId, preferredShelfId) }
+
+    FreePlayScreen(
+        state = state,
+        onAction = { action ->
+            when (action) {
+                // Leaving is the host's, because free play does not own where a child came from.
+                FreePlayAction.HomeRequested -> onHome()
+
+                FreePlayAction.SwitchProfileRequested -> onSwitchProfile()
+
+                else -> model.onAction(action)
             }
         },
         modifier = modifier

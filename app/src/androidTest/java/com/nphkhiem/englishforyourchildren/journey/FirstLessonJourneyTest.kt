@@ -118,16 +118,27 @@ class FirstLessonJourneyTest {
     }
 
     @Test
-    fun givenAScreenNobodyHasBuiltYet_whenAChildWalksIntoIt_thenNoDiagnosticCodeIsShown() {
-        // Free play has no live screen, so it lands on the missing-content fallback. That fallback
-        // used to be the caregiver database recovery, which documents itself as the one recovery a
-        // child never sees, and which offers to erase their progress.
+    fun givenAChildWithNoAdventureBehindThem_whenTheyOpenFreePlay_thenItExplainsRatherThanFails() {
+        // This used to assert that free play landed on the missing-content recovery, because it had
+        // no live screen. It has one now, and a library with nothing in it is a sentence about what
+        // to do next rather than an error a child cannot act on.
         createChild()
 
         tv.press(tv.string("home_free_play"))
 
-        tv.awaitText(tv.string("recovery_lesson_title"))
+        tv.awaitText(tv.string("free_play_empty_title"))
         compose.onAllNodesWithText(DATABASE_CODE, substring = true).assertCountEquals(0)
+    }
+
+    @Test
+    fun givenFreePlayIsOpen_whenTheChildAsksToGoHome_thenTheyAreBackWhereTheyStarted() {
+        createChild()
+        tv.press(tv.string("home_free_play"))
+        tv.awaitText(tv.string("free_play_empty_title"))
+
+        tv.press(tv.string("free_play_empty_action"))
+
+        tv.awaitText(tv.string("home_start"))
     }
 
     private fun createChild() {

@@ -4,7 +4,13 @@ import androidx.compose.runtime.Immutable
 
 /** One word a child has already met in a lesson. Free play never contains anything else. */
 @Immutable
-data class LearnedObject(val id: String, val label: String)
+data class LearnedObject(
+    val id: String,
+    val label: String,
+    /** The picture for this word, or null where none has been drawn. A library of written words is
+     * no use to a child who cannot read, which is the whole audience. */
+    val image: String? = null
+)
 
 /**
  * One story shelf: a unit, or an approved semantic group, holding the words learned from it.
