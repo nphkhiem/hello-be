@@ -37,6 +37,9 @@ class LessonViewModelTest {
     private val curriculum = FakeCurriculumRepository()
     private val progress = FakeProgressRepository(timeProvider = FakeTimeProvider(EpochMillis(NOW)))
 
+    /** The lesson's own clock, which is what decides whether a press is an answer. */
+    private val clock = FakeTimeProvider(EpochMillis(NOW))
+
     /** Every recording the course names is unmade, so the shipped answer to any prompt is this. */
     private var playback = FakePlaybackController(failWith = PlaybackFailureCode.MISSING)
 
@@ -110,7 +113,7 @@ class LessonViewModelTest {
         curriculum.setLesson(lesson(withAudio = false))
         val model = started()
 
-        model.onAction(LessonUiAction.AnswerChosen("word-ears", activityNumber = 1))
+        model.press(LessonUiAction.AnswerChosen("word-ears", activityNumber = 1))
 
         assertThat(model.state.value.support).isEqualTo(SupportLevel.NONE)
         assertThat(model.state.value.activityNumber).isEqualTo(2)
@@ -120,7 +123,7 @@ class LessonViewModelTest {
     fun givenACorrectAnswer_whenItIsChosen_thenTheWorkIsWrittenDownBeforeMovingOn() = runTest {
         val model = started()
 
-        model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+        model.press(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
 
         assertThat(progress.persisted).hasSize(1)
         assertThat(model.state.value.activityNumber).isEqualTo(2)
@@ -132,10 +135,39 @@ class LessonViewModelTest {
         // serialized queue is what makes sure the second is judged after the first, not beside it.
         val model = started()
 
-        model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+        model.press(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
         model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
 
         assertThat(progress.persisted).hasSize(1)
+    }
+
+    @Test
+    fun givenASecondPressArrivesAfterTheLessonMoved_whenItLands_thenItAnswersNothing() = runTest {
+        // The other half of the same gesture, and the one the repeated-input journey found. This
+        // press is not stale: the first was written down, the lesson advanced, the screen redrew,
+        // and this arrives through the new question's own card carrying its number. Everything
+        // else in the app reads that as an answer. It cannot be one, because at that moment the
+        // child had been looking at the question for no time at all.
+        val model = started()
+        model.press(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+
+        model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 2))
+
+        assertThat(progress.persisted).hasSize(1)
+        assertThat(model.state.value.activityNumber).isEqualTo(2)
+    }
+
+    @Test
+    fun givenTheChildHasLookedAtTheNewQuestion_whenTheyAnswerIt_thenItCounts() = runTest {
+        // The other side of the same rule, so that refusing a press stays a refusal of one gesture
+        // rather than a lesson that has become hard to answer.
+        val model = started()
+        model.press(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+
+        model.press(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 2))
+
+        assertThat(progress.persisted).hasSize(2)
+        assertThat(model.state.value.activityNumber).isEqualTo(3)
     }
 
     @Test
@@ -149,7 +181,7 @@ class LessonViewModelTest {
         // The question has to be heard before it can be answered. See ADR 0004.
         player.finish(PROMPT)
 
-        model.onAction(LessonUiAction.AnswerChosen("word-ears", activityNumber = 1))
+        model.press(LessonUiAction.AnswerChosen("word-ears", activityNumber = 1))
 
         assertThat(progress.persisted).isEmpty()
         assertThat(model.state.value.support).isEqualTo(SupportLevel.REPEAT)
@@ -162,7 +194,7 @@ class LessonViewModelTest {
             val model = started()
             progress.failNext(DomainError.PersistenceUnavailable)
 
-            model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+            model.press(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
 
             assertThat(model.state.value.pendingSave).isTrue()
             assertThat(model.state.value.activityNumber).isEqualTo(1)
@@ -172,9 +204,9 @@ class LessonViewModelTest {
     fun givenAFailedWrite_whenTheChildCarriesOn_thenTheyMoveAndItStillSaysNotSaved() = runTest {
         val model = started()
         progress.failNext(DomainError.PersistenceUnavailable)
-        model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+        model.press(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
 
-        model.onAction(LessonUiAction.ContinueUnsaved)
+        model.press(LessonUiAction.ContinueUnsaved)
 
         assertThat(model.state.value.activityNumber).isEqualTo(2)
         assertThat(model.state.value.pendingSave).isTrue()
@@ -184,9 +216,9 @@ class LessonViewModelTest {
     fun givenAFailedWrite_whenItIsRetriedAndSucceeds_thenNothingIsPendingAnyMore() = runTest {
         val model = started()
         progress.failNext(DomainError.PersistenceUnavailable)
-        model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+        model.press(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
 
-        model.onAction(LessonUiAction.SaveRetryRequested)
+        model.press(LessonUiAction.SaveRetryRequested)
 
         assertThat(model.state.value.pendingSave).isFalse()
         assertThat(model.state.value.activityNumber).isEqualTo(2)
@@ -196,7 +228,7 @@ class LessonViewModelTest {
     fun givenALesson_whenBackIsPressed_thenTheStopQuestionIsAskedRatherThanLeaving() = runTest {
         val model = started()
 
-        model.onAction(LessonUiAction.StopRequested)
+        model.press(LessonUiAction.StopRequested)
 
         assertThat(model.state.value.stopForNowVisible).isTrue()
     }
@@ -206,7 +238,7 @@ class LessonViewModelTest {
         val model = started()
 
         repeat(3) {
-            model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = it + 1))
+            model.press(LessonUiAction.AnswerChosen("word-eyes", activityNumber = it + 1))
         }
 
         assertThat(progress.completed).hasSize(1)
@@ -244,7 +276,7 @@ class LessonViewModelTest {
         runTest {
             val model = started()
 
-            model.onAction(LessonUiAction.SkipRequested)
+            model.press(LessonUiAction.SkipRequested)
 
             assertThat(model.state.value.activityNumber).isEqualTo(2)
             assertThat(model.state.value.support).isEqualTo(SupportLevel.NONE)
@@ -266,10 +298,10 @@ class LessonViewModelTest {
     @Test
     fun givenTheStopQuestionIsOpen_whenTheChildKeepsLearning_thenTheLessonIsStillThere() = runTest {
         val model = started()
-        model.onAction(LessonUiAction.StopRequested)
+        model.press(LessonUiAction.StopRequested)
         assertThat(model.state.value.stopForNowVisible).isTrue()
 
-        model.onAction(LessonUiAction.KeepLearningRequested)
+        model.press(LessonUiAction.KeepLearningRequested)
 
         assertThat(model.state.value.stopForNowVisible).isFalse()
         assertThat(model.state.value.activityNumber).isEqualTo(1)
@@ -283,7 +315,7 @@ class LessonViewModelTest {
         val model = started()
         player.finish(PROMPT)
 
-        model.onAction(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
+        model.press(LessonUiAction.AnswerChosen("word-eyes", activityNumber = 1))
 
         assertThat(model.state.value.activityNumber).isEqualTo(2)
         assertThat(playback.played).hasSize(2)
@@ -295,7 +327,7 @@ class LessonViewModelTest {
         // times on the way through the lesson.
         val model = started()
 
-        model.onAction(LessonUiAction.SkipRequested)
+        model.press(LessonUiAction.SkipRequested)
 
         assertThat(model.state.value.activityNumber).isEqualTo(2)
         assertThat(playback.played).hasSize(1)
@@ -350,7 +382,7 @@ class LessonViewModelTest {
         curriculum.setLesson(speakingLesson())
         val model = started()
 
-        model.onAction(LessonUiAction.RepetitionFinished)
+        model.press(LessonUiAction.RepetitionFinished)
 
         assertThat(model.state.value.activityNumber).isEqualTo(2)
         assertThat(progress.persisted.single().outcome)
@@ -392,7 +424,7 @@ class LessonViewModelTest {
         runTest {
             val model = started()
 
-            model.onAction(LessonUiAction.SkipRequested)
+            model.press(LessonUiAction.SkipRequested)
 
             assertThat(model.state.value.learningObject?.image).isEqualTo("img-eyes")
         }
@@ -423,9 +455,22 @@ class LessonViewModelTest {
     private fun viewModel() = LessonViewModel(
         curriculum = curriculum,
         progress = progress,
-        timeProvider = FakeTimeProvider(EpochMillis(NOW)),
+        timeProvider = clock,
         playback = playback
     )
+
+    /**
+     * A child who has looked at the question, and then presses.
+     *
+     * Every deliberate press in these tests goes through here, because a lesson refuses one that
+     * lands the instant a question appears: see the double press above, which is the same call
+     * without this. A fake clock is what makes that a rule these tests can state rather than a
+     * race they would have to lose on purpose.
+     */
+    private suspend fun LessonViewModel.press(action: LessonUiAction) {
+        clock.advanceBy(LOOKED_AT_IT_MILLIS)
+        onAction(action)
+    }
 
     private suspend fun started(lessonId: String = LESSON): LessonViewModel {
         val model = viewModel()
@@ -493,6 +538,9 @@ class LessonViewModelTest {
         const val UNIT = "u01-my-body"
         const val LESSON = "u01-my-body-l1"
         const val NOW = 1_756_000_000_000
+
+        /** Longer than a lesson's own window, which is what makes a press a considered one. */
+        const val LOOKED_AT_IT_MILLIS = 400L
         val PROMPT = AssetId("aud-en-prompt-where-is")
         val HelloBeChoiceFeedbackNeutral =
             com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeChoiceFeedback.NEUTRAL

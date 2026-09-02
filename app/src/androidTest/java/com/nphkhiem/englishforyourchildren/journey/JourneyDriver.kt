@@ -23,6 +23,7 @@ class JourneyDriver(private val compose: ComposeTestRule) {
      */
     fun press(text: String) {
         compose.onNodeWithText(text).requestFocus()
+        lookAtIt()
         compose.onNodeWithText(text).performKeyInput { pressKey(Key.DirectionCenter) }
         compose.waitForIdle()
     }
@@ -39,11 +40,25 @@ class JourneyDriver(private val compose: ComposeTestRule) {
      */
     fun doublePress(text: String) {
         compose.onNodeWithText(text).requestFocus()
+        lookAtIt()
         compose.onNodeWithText(text).performKeyInput {
             pressKey(Key.DirectionCenter)
             pressKey(Key.DirectionCenter)
         }
         compose.waitForIdle()
+    }
+
+    /**
+     * The moment a child spends looking at something before pressing at it.
+     *
+     * A lesson refuses an answer that lands the instant a question appears, because a press that
+     * quick belongs to the gesture that turned the page rather than to the question now on it. A
+     * test drives a television faster than any child can, so it waits where a child would look.
+     * Only the first press of a gesture waits: what makes a double press one is the gap that is not
+     * there between its halves.
+     */
+    private fun lookAtIt() {
+        Thread.sleep(LOOKED_AT_IT_MILLIS)
     }
 
     /**
@@ -71,5 +86,8 @@ class JourneyDriver(private val compose: ComposeTestRule) {
     private companion object {
         const val PACKAGE = "com.nphkhiem.englishforyourchildren"
         const val TIMEOUT_MILLIS = 10_000L
+
+        /** Longer than the window a lesson holds a new question closed for. */
+        const val LOOKED_AT_IT_MILLIS = 400L
     }
 }

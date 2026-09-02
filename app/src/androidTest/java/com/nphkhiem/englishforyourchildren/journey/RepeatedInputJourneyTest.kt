@@ -36,9 +36,10 @@ import org.junit.Test
  * written down, and both are tested. What was never tested is the same thing through the real focus
  * and key pipeline, which is where a duplicate actually comes from.
  *
- * A second press arriving *after* the lesson has moved on is a different case, and a worse one: it
- * is accepted, and answers a question the child never saw. That is filed as its own defect rather
- * than asserted here as though it were intended. See `M1_TRACEABILITY.md`.
+ * The two halves of that gesture land on either side of the write, and which side is a matter of
+ * milliseconds, so both are asserted here. The second is the case this test first found and that
+ * was fixed afterwards: a press arriving *after* the lesson has moved on used to be accepted, and
+ * answered a question the child never saw.
  */
 @HiltAndroidTest
 @UninstallModules(DataProvidersModule::class)
@@ -106,6 +107,21 @@ class RepeatedInputJourneyTest {
 
         // One question forward, and one row. As far as this child's history is concerned they
         // pressed once, because that is how many questions they were asked.
+        tv.awaitText(SECOND_QUESTION)
+        assertThat(recordedAttempts().map { it.activityId })
+            .containsExactly("$FIRST_LESSON_ID-a1")
+    }
+
+    @Test
+    fun givenTwoPressesLandEitherSideOfTheWrite_whenItLands_thenOnlyOneAnswerWasRecorded() {
+        // The same gesture with nothing held open, which is what a television actually does: the
+        // first press is written down and the lesson moves on, and the second arrives through the
+        // new question's own card. Whether it lands before or after the advance is a race, and the
+        // child pressed once either way, so the row count is the same either way.
+        openFirstLesson()
+
+        tv.doublePress(FIRST_ANSWER)
+
         tv.awaitText(SECOND_QUESTION)
         assertThat(recordedAttempts().map { it.activityId })
             .containsExactly("$FIRST_LESSON_ID-a1")

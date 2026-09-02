@@ -7,6 +7,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.ActivityInstanceId
 import com.nphkhiem.englishforyourchildren.domain.model.Answerable
 import com.nphkhiem.englishforyourchildren.domain.model.AssetId
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
+import com.nphkhiem.englishforyourchildren.domain.model.EpochMillis
 import com.nphkhiem.englishforyourchildren.domain.model.LessonCheckpoint
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
@@ -74,6 +75,12 @@ sealed interface LessonUiAction {
  * while a write is in flight waits for it rather than racing it. A television remote makes this
  * ordinary: a button held a moment too long sends two presses, and the second must be judged
  * against the state the first produced, not beside it.
+ *
+ * **And time is the rest of it.** Ordering alone does not catch the second press of a rapid double
+ * press, because by the time it arrives the first has been written down and the lesson has moved
+ * on, so it comes through the new question's own card carrying the new question's number. Every
+ * other check in this app reads that as a legitimate answer. Only the clock can say otherwise, and
+ * it does: the child had not yet seen what they would have been answering.
  */
 @HiltViewModel
 class LessonViewModel @Inject constructor(
@@ -110,6 +117,17 @@ class LessonViewModel @Inject constructor(
 
     /** The theme of the unit this lesson belongs to. A slug is not a thing to show anybody. */
     private var unitTheme: String = ""
+
+    /**
+     * The question the child is looking at, and when it was put in front of them.
+     *
+     * A press landing inside [TIME_TO_SEE_IT_MILLIS] of that moment is one the child made before
+     * they could have read the question it would answer. That is not a stray event to be discarded
+     * defensively: it is a real press, aimed at what really was on screen, and the only thing that
+     * separates it from an answer is that the question is younger than the gesture.
+     */
+    private var questionOnScreen: ActivityInstanceId? = null
+    private var questionShownAt: EpochMillis = EpochMillis(0)
 
     suspend fun start(profileId: ProfileId, lessonId: LessonId, courseVersion: CourseVersion) {
         val lesson = curriculum.getLesson(lessonId, courseVersion)
@@ -272,11 +290,14 @@ class LessonViewModel @Inject constructor(
     }
 
     private fun LessonUiAction.toDomain(state: LessonSessionState): LessonAction? = when (this) {
-        is LessonUiAction.AnswerChosen -> if (activityNumber != state.activityIndex + 1) {
+        is LessonUiAction.AnswerChosen -> when {
             // A press for a question the child has already left.
-            null
-        } else {
-            LessonAction.AnswerChosen(
+            activityNumber != state.activityIndex + 1 -> null
+
+            // A press for the question they are on, made before they could have seen it.
+            !questionHasBeenSeen() -> null
+
+            else -> LessonAction.AnswerChosen(
                 expectedActivityInstanceId = state.currentInstance,
                 // Whether it was right is decided here and never reaches the screen, so the screen
                 // cannot give it away through focus or ordering.
@@ -295,15 +316,25 @@ class LessonViewModel @Inject constructor(
             nextInstance = nextInstance(state)
         )
 
-        LessonUiAction.RepetitionFinished -> LessonAction.RepetitionFinished(
-            expectedActivityInstanceId = state.currentInstance,
-            at = timeProvider.now()
-        )
+        // The two other ways past an activity record an attempt and move the child on, so they
+        // are the same gesture seen from a different family and are held to the same moment.
+        LessonUiAction.RepetitionFinished -> if (!questionHasBeenSeen()) {
+            null
+        } else {
+            LessonAction.RepetitionFinished(
+                expectedActivityInstanceId = state.currentInstance,
+                at = timeProvider.now()
+            )
+        }
 
-        LessonUiAction.SkipRequested -> LessonAction.SkipRequested(
-            expectedActivityInstanceId = state.currentInstance,
-            at = timeProvider.now()
-        )
+        LessonUiAction.SkipRequested -> if (!questionHasBeenSeen()) {
+            null
+        } else {
+            LessonAction.SkipRequested(
+                expectedActivityInstanceId = state.currentInstance,
+                at = timeProvider.now()
+            )
+        }
 
         LessonUiAction.KeepLearningRequested ->
             LessonAction.KeepLearningRequested(state.currentInstance)
@@ -311,7 +342,22 @@ class LessonViewModel @Inject constructor(
         LessonUiAction.StopRequested -> LessonAction.StopRequested(state.currentInstance)
     }
 
+    /**
+     * Long enough with this question on screen for a press to be an answer to it.
+     *
+     * Three hundred milliseconds is what Android itself calls a double tap, and it is borrowed for
+     * the same reason: two presses closer together than that are one gesture rather than two
+     * decisions. Nothing a child does deliberately lands inside it, because they have not looked at
+     * the question yet.
+     */
+    private fun questionHasBeenSeen(): Boolean =
+        timeProvider.now().value - questionShownAt.value >= TIME_TO_SEE_IT_MILLIS
+
     private fun publish(state: LessonSessionState) {
+        if (state.currentInstance != questionOnScreen) {
+            questionOnScreen = state.currentInstance
+            questionShownAt = timeProvider.now()
+        }
         _state.value = LessonUiMapper.map(state, unitTheme)
         if (state.phase == DomainPhase.Finished) {
             session = state
@@ -331,4 +377,9 @@ class LessonViewModel @Inject constructor(
     }
 
     private fun instanceOf(activity: Activity) = ActivityInstanceId("${activity.id.value}-1")
+
+    private companion object {
+        /** How long a question is on screen before a press can be an answer to it. */
+        const val TIME_TO_SEE_IT_MILLIS = 300L
+    }
 }
