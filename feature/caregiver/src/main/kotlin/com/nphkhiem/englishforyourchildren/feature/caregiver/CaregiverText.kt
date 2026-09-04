@@ -35,7 +35,7 @@ val LocalCaregiverLanguage = compositionLocalOf { CaregiverLanguage.BOTH }
 @Composable
 @ReadOnlyComposable
 fun caregiverText(@StringRes id: Int, vararg formatArgs: Any): String =
-    LocalContext.current.caregiverText(LocalCaregiverLanguage.current, id, formatArgs)
+    LocalContext.current.caregiverText(LocalCaregiverLanguage.current, id, *formatArgs)
 
 /**
  * The same resolution, reachable from somewhere that is not a composition.
@@ -47,7 +47,7 @@ fun caregiverText(@StringRes id: Int, vararg formatArgs: Any): String =
 fun Context.caregiverText(
     language: CaregiverLanguage,
     @StringRes id: Int,
-    formatArgs: Array<out Any> = emptyArray()
+    vararg formatArgs: Any
 ): String {
     val english = inLocale(ENGLISH).read(id, formatArgs)
     if (language == CaregiverLanguage.ENGLISH) return english

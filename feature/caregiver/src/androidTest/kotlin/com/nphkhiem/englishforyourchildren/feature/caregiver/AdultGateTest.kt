@@ -173,13 +173,13 @@ class AdultGateTest {
         }
     }
 
-    // These three have no Vietnamese yet, so every mode renders the English and reading it
-    // straight from resources still describes what the screen shows.
-    private fun instruction() = context.resources.getString(R.string.gate_instruction)
+    private fun instruction() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.gate_instruction)
 
-    private fun retry() = context.resources.getString(R.string.gate_retry)
+    private fun retry() = context.caregiverText(CaregiverLanguage.BOTH, R.string.gate_retry)
 
-    private fun unavailable() = context.resources.getString(R.string.gate_unavailable)
+    private fun unavailable() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.gate_unavailable)
 
     private companion object {
         const val ENGLISH_TITLE = "Grown-ups only"

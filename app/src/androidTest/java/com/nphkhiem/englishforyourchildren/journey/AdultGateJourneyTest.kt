@@ -5,16 +5,20 @@ import android.content.res.AssetManager
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.MainActivity
 import com.nphkhiem.englishforyourchildren.data.di.DataProvidersModule
 import com.nphkhiem.englishforyourchildren.data.local.HelloBeDatabase
 import com.nphkhiem.englishforyourchildren.data.profile.ChildProfileDao
 import com.nphkhiem.englishforyourchildren.data.progress.ProgressDao
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.domain.repository.SettingsRepository
 import com.nphkhiem.englishforyourchildren.domain.result.DomainResult
 import com.nphkhiem.englishforyourchildren.feature.caregiver.GateArithmetic
 import com.nphkhiem.englishforyourchildren.feature.caregiver.GateChallenges
+import com.nphkhiem.englishforyourchildren.feature.caregiver.R as CaregiverR
+import com.nphkhiem.englishforyourchildren.feature.caregiver.caregiverText
 import com.nphkhiem.englishforyourchildren.feature.caregiver.di.CaregiverModule
 import com.nphkhiem.englishforyourchildren.playback.ImageAssetLocator
 import com.nphkhiem.englishforyourchildren.playback.MediaAssetLocator
@@ -135,9 +139,9 @@ class AdultGateJourneyTest {
         tv.press(CORRECT.toString())
 
         // Settings, not the overview: see the comment beside the wiring in `HelloBeNavHost`.
-        tv.awaitText(tv.string("settings_captions_title"))
+        tv.awaitText(caregiver(CaregiverR.string.settings_captions_title))
         val before = storedCaptions()
-        tv.press(tv.string("settings_captions_title"))
+        tv.press(caregiver(CaregiverR.string.settings_captions_title))
 
         compose.waitUntil(TIMEOUT_MILLIS) { storedCaptions() != before }
         assertThat(storedCaptions()).isNotEqualTo(before)
@@ -154,8 +158,13 @@ class AdultGateJourneyTest {
         tv.pressWhateverIsFocused()
 
         // Still at the gate. A settings row would mean the press opened it.
-        tv.awaitText(tv.string("gate_instruction"))
+        tv.awaitText(caregiver(CaregiverR.string.gate_instruction))
     }
+
+    /** A caregiver string as the screen shows it, which is both languages by default. */
+    private fun caregiver(id: Int): String =
+        InstrumentationRegistry.getInstrumentation().targetContext
+            .caregiverText(CaregiverLanguage.BOTH, id)
 
     private fun storedCaptions(): Boolean = runBlocking {
         val read = settings.observeSettings().first()

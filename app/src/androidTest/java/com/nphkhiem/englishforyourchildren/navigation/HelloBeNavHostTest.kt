@@ -234,7 +234,10 @@ class HelloBeNavHostTest {
 
     private fun stopForNowTitle() = string("stop_for_now_title", learningPkg())
 
-    private fun recoveryTitle() = string("recovery_db_title", learningPkg())
+    /** Read as the screen reads it: the recovery panel is a caregiver surface, so bilingual. */
+    private fun recoveryTitle() = InstrumentationRegistry.getInstrumentation()
+        .targetContext
+        .caregiverText(CaregiverLanguage.BOTH, CaregiverR.string.recovery_db_title)
 
     private fun grownUps() = string("home_grown_ups", learningPkg())
 

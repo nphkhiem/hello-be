@@ -12,6 +12,7 @@ import androidx.compose.ui.test.requestFocus
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import org.junit.Rule
@@ -24,8 +25,9 @@ class CaregiverShellTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val resources
-        get() = InstrumentationRegistry.getInstrumentation().targetContext.resources
+    /** Strings are read the way the screens read them, in both languages. */
+    private val context
+        get() = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test
     fun givenTheShell_whenTheRailIsRead_thenItHoldsExactlyTheThreeSectionsAndTheWayOut() {
@@ -128,15 +130,19 @@ class CaregiverShellTest {
         }
     }
 
-    private fun overview() = resources.getString(R.string.caregiver_overview)
+    private fun overview() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.caregiver_overview)
 
-    private fun settings() = resources.getString(R.string.caregiver_settings)
+    private fun settings() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.caregiver_settings)
 
-    private fun profiles() = resources.getString(R.string.caregiver_profiles)
+    private fun profiles() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.caregiver_profiles)
 
-    private fun returnToChild() = resources.getString(R.string.caregiver_return)
+    private fun returnToChild() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.caregiver_return)
 
-    private fun gateTitle() = resources.getString(R.string.gate_title)
+    private fun gateTitle() = context.caregiverText(CaregiverLanguage.BOTH, R.string.gate_title)
 
     private companion object {
         const val PANEL_CONTROL = "Panel control"

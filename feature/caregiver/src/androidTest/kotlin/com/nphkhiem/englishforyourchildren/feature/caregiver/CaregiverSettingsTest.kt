@@ -13,6 +13,7 @@ import androidx.compose.ui.test.requestFocus
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import org.junit.Rule
 import org.junit.Test
@@ -24,8 +25,9 @@ class CaregiverSettingsTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val resources
-        get() = InstrumentationRegistry.getInstrumentation().targetContext.resources
+    /** Strings are read the way the screens read them, in both languages. */
+    private val context
+        get() = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test
     fun givenTheSettings_whenARowIsRead_thenItNamesItsEffectOnTheChild() {
@@ -205,13 +207,14 @@ class CaregiverSettingsTest {
         }
     }
 
-    private fun on() = resources.getString(R.string.settings_on)
+    private fun on() = context.caregiverText(CaregiverLanguage.BOTH, R.string.settings_on)
 
-    private fun off() = resources.getString(R.string.settings_off)
+    private fun off() = context.caregiverText(CaregiverLanguage.BOTH, R.string.settings_off)
 
-    private fun saving() = resources.getString(R.string.settings_saving)
+    private fun saving() = context.caregiverText(CaregiverLanguage.BOTH, R.string.settings_saving)
 
-    private fun saveFailed() = resources.getString(R.string.settings_save_failed)
+    private fun saveFailed() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.settings_save_failed)
 
-    private fun restore() = resources.getString(R.string.settings_restore)
+    private fun restore() = context.caregiverText(CaregiverLanguage.BOTH, R.string.settings_restore)
 }

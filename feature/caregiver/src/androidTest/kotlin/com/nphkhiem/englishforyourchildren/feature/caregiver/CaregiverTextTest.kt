@@ -19,33 +19,43 @@ class CaregiverTextTest {
     fun givenEnglishIsChosen_whenATranslatedStringIsRead_thenOnlyEnglishComesBack() {
         val read = context.caregiverText(CaregiverLanguage.ENGLISH, R.string.gate_title)
 
-        assertThat(read).isEqualTo(ENGLISH_TITLE)
+        assertThat(read).isEqualTo(context.resources.getString(R.string.gate_title))
     }
 
     @Test
-    fun givenVietnameseIsChosen_whenATranslatedStringIsRead_thenOnlyVietnameseComesBack() {
-        // Proves `values-vi` is genuinely reached. A configuration context that silently fell back
-        // would return the English here and look like a passing test of nothing.
-        val read = context.caregiverText(CaregiverLanguage.VIETNAMESE, R.string.gate_title)
+    fun givenVietnameseIsChosen_whenATranslatedStringIsRead_thenValuesViIsReallyReached() {
+        // Deliberately not pinned to the wording. The Vietnamese is being written and rewritten by
+        // the person who speaks it, and a test that named the sentence would break every time they
+        // improved it while proving nothing more than this does: that a configuration context
+        // really reaches `values-vi` rather than quietly falling back to the default file.
+        val english = context.caregiverText(CaregiverLanguage.ENGLISH, R.string.gate_title)
 
-        assertThat(read).isEqualTo(VIETNAMESE_TITLE)
+        val vietnamese = context.caregiverText(CaregiverLanguage.VIETNAMESE, R.string.gate_title)
+
+        assertThat(vietnamese).isNotEmpty()
+        assertThat(vietnamese).isNotEqualTo(english)
     }
 
     @Test
     fun givenBothAreChosen_whenATranslatedStringIsRead_thenItCarriesEachLanguageOnce() {
-        val read = context.caregiverText(CaregiverLanguage.BOTH, R.string.gate_title)
+        val english = context.caregiverText(CaregiverLanguage.ENGLISH, R.string.gate_title)
+        val vietnamese = context.caregiverText(CaregiverLanguage.VIETNAMESE, R.string.gate_title)
 
-        assertThat(read).isEqualTo("$ENGLISH_TITLE · $VIETNAMESE_TITLE")
+        val both = context.caregiverText(CaregiverLanguage.BOTH, R.string.gate_title)
+
+        assertThat(both).isEqualTo("$english · $vietnamese")
     }
 
     @Test
-    fun givenBothAreChosen_whenAnUntranslatedStringIsRead_thenEnglishStandsAloneRatherThanTwice() {
-        // The thing that makes an unfinished `values-vi` safe to ship. Most keys have no Vietnamese
-        // yet, Android hands back the English for them, and joining a sentence to itself would read
-        // as a stutter rather than as two languages.
-        val english = context.caregiverText(CaregiverLanguage.ENGLISH, R.string.caregiver_overview)
+    fun givenAStringThatReadsTheSameInEitherLanguage_whenBothAreChosen_thenItIsNotSaidTwice() {
+        // A language names itself the same way whoever is reading, so this one is identical in the
+        // two files. Joining a sentence to itself would read as a stutter, and the same guard is
+        // what let an unfinished values-vi ship earlier in this branch.
+        val english =
+            context.caregiverText(CaregiverLanguage.ENGLISH, R.string.settings_language_vietnamese)
 
-        val both = context.caregiverText(CaregiverLanguage.BOTH, R.string.caregiver_overview)
+        val both =
+            context.caregiverText(CaregiverLanguage.BOTH, R.string.settings_language_vietnamese)
 
         assertThat(both).isEqualTo(english)
         assertThat(both).doesNotContain("·")
@@ -53,18 +63,13 @@ class CaregiverTextTest {
 
     @Test
     fun givenAStringTakingAnArgument_whenItIsRead_thenTheArgumentSurvivesTheLanguageChoice() {
-        val read = context.caregiverText(
-            CaregiverLanguage.ENGLISH,
-            R.string.caregiver_rail_title,
-            arrayOf(CHILD)
-        )
+        val read =
+            context.caregiverText(CaregiverLanguage.BOTH, R.string.caregiver_rail_title, CHILD)
 
         assertThat(read).contains(CHILD)
     }
 
     private companion object {
-        const val ENGLISH_TITLE = "Grown-ups only"
-        const val VIETNAMESE_TITLE = "Dành cho người lớn"
         const val CHILD = "Bé"
     }
 }

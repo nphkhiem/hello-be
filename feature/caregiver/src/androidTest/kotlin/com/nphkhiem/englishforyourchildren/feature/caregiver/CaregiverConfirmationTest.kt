@@ -13,6 +13,7 @@ import androidx.compose.ui.test.requestFocus
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import org.junit.Rule
@@ -25,8 +26,9 @@ class CaregiverConfirmationTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val resources
-        get() = InstrumentationRegistry.getInstrumentation().targetContext.resources
+    /** Strings are read the way the screens read them, in both languages. */
+    private val context
+        get() = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test
     fun givenDeleteProfileDialog_whenOpened_thenCancelHasInitialFocus() {
@@ -177,28 +179,46 @@ class CaregiverConfirmationTest {
         }
     }
 
-    private fun deleteTitle() =
-        resources.getString(R.string.confirm_delete_title, CaregiverFixtures.PROFILE)
+    private fun deleteTitle() = context.caregiverText(
+        CaregiverLanguage.BOTH,
+        R.string.confirm_delete_title,
+        CaregiverFixtures.PROFILE
+    )
 
-    private fun deleteBody() =
-        resources.getString(R.string.confirm_delete_body, CaregiverFixtures.PROFILE)
+    private fun deleteBody() = context.caregiverText(
+        CaregiverLanguage.BOTH,
+        R.string.confirm_delete_body,
+        CaregiverFixtures.PROFILE
+    )
 
-    private fun deleteFailed() =
-        resources.getString(R.string.confirm_delete_failed, CaregiverFixtures.PROFILE)
+    private fun deleteFailed() = context.caregiverText(
+        CaregiverLanguage.BOTH,
+        R.string.confirm_delete_failed,
+        CaregiverFixtures.PROFILE
+    )
 
-    private fun resetTitle() =
-        resources.getString(R.string.confirm_reset_title, CaregiverFixtures.PROFILE)
+    private fun resetTitle() = context.caregiverText(
+        CaregiverLanguage.BOTH,
+        R.string.confirm_reset_title,
+        CaregiverFixtures.PROFILE
+    )
 
-    private fun resetBody() =
-        resources.getString(R.string.confirm_reset_body, CaregiverFixtures.PROFILE)
+    private fun resetBody() = context.caregiverText(
+        CaregiverLanguage.BOTH,
+        R.string.confirm_reset_body,
+        CaregiverFixtures.PROFILE
+    )
 
-    private fun keepProfile() = resources.getString(R.string.confirm_delete_keep)
+    private fun keepProfile() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.confirm_delete_keep)
 
-    private fun keepProgress() = resources.getString(R.string.confirm_reset_keep)
+    private fun keepProgress() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.confirm_reset_keep)
 
-    private fun deleteProfile() = resources.getString(R.string.confirm_delete_do)
+    private fun deleteProfile() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.confirm_delete_do)
 
-    private fun retry() = resources.getString(R.string.confirm_retry)
+    private fun retry() = context.caregiverText(CaregiverLanguage.BOTH, R.string.confirm_retry)
 
     private companion object {
         const val POUNDING = 8
