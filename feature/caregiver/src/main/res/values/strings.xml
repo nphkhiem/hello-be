@@ -76,4 +76,20 @@
     <!-- A code with no child data in it, shown only on a caregiver surface. The trailing clause is
          part of the approved copy and is what tells a caregiver the code is safe to read out. -->
     <string name="recovery_db_code">Recovery code: %1$s · contains no child data</string>
+    <string name="gate_question">What is %1$d + %2$d?</string>
+    <string name="settings_vietnamese_help_title">Vietnamese help</string>
+    <string name="settings_vietnamese_help_consequence">Appears only after the third try at a question</string>
+    <string name="settings_caregiver_language_title">Caregiver language</string>
+    <string name="settings_caregiver_language_consequence">Changes this area only, never the lessons</string>
+    <string name="settings_captions_title">Captions</string>
+    <string name="settings_captions_consequence">Show spoken instructions on screen</string>
+    <string name="settings_reduced_motion_title">Reduced motion</string>
+    <string name="settings_reduced_motion_consequence">Use static pages and simple fades</string>
+    <string name="settings_high_contrast_title">High contrast</string>
+    <string name="settings_high_contrast_consequence">Stronger borders and no faint text</string>
+    <string name="settings_background_music_title">Background music</string>
+    <string name="settings_background_music_consequence">Speech always stays clear</string>
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_vietnamese">Tiếng Việt</string>
+    <string name="settings_language_both">English + Tiếng Việt</string>
 </resources>

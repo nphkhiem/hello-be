@@ -81,6 +81,12 @@ One unit of a planned twelve. None of the roughly forty referenced media assets 
 lesson runs silent and answer cards show written words to a pre-reader. The attribution ledger is
 empty, deliberately, and stops a release.
 
-Seven destinations have no live screen: the adult gate, everything behind it, both destructive
-confirmations, and free play. Pressing them reaches a resting-page recovery rather than the screen.
-That is Phase 3.
+Destinations with no live screen, as Phase 3 works through them. Free play went live in #61. The
+adult gate and caregiver settings went live in P3-T7. What remains is the caregiver overview,
+profile management and both destructive confirmations, which are P3-T8. Pressing those still
+reaches a resting-page recovery rather than the screen.
+
+**Solving the gate lands on Settings, not the Overview, and that is temporary.** The overview's
+ViewModel is P3-T8's, so landing there today would reward a caregiver for solving the gate by
+showing them a recovery panel. The wiring in `HelloBeNavHost` says so beside itself, and T8 moves it
+back rather than inheriting it.

@@ -104,6 +104,17 @@ class JourneyDriver(private val compose: ComposeTestRule) {
         }
     }
 
+    /**
+     * Select, without moving first.
+     *
+     * What a child does: press the button at whatever the screen chose to focus. Distinct from
+     * [press], which walks to a named control the way an adult reading the screen would.
+     */
+    fun pressWhateverIsFocused() {
+        compose.onRoot().performKeyInput { pressKey(Key.DirectionCenter) }
+        compose.waitForIdle()
+    }
+
     fun string(name: String): String {
         val resources = InstrumentationRegistry.getInstrumentation().targetContext.resources
         return resources.getString(resources.getIdentifier(name, "string", PACKAGE))

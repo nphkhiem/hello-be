@@ -17,7 +17,10 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.HelloBeRoot
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
+import com.nphkhiem.englishforyourchildren.feature.caregiver.R as CaregiverR
+import com.nphkhiem.englishforyourchildren.feature.caregiver.caregiverText
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -235,7 +238,16 @@ class HelloBeNavHostTest {
 
     private fun grownUps() = string("home_grown_ups", learningPkg())
 
-    private fun caregiverArea() = string("caregiver_area", learningPkg())
+    /**
+     * What the caregiver frame actually says, which is both languages.
+     *
+     * Read the way the screen reads it rather than straight from resources. The string used to
+     * carry both halves itself; it now carries the English and the caregiver's chosen language
+     * decides what is shown beside it, which for the default is the Vietnamese.
+     */
+    private fun caregiverArea() = InstrumentationRegistry.getInstrumentation()
+        .targetContext
+        .caregiverText(CaregiverLanguage.BOTH, CaregiverR.string.caregiver_area)
 
     private companion object {
         const val FIRST_PROFILE = "Minh"

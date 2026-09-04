@@ -1,6 +1,8 @@
 package com.nphkhiem.englishforyourchildren.navigation
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,9 +12,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
+import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateScreen
+import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateUiState
+import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateViewModel
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverLanguageViewModel
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverScaffold
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSection
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSettingsAction
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSettingsScreen
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSettingsUiState
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSettingsViewModel
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellAction
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellState
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellViewModel
+import com.nphkhiem.englishforyourchildren.feature.caregiver.GateChallenge
+import com.nphkhiem.englishforyourchildren.feature.caregiver.LocalCaregiverLanguage
+import com.nphkhiem.englishforyourchildren.feature.caregiver.R as CaregiverR
+import com.nphkhiem.englishforyourchildren.feature.caregiver.SettingId
+import com.nphkhiem.englishforyourchildren.feature.caregiver.caregiverText
+import com.nphkhiem.englishforyourchildren.feature.caregiver.languageName
+import com.nphkhiem.englishforyourchildren.feature.caregiver.languageNamed
+import com.nphkhiem.englishforyourchildren.feature.caregiver.settingRows
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeAction
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeViewModel
@@ -280,5 +304,132 @@ internal fun LiveLesson(
             }
         },
         modifier = modifier
+    )
+}
+
+/**
+ * The caregiver area, in the language its reader chose.
+ *
+ * Wrapped around the caregiver destinations and nowhere else, which is the whole point of the
+ * scoping: child mode is English-led whatever a caregiver sets, so the override must not be able to
+ * reach it.
+ */
+@Composable
+internal fun CaregiverLanguageScope(content: @Composable () -> Unit) {
+    val model: CaregiverLanguageViewModel = hiltViewModel()
+    val language by model.language.collectAsStateWithLifecycle()
+
+    CompositionLocalProvider(LocalCaregiverLanguage provides language) { content() }
+}
+
+/**
+ * The door, live.
+ *
+ * The question is composed here rather than in the ViewModel, because a sentence needs a string
+ * resource and a language and the ViewModel has neither. The arithmetic comes up from below and the
+ * grammar goes on here.
+ *
+ * Whether the gate opens is still the host's answer, not the screen's, which is what lets the
+ * screen know the correct index without being the thing that lets anyone through.
+ */
+@Composable
+internal fun LiveAdultGate(onOpened: () -> Unit, modifier: Modifier = Modifier) {
+    val model: AdultGateViewModel = hiltViewModel()
+    val state by model.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(state.opened) { if (state.opened) onOpened() }
+
+    AdultGateScreen(
+        state = AdultGateUiState(
+            challenge = GateChallenge(
+                question = caregiverText(
+                    CaregiverR.string.gate_question,
+                    state.arithmetic.left,
+                    state.arithmetic.right
+                ),
+                answers = state.arithmetic.answers.map { it.toString() },
+                correctIndex = state.arithmetic.correctIndex
+            ),
+            previousAnswerWasWrong = state.previousAnswerWasWrong
+        ),
+        onAction = { model.onAction(it) },
+        modifier = modifier
+    )
+}
+
+/**
+ * Settings, live.
+ *
+ * The rows are assembled here for the same reason the gate's question is: every title, every
+ * consequence and every option name is a piece of writing.
+ */
+@Composable
+internal fun LiveCaregiverSettings(onBack: () -> Unit, modifier: Modifier = Modifier) {
+    val model: CaregiverSettingsViewModel = hiltViewModel()
+    val state by model.state.collectAsStateWithLifecycle()
+    var expanded by remember { mutableStateOf<SettingId?>(null) }
+
+    val names = CaregiverLanguage.entries.associateWith { languageName(it) }
+
+    CaregiverSettingsScreen(
+        state = CaregiverSettingsUiState(
+            rows = settingRows(state.settings),
+            expandedRow = expanded,
+            saveStatus = state.saveStatus,
+            canRestoreDefaults = state.canRestoreDefaults
+        ),
+        onAction = { action ->
+            when (action) {
+                is CaregiverSettingsAction.SettingToggled -> model.onToggle(action.id)
+
+                // Expansion is where the caregiver is looking, not what they have decided, so it
+                // lives here and never reaches storage.
+                is CaregiverSettingsAction.SettingExpanded ->
+                    expanded = if (expanded == action.id) null else action.id
+
+                is CaregiverSettingsAction.SettingChoiceChosen -> {
+                    languageNamed(action.option, names)?.let { model.onLanguageChosen(it) }
+                    expanded = null
+                }
+
+                CaregiverSettingsAction.RestoreDefaultsRequested -> model.onRestoreDefaults()
+            }
+        },
+        modifier = modifier
+    )
+
+    BackHandler { onBack() }
+}
+
+/**
+ * The frame every caregiver section sits in, live.
+ *
+ * Only the child's name comes from storage. The section is where the host has put the caregiver,
+ * not something to be read back, which is why it is a parameter rather than state.
+ */
+@Composable
+internal fun LiveCaregiverShell(
+    profileId: ProfileId?,
+    section: CaregiverSection,
+    onSection: (CaregiverSection) -> Unit,
+    onReturn: () -> Unit,
+    modifier: Modifier = Modifier,
+    body: @Composable () -> Unit
+) {
+    val model: CaregiverShellViewModel = hiltViewModel()
+    val profileName by model.profileName.collectAsStateWithLifecycle()
+
+    LaunchedEffect(profileId) { model.start(profileId) }
+
+    CaregiverScaffold(
+        state = CaregiverShellState(profileName = profileName, section = section),
+        onAction = { action ->
+            when (action) {
+                is CaregiverShellAction.SectionChosen -> onSection(action.section)
+                CaregiverShellAction.ReturnToChildRequested -> onReturn()
+            }
+        },
+        modifier = modifier,
+        content = body
     )
 }

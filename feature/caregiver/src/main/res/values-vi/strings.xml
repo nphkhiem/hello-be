@@ -24,6 +24,10 @@
     <string name="settings_group_audio">Âm thanh</string>
     <string name="profiles_local">Chỉ lưu trên TV này</string>
 
+    <string name="settings_language_english">English</string>
+    <string name="settings_language_vietnamese">Tiếng Việt</string>
+    <string name="settings_language_both">English + Tiếng Việt</string>
+
     <!--
         Not yet translated. English text given so the meaning is here rather than
         somewhere else. Move a line out of this block once it says something in Vietnamese.
@@ -84,5 +88,18 @@
         recovery_db_retry: Try again
         recovery_db_review_reset: Review reset
         recovery_db_code: Recovery code: %1$s · contains no child data
+        gate_question: What is %1$d + %2$d?
+        settings_vietnamese_help_title: Vietnamese help
+        settings_vietnamese_help_consequence: Appears only after the third try at a question
+        settings_caregiver_language_title: Caregiver language
+        settings_caregiver_language_consequence: Changes this area only, never the lessons
+        settings_captions_title: Captions
+        settings_captions_consequence: Show spoken instructions on screen
+        settings_reduced_motion_title: Reduced motion
+        settings_reduced_motion_consequence: Use static pages and simple fades
+        settings_high_contrast_title: High contrast
+        settings_high_contrast_consequence: Stronger borders and no faint text
+        settings_background_music_title: Background music
+        settings_background_music_consequence: Speech always stays clear
     -->
 </resources>

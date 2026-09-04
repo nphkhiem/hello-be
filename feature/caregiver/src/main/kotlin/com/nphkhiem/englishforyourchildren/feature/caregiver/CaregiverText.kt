@@ -37,8 +37,14 @@ val LocalCaregiverLanguage = compositionLocalOf { CaregiverLanguage.BOTH }
 fun caregiverText(@StringRes id: Int, vararg formatArgs: Any): String =
     LocalContext.current.caregiverText(LocalCaregiverLanguage.current, id, formatArgs)
 
-/** The same resolution, reachable from somewhere that is not a composition. */
-internal fun Context.caregiverText(
+/**
+ * The same resolution, reachable from somewhere that is not a composition.
+ *
+ * Public because a test asserting what a caregiver reads has to resolve it the way the screen does.
+ * Reading the resource straight would describe the English rather than what is on screen, which is
+ * how a bilingual assertion quietly becomes a monolingual one.
+ */
+fun Context.caregiverText(
     language: CaregiverLanguage,
     @StringRes id: Int,
     formatArgs: Array<out Any> = emptyArray()
