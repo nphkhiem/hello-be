@@ -47,6 +47,20 @@ class CaregiverTranslationTest {
     }
 
     @Test
+    fun givenAnyTranslatedString_whenItIsRead_thenItKeepsEveryPlaceholderTheEnglishHas() {
+        // The one mistake in a translation that no compiler catches. A dropped %1$s means the
+        // child's name silently disappears at runtime, and an added one crashes the format call.
+        val wrong = english().keys.mapNotNull { key ->
+            val vietnamese = translated()[key] ?: return@mapNotNull null
+            val expected = placeholders(english().getValue(key))
+            val actual = placeholders(vietnamese)
+            if (expected == actual) null else "$key expected $expected but says $actual"
+        }
+
+        assertThat(wrong).isEmpty()
+    }
+
+    @Test
     fun givenAnyVietnameseString_whenItIsRead_thenItSaysSomething() {
         // A blank value is the one state worse than an untranslated one. `TBU` is visible and
         // findable, and an absent key falls back to English, but an empty string shows a caregiver
@@ -55,6 +69,10 @@ class CaregiverTranslationTest {
 
         assertThat(blank).isEmpty()
     }
+
+    /** Every %1$s and %2$d in a string, as a set, because order is the translator's to choose. */
+    private fun placeholders(value: String): Set<String> =
+        PLACEHOLDER.findAll(value).map { it.value }.toSet()
 
     private fun english(): Map<String, String> = strings(File(VALUES, "strings.xml"))
 
@@ -71,6 +89,8 @@ class CaregiverTranslationTest {
         val VALUES_VI = File("src/main/res/values-vi")
         val ENTRY = Regex("""<string name="([^"]+)">(.*?)</string>""", RegexOption.DOT_MATCHES_ALL)
         val COMMENT = Regex("""<!--.*?-->""", RegexOption.DOT_MATCHES_ALL)
+
+        val PLACEHOLDER = Regex("""%\d+\$[sd]""")
 
         /** What a string says while it is waiting for somebody who speaks the language. */
         const val UNTRANSLATED = "TBU"
