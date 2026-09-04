@@ -29,7 +29,7 @@
     <string name="settings_off">Tắt</string>
     <string name="settings_saving">Đang lưu\u2026</string>
     <string name="settings_save_failed">Chưa lưu được thay đổi này. Hãy thử lại.</string>
-    <string name="settings_restore">Đặt lại như ban đầu</string>
+    <string name="settings_restore">Khôi phục cài đặt gốc</string>
     <string name="profiles_title">Hồ sơ</string>
     <string name="profiles_local">Chỉ lưu trên thiết bị này</string>
     <string name="profiles_capacity">Đã dùng %1$d trong %2$d hồ sơ</string>
