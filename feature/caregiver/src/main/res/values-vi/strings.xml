@@ -2,104 +2,92 @@
 <!--
     The caregiver area in Vietnamese.
 
-    UNREVIEWED AND INCOMPLETE ON PURPOSE. The seven strings below were already written in
-    Vietnamese in the English file, where they sat joined to their English halves by a middle dot;
-    splitting them apart is all that happened here. Everything else is still waiting for someone who
-    speaks the language.
+    UNREVIEWED AND INCOMPLETE. A value of TBU means nobody has translated that string yet, and it is
+    what a caregiver reading Vietnamese will actually see, so no release goes out while one remains.
+    `CaregiverTranslationTest` counts them and fails when a new English string arrives without a
+    Vietnamese decision beside it.
 
-    The keys commented out at the bottom have no translation yet. Android falls back to the English
-    string for each of them, so nothing is blank and nothing crashes; a caregiver reading Vietnamese
-    simply meets English for those. `CaregiverTranslationTest` pins that list, so a new English
-    string added without a decision about its Vietnamese fails the build rather than quietly joining
-    the gap.
-
-    To translate one: move it out of the comment block and fill it in.
+    Keys are in the same order as values/strings.xml, so the two files can be read side by side and
+    the English for any key is on the matching line there.
 -->
 <resources>
     <string name="gate_title">Dành cho người lớn</string>
+    <string name="gate_instruction">TBU</string>
     <string name="gate_back_hint">Quay lại màn hình của bé</string>
+    <string name="gate_retry">TBU</string>
+    <string name="gate_unavailable">TBU</string>
     <string name="caregiver_area">Khu vực phụ huynh</string>
+    <string name="caregiver_rail_title">TBU</string>
+    <string name="caregiver_overview">TBU</string>
+    <string name="caregiver_settings">TBU</string>
+    <string name="caregiver_profiles">TBU</string>
+    <string name="caregiver_return">TBU</string>
+    <string name="overview_title">TBU</string>
+    <string name="overview_local_note">TBU</string>
+    <string name="overview_recent">TBU</string>
+    <string name="overview_suggestion">TBU</string>
+    <string name="overview_new_profile_title">TBU</string>
+    <string name="overview_new_profile_hint">TBU</string>
+    <string name="overview_nothing_recent_title">TBU</string>
+    <string name="overview_nothing_recent_hint">TBU</string>
+    <string name="overview_pending_save">TBU</string>
+    <string name="settings_title">TBU</string>
+    <string name="settings_intro">TBU</string>
     <string name="settings_group_language">Hỗ trợ ngôn ngữ</string>
     <string name="settings_group_accessibility">Trợ năng</string>
     <string name="settings_group_audio">Âm thanh</string>
-    <string name="profiles_local">Chỉ lưu trên TV này</string>
-
-    <string name="settings_language_english">English</string>
+    <string name="settings_on">TBU</string>
+    <string name="settings_off">TBU</string>
+    <string name="settings_saving">TBU</string>
+    <string name="settings_save_failed">TBU</string>
+    <string name="settings_restore">TBU</string>
+    <string name="profiles_title">TBU</string>
+    <string name="profiles_local">Chỉ lưu trên thiết bị này</string>
+    <string name="profiles_capacity">TBU</string>
+    <string name="profiles_add">TBU</string>
+    <string name="profiles_at_limit">TBU</string>
+    <string name="profiles_selected">TBU</string>
+    <string name="profiles_edit_name">TBU</string>
+    <string name="profiles_change_picture">TBU</string>
+    <string name="profiles_reset">TBU</string>
+    <string name="profiles_delete">TBU</string>
+    <string name="profiles_empty_title">TBU</string>
+    <string name="profiles_empty_hint">TBU</string>
+    <string name="profiles_persistence_failed">TBU</string>
+    <string name="confirm_delete_title">TBU</string>
+    <string name="confirm_delete_body">TBU</string>
+    <string name="confirm_delete_keep">TBU</string>
+    <string name="confirm_delete_do">TBU</string>
+    <string name="confirm_delete_working">TBU</string>
+    <string name="confirm_delete_failed">TBU</string>
+    <string name="confirm_reset_title">TBU</string>
+    <string name="confirm_reset_body">TBU</string>
+    <string name="confirm_reset_keep">TBU</string>
+    <string name="confirm_reset_do">TBU</string>
+    <string name="confirm_reset_working">TBU</string>
+    <string name="confirm_reset_failed">TBU</string>
+    <string name="confirm_retry">TBU</string>
+    <string name="confirm_reset_mark">TBU</string>
+    <string name="recovery_db_kicker">TBU</string>
+    <string name="recovery_db_title">TBU</string>
+    <string name="recovery_db_body">TBU</string>
+    <string name="recovery_db_retry">TBU</string>
+    <string name="recovery_db_review_reset">TBU</string>
+    <string name="recovery_db_code">TBU</string>
+    <string name="gate_question">TBU</string>
+    <string name="settings_vietnamese_help_title">TBU</string>
+    <string name="settings_vietnamese_help_consequence">TBU</string>
+    <string name="settings_caregiver_language_title">TBU</string>
+    <string name="settings_caregiver_language_consequence">TBU</string>
+    <string name="settings_captions_title">TBU</string>
+    <string name="settings_captions_consequence">TBU</string>
+    <string name="settings_reduced_motion_title">TBU</string>
+    <string name="settings_reduced_motion_consequence">TBU</string>
+    <string name="settings_high_contrast_title">TBU</string>
+    <string name="settings_high_contrast_consequence">TBU</string>
+    <string name="settings_background_music_title">TBU</string>
+    <string name="settings_background_music_consequence">TBU</string>
+    <string name="settings_language_english">Tiếng Anh</string>
     <string name="settings_language_vietnamese">Tiếng Việt</string>
-    <string name="settings_language_both">English + Tiếng Việt</string>
-
-    <!--
-        Not yet translated. English text given so the meaning is here rather than
-        somewhere else. Move a line out of this block once it says something in Vietnamese.
-
-        gate_instruction: Solve this quick question to open caregiver settings.
-        gate_retry: Not quite. Here is another question.
-        gate_unavailable: This question is not ready. Press Back to return.
-        caregiver_rail_title: For %1$s
-        caregiver_overview: Overview
-        caregiver_settings: Settings
-        caregiver_profiles: Profiles
-        caregiver_return: Return to child mode
-        overview_title: %1$s\u2019s learning
-        overview_local_note: A simple local summary. Nothing is sent from this TV.
-        overview_recent: Recently practiced
-        overview_suggestion: Try away from the TV
-        overview_new_profile_title: No sessions yet
-        overview_new_profile_hint: When %1$s finishes a first adventure, a summary appears here.
-        overview_nothing_recent_title: Nothing this week
-        overview_nothing_recent_hint: %1$s has practised before. There is nothing new to report for this period.
-        overview_pending_save: One recent session is still being written down.
-        settings_title: Settings
-        settings_intro: Changes describe their effect on the child experience.
-        settings_on: On
-        settings_off: Off
-        settings_saving: Saving\u2026
-        settings_save_failed: That change was not saved. Try again.
-        settings_restore: Restore defaults
-        profiles_title: Profiles
-        profiles_capacity: %1$d of %2$d profiles
-        profiles_add: Add child
-        profiles_at_limit: This TV holds four profiles. Remove one to add another.
-        profiles_selected: Selected profile
-        profiles_edit_name: Edit name
-        profiles_change_picture: Change picture
-        profiles_reset: Reset progress
-        profiles_delete: Delete profile
-        profiles_empty_title: No profiles on this TV
-        profiles_empty_hint: Add a child to start.
-        profiles_persistence_failed: Profile changes are not being saved right now.
-        confirm_delete_title: Delete %1$s\u2019s profile?
-        confirm_delete_body: This removes %1$s and all learning progress from this TV. It cannot be undone.
-        confirm_delete_keep: Keep profile
-        confirm_delete_do: Delete profile
-        confirm_delete_working: Deleting\u2026
-        confirm_delete_failed: %1$s\u2019s profile was not deleted. Nothing has changed.
-        confirm_reset_title: Reset %1$s\u2019s learning progress?
-        confirm_reset_body: %1$s\u2019s profile and picture will stay. Finished lessons and practiced words will start again.
-        confirm_reset_keep: Keep progress
-        confirm_reset_do: Reset progress
-        confirm_reset_working: Resetting\u2026
-        confirm_reset_failed: %1$s\u2019s progress was not reset. Nothing has changed.
-        confirm_retry: Try again
-        confirm_reset_mark: \u21BB
-        recovery_db_kicker: Local data needs attention
-        recovery_db_title: Hello Bé needs a grown-up
-        recovery_db_body: Try opening the local learning data again. Reset is available only if retry and restart cannot recover it.
-        recovery_db_retry: Try again
-        recovery_db_review_reset: Review reset
-        recovery_db_code: Recovery code: %1$s · contains no child data
-        gate_question: What is %1$d + %2$d?
-        settings_vietnamese_help_title: Vietnamese help
-        settings_vietnamese_help_consequence: Appears only after the third try at a question
-        settings_caregiver_language_title: Caregiver language
-        settings_caregiver_language_consequence: Changes this area only, never the lessons
-        settings_captions_title: Captions
-        settings_captions_consequence: Show spoken instructions on screen
-        settings_reduced_motion_title: Reduced motion
-        settings_reduced_motion_consequence: Use static pages and simple fades
-        settings_high_contrast_title: High contrast
-        settings_high_contrast_consequence: Stronger borders and no faint text
-        settings_background_music_title: Background music
-        settings_background_music_consequence: Speech always stays clear
-    -->
+    <string name="settings_language_both">Tiếng Anh + Tiếng Việt</string>
 </resources>

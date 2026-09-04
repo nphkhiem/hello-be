@@ -69,9 +69,10 @@ fun settingRows(settings: AppSettings): List<SettingRow> = listOf(
 /**
  * What a language is called on the screen.
  *
- * Never run through [caregiverText]: a language names itself the same way whoever is reading. A
- * Vietnamese speaker looking for their own language looks for "Tiếng Việt", not for a translation
- * of the word "Vietnamese".
+ * Read through [caregiverText] like everything else here, so a caregiver reading Vietnamese meets
+ * "Tiếng Anh" rather than "English". An earlier version of this comment claimed the opposite while
+ * the code already did this, and the native speaker on the project settled it: a language name is
+ * a word in a sentence, not a label that stands outside translation.
  */
 @Composable
 fun languageName(language: CaregiverLanguage): String = when (language) {
