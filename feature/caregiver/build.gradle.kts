@@ -20,6 +20,7 @@ dependencies {
     // because the settings screen writes what a caregiver changes, which is the point of it.
     implementation(libs.androidx.activity.compose)
 
+    testImplementation(projects.testSupport)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui)
