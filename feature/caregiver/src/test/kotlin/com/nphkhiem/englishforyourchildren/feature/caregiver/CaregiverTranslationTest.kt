@@ -38,12 +38,22 @@ class CaregiverTranslationTest {
 
     @Test
     fun givenTheStringsNobodyHasTranslated_whenTheyAreCounted_thenTheNumberHasNotGrown() {
-        // The whole ratchet. This number is allowed to fall and never to rise, so translating one
-        // means changing it here, and adding an English string without a Vietnamese decision fails
-        // rather than quietly joining the backlog.
+        // The ratchet, and deliberately an upper bound rather than an exact count. Somebody working
+        // through the backlog should not have to edit this file every time they finish a line; what
+        // must not happen is a new English string arriving and quietly joining the gap.
         val waiting = translated().filterValues { it == UNTRANSLATED }.keys
 
-        assertThat(waiting).hasSize(AWAITING_A_NATIVE_SPEAKER)
+        assertThat(waiting.size).isAtMost(AWAITING_A_NATIVE_SPEAKER)
+    }
+
+    @Test
+    fun givenAnyVietnameseString_whenItIsRead_thenItSaysSomething() {
+        // A blank value is the one state worse than an untranslated one. `TBU` is visible and
+        // findable, and an absent key falls back to English, but an empty string shows a caregiver
+        // nothing at all and looks like a screen that failed to load.
+        val blank = translated().filterValues { it.isBlank() }.keys
+
+        assertThat(blank).isEmpty()
     }
 
     private fun english(): Map<String, String> = strings(File(VALUES, "strings.xml"))
@@ -65,7 +75,7 @@ class CaregiverTranslationTest {
         /** What a string says while it is waiting for somebody who speaks the language. */
         const val UNTRANSLATED = "TBU"
 
-        /** Only ever goes down. See the file's own header. */
+        /** An upper bound, not a tally. It comes down as the backlog does. */
         const val AWAITING_A_NATIVE_SPEAKER = 69
     }
 }
