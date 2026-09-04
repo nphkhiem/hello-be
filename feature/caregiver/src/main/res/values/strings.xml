@@ -2,13 +2,13 @@
 <resources>
     <!-- Bilingual throughout, per the approved draft: caregiver surfaces address an adult who may
          read either language, and the separator is a middle dot rather than a slash. -->
-    <string name="gate_title">Grown-ups only · Dành cho người lớn</string>
+    <string name="gate_title">Grown-ups only</string>
     <string name="gate_instruction">Solve this quick question to open caregiver settings.</string>
-    <string name="gate_back_hint">Back returns to the child screen · Quay lại màn hình của bé</string>
+    <string name="gate_back_hint">Back returns to the child screen</string>
     <!-- Neutral on purpose. An incorrect answer is not a failure and is never styled as one. -->
     <string name="gate_retry">Not quite. Here is another question.</string>
     <string name="gate_unavailable">This question is not ready. Press Back to return.</string>
-    <string name="caregiver_area">Caregiver area · Khu vực phụ huynh</string>
+    <string name="caregiver_area">Caregiver area</string>
     <string name="caregiver_rail_title">For %1$s</string>
     <string name="caregiver_overview">Overview</string>
     <string name="caregiver_settings">Settings</string>
@@ -27,9 +27,9 @@
     <string name="overview_pending_save">One recent session is still being written down.</string>
     <string name="settings_title">Settings</string>
     <string name="settings_intro">Changes describe their effect on the child experience.</string>
-    <string name="settings_group_language">Language support · Hỗ trợ ngôn ngữ</string>
-    <string name="settings_group_accessibility">Accessibility · Trợ năng</string>
-    <string name="settings_group_audio">Audio · Âm thanh</string>
+    <string name="settings_group_language">Language support</string>
+    <string name="settings_group_accessibility">Accessibility</string>
+    <string name="settings_group_audio">Audio</string>
     <!-- State in words. The approved draft keeps setting state visible in text and semantics
          rather than in the colour of a toggle. -->
     <string name="settings_on">On</string>
@@ -38,7 +38,7 @@
     <string name="settings_save_failed">That change was not saved. Try again.</string>
     <string name="settings_restore">Restore defaults</string>
     <string name="profiles_title">Profiles</string>
-    <string name="profiles_local">Stored only on this TV · Chỉ lưu trên TV này</string>
+    <string name="profiles_local">Stored only on this TV</string>
     <string name="profiles_capacity">%1$d of %2$d profiles</string>
     <string name="profiles_add">Add child</string>
     <!-- Said rather than left to a greyed control, per the unavailable rule this product uses

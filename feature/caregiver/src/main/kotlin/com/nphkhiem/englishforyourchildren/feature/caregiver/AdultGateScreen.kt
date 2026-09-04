@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.tv.material3.Surface
 import androidx.tv.material3.SurfaceDefaults
@@ -90,7 +89,7 @@ private fun GateCard(
             verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap)
         ) {
             Text(
-                text = stringResource(R.string.gate_title),
+                text = caregiverText(R.string.gate_title),
                 style = HelloBeTheme.typography.headlineLarge,
                 color = HelloBeTheme.colors.textPrimary,
                 textAlign = TextAlign.Center
@@ -100,7 +99,7 @@ private fun GateCard(
                 // above a line saying there is not one is the self-contradicting copy that
                 // shipped on child home once already.
                 Text(
-                    text = stringResource(R.string.gate_instruction),
+                    text = caregiverText(R.string.gate_instruction),
                     style = HelloBeTheme.typography.bodyMedium,
                     color = HelloBeTheme.colors.textSecondary,
                     textAlign = TextAlign.Center
@@ -111,7 +110,7 @@ private fun GateCard(
                 // Neutral, and never the error palette. A grown-up who mistypes has not failed at
                 // anything, and the design brief keeps failure language out of this product.
                 Text(
-                    text = stringResource(R.string.gate_retry),
+                    text = caregiverText(R.string.gate_retry),
                     style = HelloBeTheme.typography.bodyMedium,
                     color = HelloBeTheme.colors.textSecondary,
                     textAlign = TextAlign.Center
@@ -122,7 +121,7 @@ private fun GateCard(
                 // Fails closed. A challenge that cannot offer a wrong answer to stand on would open
                 // on a single press, so it offers nothing to press at all.
                 Text(
-                    text = stringResource(R.string.gate_unavailable),
+                    text = caregiverText(R.string.gate_unavailable),
                     style = HelloBeTheme.typography.bodyMedium,
                     color = HelloBeTheme.colors.textSecondary,
                     textAlign = TextAlign.Center
@@ -143,7 +142,7 @@ private fun GateCard(
             }
 
             Text(
-                text = stringResource(R.string.gate_back_hint),
+                text = caregiverText(R.string.gate_back_hint),
                 style = HelloBeTheme.typography.labelSmall,
                 color = HelloBeTheme.colors.textTertiary,
                 textAlign = TextAlign.Center

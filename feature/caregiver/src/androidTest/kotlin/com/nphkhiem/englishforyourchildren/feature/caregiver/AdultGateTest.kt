@@ -1,5 +1,6 @@
 package com.nphkhiem.englishforyourchildren.feature.caregiver
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
@@ -13,6 +14,7 @@ import androidx.compose.ui.test.requestFocus
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import org.junit.Rule
 import org.junit.Test
@@ -24,8 +26,8 @@ class AdultGateTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val resources
-        get() = InstrumentationRegistry.getInstrumentation().targetContext.resources
+    private val context
+        get() = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test
     fun givenTheGate_whenItOpens_thenFocusRestsOnAnAnswerThatIsNotTheCorrectOne() {
@@ -130,14 +132,38 @@ class AdultGateTest {
 
     @Test
     fun givenTheGate_whenItIsRead_thenItExplainsItselfAndBackInBothLanguages() {
+        // Bilingual, per the approved draft, which is what makes this a caregiver surface. It used
+        // to be bilingual because the strings themselves carried both languages joined by a middle
+        // dot, which meant a caregiver who reads only one of them could never be given just that
+        // one. It is now the default of `LocalCaregiverLanguage`, and the joining happens here.
         setGate(CaregiverFixtures.gate())
 
         composeTestRule.onNodeWithText(title()).assertIsDisplayed()
         composeTestRule.onNodeWithText(backHint()).assertIsDisplayed()
-        // Bilingual, per the approved draft, which is what makes this a caregiver surface.
         assertThat(title()).contains("·")
         assertThat(backHint()).contains("·")
     }
+
+    @Test
+    fun givenACaregiverWhoReadsOneLanguage_whenTheGateIsShown_thenItSpeaksOnlyThatOne() {
+        // The point of the setting. English here, because Vietnamese for this screen exists; a
+        // string with no translation yet would fall back to English and prove nothing.
+        composeTestRule.setContent {
+            HelloBeTheme {
+                CompositionLocalProvider(
+                    LocalCaregiverLanguage provides CaregiverLanguage.ENGLISH
+                ) {
+                    AdultGateScreen(state = CaregiverFixtures.gate(), onAction = {})
+                }
+            }
+        }
+
+        composeTestRule.onNodeWithText(ENGLISH_TITLE).assertIsDisplayed()
+    }
+
+    private fun title() = context.caregiverText(CaregiverLanguage.BOTH, R.string.gate_title)
+
+    private fun backHint() = context.caregiverText(CaregiverLanguage.BOTH, R.string.gate_back_hint)
 
     private fun setGate(state: AdultGateUiState, onAction: (AdultGateAction) -> Unit = {}) {
         composeTestRule.setContent {
@@ -147,17 +173,16 @@ class AdultGateTest {
         }
     }
 
-    private fun title() = resources.getString(R.string.gate_title)
+    // These three have no Vietnamese yet, so every mode renders the English and reading it
+    // straight from resources still describes what the screen shows.
+    private fun instruction() = context.resources.getString(R.string.gate_instruction)
 
-    private fun backHint() = resources.getString(R.string.gate_back_hint)
+    private fun retry() = context.resources.getString(R.string.gate_retry)
 
-    private fun instruction() = resources.getString(R.string.gate_instruction)
-
-    private fun retry() = resources.getString(R.string.gate_retry)
-
-    private fun unavailable() = resources.getString(R.string.gate_unavailable)
+    private fun unavailable() = context.resources.getString(R.string.gate_unavailable)
 
     private companion object {
+        const val ENGLISH_TITLE = "Grown-ups only"
         const val POUNDING = 8
 
         /** One pixel of weight-distribution rounding, far below anything an eye resolves. */

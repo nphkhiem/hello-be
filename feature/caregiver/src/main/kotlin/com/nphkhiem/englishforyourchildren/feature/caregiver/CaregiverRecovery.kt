@@ -2,7 +2,6 @@ package com.nphkhiem.englishforyourchildren.feature.caregiver
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
 import com.nphkhiem.englishforyourchildren.ui.tv.component.RecoveryPanel
@@ -49,13 +48,13 @@ fun CaregiverRecovery(
 ) {
     RecoveryPanel(
         modifier = modifier,
-        kicker = stringResource(R.string.recovery_db_kicker),
-        title = stringResource(R.string.recovery_db_title),
-        message = stringResource(R.string.recovery_db_body),
-        technicalDetail = stringResource(R.string.recovery_db_code, state.code),
+        kicker = caregiverText(R.string.recovery_db_kicker),
+        title = caregiverText(R.string.recovery_db_title),
+        message = caregiverText(R.string.recovery_db_body),
+        technicalDetail = caregiverText(R.string.recovery_db_code, state.code),
         safeAction = { actionModifier ->
             HelloBeAction(
-                label = stringResource(R.string.recovery_db_retry),
+                label = caregiverText(R.string.recovery_db_retry),
                 onClick = { onAction(CaregiverRecoveryAction.RetryRequested) },
                 tone = HelloBeActionTone.POSITIVE,
                 modifier = actionModifier
@@ -63,7 +62,7 @@ fun CaregiverRecovery(
         },
         secondaryAction = { actionModifier ->
             HelloBeAction(
-                label = stringResource(R.string.recovery_db_review_reset),
+                label = caregiverText(R.string.recovery_db_review_reset),
                 onClick = { onAction(CaregiverRecoveryAction.ResetReviewRequested) },
                 tone = HelloBeActionTone.DESTRUCTIVE,
                 modifier = actionModifier
