@@ -1,6 +1,7 @@
 plugins {
     id("english.android.library")
     id("english.android.compose")
+    id("english.android.hilt")
 }
 
 android {
@@ -9,14 +10,17 @@ android {
 
 dependencies {
     implementation(projects.domain)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(projects.ui.tv)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.tv.material)
     // BackHandler only, so a destructive confirmation can treat Back as its safe choice. This
-    // module still reaches no navigation, repository or playback API.
+    // module reaches no navigation and no playback API. It does reach the domain repositories now,
+    // because the settings screen writes what a caregiver changes, which is the point of it.
     implementation(libs.androidx.activity.compose)
 
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui)
     testImplementation(libs.junit.jupiter)
