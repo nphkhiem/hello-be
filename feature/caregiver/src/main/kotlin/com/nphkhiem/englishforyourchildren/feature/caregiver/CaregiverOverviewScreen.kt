@@ -37,36 +37,27 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
  */
 @Composable
 fun CaregiverOverviewScreen(state: CaregiverOverviewUiState, modifier: Modifier = Modifier) {
-    // Deliberately not scrollable. Nothing on this panel is focusable, because nothing on it is
-    // pressed, and a scrolling container that no remote can move puts its lower half out of reach
-    // rather than out of sight. Everything a caregiver needs fits the stage at caregiver density,
-    // and a test holds it there.
     // The design brief asks caregiver content to reflow or reduce under a large font scale, and
-    // never to shrink text below its role size. Measured, this panel holds everything to a scale
-    // of about 1.4 and then runs out of stage: the instruction under the suggestion was the first
-    // thing to lose its height, which is the failure the brief names. Above that the recent words
-    // stand down. They are a reminder rather than the point of the screen, and every one of them
-    // is still in free play; the summaries and the one thing to try are what a caregiver came for.
+    // never to shrink text below its role size. Above this scale the recent words stand down. They
+    // are a reminder rather than the point of the screen, and every one of them is still in free
+    // play; the summaries and the one thing to try are what a caregiver came for.
     val reduced = LocalDensity.current.fontScale >= REDUCE_CONTENT_ABOVE
 
-    // Above that scale the panel also has to reflow, because reducing alone is not enough: the
-    // heading and the three summaries fill the stage on their own, and whatever came last lost its
-    // height. It becomes a scrolling column, and it becomes focusable at the same time. On every
-    // other surface a scroll is safe because its rows take focus; nothing here does, so the
-    // container itself has to, or a caregiver with large text could see the lower half and never
-    // reach it. At ordinary scale it stays exactly as it was: no scroll, and nothing focusable.
+    // A scrolling column whose cards take focus. This panel used to refuse a scroll at ordinary
+    // scale, on the grounds that everything fitted the stage and that a container no remote can
+    // move puts its lower half out of reach rather than out of sight. The first half stopped being
+    // true when the suggestion got a source: every label here carries two languages, and a real
+    // suggestion under a real summary is taller than the stage at any scale.
+    //
+    // The second half was the real problem, and making the container itself focusable does not
+    // answer it: a focused scrolling container does not move for a D-pad, so the lower half stayed
+    // exactly as unreachable as before. What moves a scroll on this television is focus arriving
+    // somewhere further down, which is why every card here takes focus even though none of them
+    // can be pressed. Reading is what a caregiver came to do, and this is what lets them.
     Column(
         modifier = modifier
             .fillMaxSize()
-            .then(
-                if (reduced) {
-                    Modifier
-                        .verticalScroll(rememberScrollState())
-                        .focusable()
-                } else {
-                    Modifier
-                }
-            ),
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space4)
     ) {
         PanelHead(state = state)
@@ -86,28 +77,23 @@ fun CaregiverOverviewScreen(state: CaregiverOverviewUiState, modifier: Modifier 
             )
         }
 
-        // Side by side, as the draft draws them. Stacked they were a panel taller than the stage,
-        // and on a surface where nothing takes focus the overflow would have been unreachable.
+        // Side by side, as the draft draws them, and each as tall as what it holds. A weight here
+        // would hand them the room that is left rather than the room they need, and what was left
+        // was half a suggestion: the instruction under it lost its height and was clipped away
+        // with nothing to say that it had been.
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(if (reduced) Modifier else Modifier.weight(1f)),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space4)
         ) {
             val progress = state.progress
             if (progress is OverviewProgress.Practiced && !reduced) {
                 RecentWords(
                     words = recentWordsShown(progress.recentWords),
-                    modifier = Modifier.weight(1f).fillMaxHeight()
+                    modifier = Modifier.weight(1f)
                 )
             }
             state.suggestion?.let {
-                Suggestion(
-                    suggestion = it,
-                    modifier = Modifier
-                        .weight(1f)
-                        .then(if (reduced) Modifier else Modifier.fillMaxHeight())
-                )
+                Suggestion(suggestion = it, modifier = Modifier.weight(1f))
             }
         }
     }
@@ -246,7 +232,10 @@ private fun Explanation(title: String, hint: String) {
 @Composable
 private fun Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Surface(
-        modifier = modifier,
+        // Focusable so it can be read, not so it can be pressed. Nothing on this panel is an
+        // action; what focus buys here is a scroll a remote can drive, because a card taking focus
+        // is what brings itself into view.
+        modifier = modifier.focusable(),
         shape = HelloBeShapes.large,
         colors = SurfaceDefaults.colors(
             containerColor = HelloBeTheme.colors.surfacePrimary,

@@ -60,18 +60,19 @@ class CaregiverFontScaleAuditTest {
     }
 
     @Test
-    fun givenOrdinaryText_whenTheOverviewIsDrawn_thenItDoesNotScroll() {
-        // At ordinary scale everything fits, and a scroll nothing can drive would put the lower
-        // half out of reach rather than out of sight.
+    fun givenOrdinaryText_whenTheOverviewIsDrawn_thenItAlreadyScrollsSoTheRestCanBeReached() {
+        // This used to assert the opposite: that at ordinary scale everything fits, so a scroll
+        // nothing could drive would put the lower half out of reach rather than out of sight. The
+        // fitting stopped being true when the suggestion got a source, and the driving stopped
+        // being a problem when the cards took focus. Reflow at every scale, never truncation.
         setOverview(composeTestRule, scale = 1.0f)
 
-        assertThat(composeTestRule.onAllNodes(hasScrollAction()).fetchSemanticsNodes()).isEmpty()
+        assertThat(composeTestRule.onAllNodes(hasScrollAction()).fetchSemanticsNodes())
+            .isNotEmpty()
     }
 
     @Test
-    fun givenLargeText_whenTheOverviewIsDrawn_thenItScrollsSoTheRestCanBeReached() {
-        // Reflow, not truncation. The content is taller than the stage now, so it has to be
-        // reachable, and the container takes focus for that reason alone.
+    fun givenLargeText_whenTheOverviewIsDrawn_thenItStillScrolls() {
         setOverview(composeTestRule, scale = 1.5f)
 
         assertThat(composeTestRule.onAllNodes(hasScrollAction()).fetchSemanticsNodes())

@@ -78,6 +78,17 @@ fun LessonCelebrationScreen(
         entryFocus = doneFocus,
         scenery = {
             Box(modifier = Modifier.fillMaxSize().background(HelloBeTheme.colors.scenery))
+        },
+        // The overlay slot rather than the page, so the scrim covers the stage and the prompt is
+        // bounded by the screen. An authored instruction in two languages does not fit a slot.
+        overlay = {
+            if (activity != null) {
+                PlayTogetherPrompt(
+                    activity = activity,
+                    focusRestorer = promptRestorer,
+                    onAction = onAction
+                )
+            }
         }
     ) {
         StoryPage(
@@ -86,14 +97,6 @@ fun LessonCelebrationScreen(
             doneFocus = doneFocus,
             promptRestorer = promptRestorer
         )
-
-        if (activity != null) {
-            PlayTogetherPrompt(
-                activity = activity,
-                focusRestorer = promptRestorer,
-                onAction = onAction
-            )
-        }
     }
 }
 

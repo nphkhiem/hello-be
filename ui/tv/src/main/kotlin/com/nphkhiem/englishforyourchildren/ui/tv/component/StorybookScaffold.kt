@@ -34,6 +34,13 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
  * [support] is the predictable strip along the bottom where Pip and the caption live, which is
  * how Pip is prevented from covering the focal object rather than merely being asked not to.
  *
+ * [overlay] is the one slot that covers everything, and it is where a dialog belongs. Put inside
+ * [content] a dialog is given the content slot rather than the stage: its scrim then leaves the
+ * header and the support strip uncovered, which says the wrong thing about what is still
+ * reachable, and its own height is bounded by a slot rather than by the screen. A co-play prompt
+ * carrying a caregiver instruction in two languages is what found this: its second choice was
+ * pushed out of the slot and clipped away entirely.
+ *
  * [entryFocus] is claimed exactly once, and [entryFocusReady] says when there is something real to
  * claim it on. A screen that loads its content says so, because claiming focus on a spinner spends
  * the one claim on a view that is about to be thrown away: when the real content replaces it, the
@@ -57,6 +64,7 @@ fun StorybookScaffold(
     support: (@Composable RowScope.() -> Unit)? = null,
     entryFocus: FocusRequester? = null,
     entryFocusReady: Boolean = true,
+    overlay: (@Composable BoxScope.() -> Unit)? = null,
     content: @Composable BoxScope.() -> Unit
 ) {
     if (entryFocus != null) {
@@ -109,5 +117,9 @@ fun StorybookScaffold(
                 )
             }
         }
+
+        // Last, and outside the inset column, so it covers the whole stage rather than the part of
+        // it a screen author happened to be standing in.
+        overlay?.invoke(this)
     }
 }

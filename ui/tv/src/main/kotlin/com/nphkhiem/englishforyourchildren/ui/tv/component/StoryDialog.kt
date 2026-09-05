@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -119,18 +121,34 @@ fun StoryDialog(
         ) {
             pip()
 
-            Text(
-                text = title,
-                style = HelloBeTheme.typography.headlineLarge,
-                color = colors.textPrimary,
-                textAlign = TextAlign.Center
-            )
-            Text(
-                text = description,
-                style = HelloBeTheme.typography.bodyLarge,
-                color = colors.textSecondary,
-                textAlign = TextAlign.Center
-            )
+            // The words are the part that gives way when there is not enough room. This dialog sits
+            // in the scaffold's content slot, which is a hard bound, and a caregiver instruction
+            // written in two languages arrives at roughly twice the height the shell was drawn
+            // against. Something has to yield, and it may not be the choices: a child who cannot
+            // see the safe one cannot take it.
+            //
+            // `fill = false` so that a short dialog is still exactly as tall as its content, which
+            // is every dialog the app had before an authored instruction reached one.
+            Column(
+                modifier = Modifier
+                    .weight(weight = 1f, fill = false)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap)
+            ) {
+                Text(
+                    text = title,
+                    style = HelloBeTheme.typography.headlineLarge,
+                    color = colors.textPrimary,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    text = description,
+                    style = HelloBeTheme.typography.bodyLarge,
+                    color = colors.textSecondary,
+                    textAlign = TextAlign.Center
+                )
+            }
 
             // Stacked rather than side by side: two full-width choices give a child one clear
             // vertical list to move through, and the safe choice sits first in that order.

@@ -22,9 +22,9 @@
       ],
       "coPlay": {
         "title": "Touch and name",
-        "instruction": "Sit facing your child. Say “eyes” and touch your own eyes, then let them copy you. Do ears, nose and mouth the same way.",
+        "instruction": "Say “eyes” and touch your own, then let your child copy you. Try ears, nose and mouth.",
         "titleVi": "Chạm và gọi tên",
-        "instructionVi": "Ngồi đối diện bé. Nói “eyes” và chạm vào mắt mình, rồi để bé làm theo. Làm tương tự với ears, nose và mouth."
+        "instructionVi": "Nói “eyes” rồi chạm vào mắt mình, để bé làm theo. Thử với ears, nose và mouth."
       },
       "activities": [
         {
@@ -214,9 +214,9 @@
       ],
       "coPlay": {
         "title": "Count together",
-        "instruction": "Hold up your hands and count the fingers in English together, then sit down and count toes. Ten of each is plenty for one go.",
+        "instruction": "Count your fingers together in English, then sit down and count toes.",
         "titleVi": "Cùng nhau đếm",
-        "instructionVi": "Giơ hai bàn tay lên, cùng bé đếm ngón tay bằng tiếng Anh, rồi ngồi xuống đếm ngón chân. Mười ngón mỗi bên là đủ cho một lượt."
+        "instructionVi": "Cùng bé đếm ngón tay bằng tiếng Anh, rồi ngồi xuống đếm ngón chân."
       },
       "activities": [
         {
@@ -406,9 +406,9 @@
       ],
       "coPlay": {
         "title": "Pat and say",
-        "instruction": "Pat your head and say “head”, then your hair, tummy and back. Go slowly first and a little faster after, and let your child lead a round.",
+        "instruction": "Pat your head and say “head”, then hair, tummy and back. Let your child lead a round.",
         "titleVi": "Vỗ và nói",
-        "instructionVi": "Vỗ nhẹ lên đầu và nói “head”, rồi đến tóc, bụng và lưng. Làm chậm trước rồi nhanh dần, và để bé dẫn một lượt."
+        "instructionVi": "Vỗ lên đầu và nói “head”, rồi tóc, bụng, lưng. Để bé dẫn một lượt."
       },
       "activities": [
         {
@@ -598,9 +598,9 @@
       ],
       "coPlay": {
         "title": "Stretch and wiggle",
-        "instruction": "Stand up and stretch your arms, shake your legs, bend your knees, then smile to show your teeth. Say each word out loud as you go.",
+        "instruction": "Stretch your arms, shake your legs, bend your knees, then smile to show your teeth.",
         "titleVi": "Vươn vai và lắc lư",
-        "instructionVi": "Đứng dậy vươn hai cánh tay, lắc chân, gập đầu gối, rồi cười tươi khoe hàm răng. Vừa làm vừa nói to từng từ."
+        "instructionVi": "Vươn hai tay, lắc chân, gập đầu gối, rồi cười tươi khoe răng."
       },
       "activities": [
         {
@@ -782,9 +782,9 @@
       "letters": [],
       "coPlay": {
         "title": "Body word hunt",
-        "instruction": "Say a body word in English and see how quickly your child can touch it. Then swap over and let them call the words for you.",
+        "instruction": "Say a body word in English and see how fast your child can touch it. Then swap over.",
         "titleVi": "Đi tìm từ về cơ thể",
-        "instructionVi": "Nói một từ về cơ thể bằng tiếng Anh và xem bé chạm đúng chỗ nhanh thế nào. Rồi đổi vai để bé gọi từ cho mình."
+        "instructionVi": "Nói một từ về cơ thể bằng tiếng Anh, xem bé chạm nhanh thế nào. Rồi đổi vai."
       },
       "activities": [
         {

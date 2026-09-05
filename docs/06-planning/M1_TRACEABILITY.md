@@ -105,6 +105,12 @@ whatever the child practised most recently. Null still means what the state says
 it happens for a reason a caregiver would recognise: nobody has practised yet, or the lesson offers
 nothing away from the screen.
 
+Giving the panel a real suggestion made it taller than the stage, which it had been asserted never
+to be. It scrolls now, at every font scale rather than only above 1.3, and its cards take focus so
+that a remote can drive the scroll. Focus on a card here buys reading rather than pressing: nothing
+on this panel is an action, and a card bringing itself into view is the only thing on a television
+that moves a scroll.
+
 What that suggestion still owes is the voice. The design brief asks for "spoken and written
 caregiver instruction" and only the written half exists: no recording is referenced, so the prompt
 has nothing to play and does not pretend otherwise. That is a recording to commission alongside the
