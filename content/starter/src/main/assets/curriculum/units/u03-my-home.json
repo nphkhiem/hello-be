@@ -1,0 +1,997 @@
+{
+  "schemaVersion": 2,
+  "id": "u03-my-home",
+  "ordinal": 2,
+  "theme": "My Home",
+  "word": "home",
+  "scenery": "A family home in the evening with the lamps on",
+  "lessons": [
+    {
+      "id": "u03-my-home-l1",
+      "ordinal": 0,
+      "kind": "TEACHING",
+      "teaches": [
+        "word-bedroom",
+        "word-bathroom",
+        "word-kitchen",
+        "word-door"
+      ],
+      "letters": [
+        "letter-d",
+        "letter-b"
+      ],
+      "coPlay": {
+        "title": "A tour of home",
+        "instruction": "Walk to each room together and say its English name at the doorway.",
+        "titleVi": "Đi thăm nhà mình",
+        "instructionVi": "Cùng bé đi tới từng phòng và nói tên tiếng Anh ngay ở cửa."
+      },
+      "activities": [
+        {
+          "id": "u03-my-home-l1-a1",
+          "ordinal": 0,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where is the bedroom?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-bedroom",
+              "label": "bedroom",
+              "image": "img-bedroom",
+              "audio": "aud-en-bedroom"
+            },
+            {
+              "skillId": "word-bathroom",
+              "label": "bathroom",
+              "image": "img-bathroom",
+              "audio": "aud-en-bathroom"
+            }
+          ],
+          "correctSkillId": "word-bedroom"
+        },
+        {
+          "id": "u03-my-home-l1-a2",
+          "ordinal": 1,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where is the kitchen?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-kitchen",
+              "label": "kitchen",
+              "image": "img-kitchen",
+              "audio": "aud-en-kitchen"
+            },
+            {
+              "skillId": "word-door",
+              "label": "door",
+              "image": "img-door",
+              "audio": "aud-en-door"
+            }
+          ],
+          "correctSkillId": "word-kitchen"
+        },
+        {
+          "id": "u03-my-home-l1-a3",
+          "ordinal": 2,
+          "family": "PICTURE_MATCHING",
+          "prompt": "Find the bathroom.",
+          "promptAsset": "aud-en-prompt-find-the",
+          "choices": [
+            {
+              "skillId": "word-bedroom",
+              "label": "bedroom",
+              "image": "img-bedroom",
+              "audio": "aud-en-bedroom"
+            },
+            {
+              "skillId": "word-bathroom",
+              "label": "bathroom",
+              "image": "img-bathroom",
+              "audio": "aud-en-bathroom"
+            },
+            {
+              "skillId": "word-kitchen",
+              "label": "kitchen",
+              "image": "img-kitchen",
+              "audio": "aud-en-kitchen"
+            },
+            {
+              "skillId": "word-door",
+              "label": "door",
+              "image": "img-door",
+              "audio": "aud-en-door"
+            }
+          ],
+          "correctSkillId": "word-bathroom"
+        },
+        {
+          "id": "u03-my-home-l1-a4",
+          "ordinal": 3,
+          "family": "LETTER_AND_SOUND",
+          "prompt": "Which one starts with D?",
+          "promptAsset": "aud-en-prompt-which-one-starts-with",
+          "choices": [
+            {
+              "skillId": "word-door",
+              "label": "door",
+              "image": "img-door",
+              "audio": "aud-en-door"
+            },
+            {
+              "skillId": "word-kitchen",
+              "label": "kitchen",
+              "image": "img-kitchen",
+              "audio": "aud-en-kitchen"
+            }
+          ],
+          "correctSkillId": "word-door",
+          "letterSkillId": "letter-d",
+          "letterAsset": "aud-en-letter-d"
+        },
+        {
+          "id": "u03-my-home-l1-a5",
+          "ordinal": 4,
+          "family": "SAY_WITH_PIP",
+          "prompt": "Say it with me: bedroom.",
+          "promptAsset": "aud-en-prompt-say-with-me",
+          "choices": [
+            {
+              "skillId": "word-bedroom",
+              "label": "bedroom",
+              "image": "img-bedroom",
+              "audio": "aud-en-bedroom"
+            },
+            {
+              "skillId": "word-bathroom",
+              "label": "bathroom",
+              "image": "img-bathroom",
+              "audio": "aud-en-bathroom"
+            },
+            {
+              "skillId": "word-kitchen",
+              "label": "kitchen",
+              "image": "img-kitchen",
+              "audio": "aud-en-kitchen"
+            },
+            {
+              "skillId": "word-door",
+              "label": "door",
+              "image": "img-door",
+              "audio": "aud-en-door"
+            }
+          ]
+        },
+        {
+          "id": "u03-my-home-l1-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Where is the door?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-bedroom",
+              "label": "bedroom",
+              "image": "img-bedroom",
+              "audio": "aud-en-bedroom"
+            },
+            {
+              "skillId": "word-bathroom",
+              "label": "bathroom",
+              "image": "img-bathroom",
+              "audio": "aud-en-bathroom"
+            },
+            {
+              "skillId": "word-kitchen",
+              "label": "kitchen",
+              "image": "img-kitchen",
+              "audio": "aud-en-kitchen"
+            },
+            {
+              "skillId": "word-door",
+              "label": "door",
+              "image": "img-door",
+              "audio": "aud-en-door"
+            }
+          ],
+          "correctSkillId": "word-door"
+        }
+      ]
+    },
+    {
+      "id": "u03-my-home-l2",
+      "ordinal": 1,
+      "kind": "TEACHING",
+      "teaches": [
+        "word-bed",
+        "word-chair",
+        "word-table",
+        "word-lamp"
+      ],
+      "letters": [
+        "letter-l",
+        "letter-t"
+      ],
+      "coPlay": {
+        "title": "Touch four things",
+        "instruction": "Touch the bed, a chair, the table and a lamp, and say each word out loud.",
+        "titleVi": "Chạm vào bốn thứ",
+        "instructionVi": "Chạm vào giường, ghế, bàn và đèn, vừa chạm vừa nói to từng từ."
+      },
+      "activities": [
+        {
+          "id": "u03-my-home-l2-a1",
+          "ordinal": 0,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where is the bed?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-bed",
+              "label": "bed",
+              "image": "img-bed",
+              "audio": "aud-en-bed"
+            },
+            {
+              "skillId": "word-chair",
+              "label": "chair",
+              "image": "img-chair",
+              "audio": "aud-en-chair"
+            }
+          ],
+          "correctSkillId": "word-bed"
+        },
+        {
+          "id": "u03-my-home-l2-a2",
+          "ordinal": 1,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where is the table?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-table",
+              "label": "table",
+              "image": "img-table",
+              "audio": "aud-en-table"
+            },
+            {
+              "skillId": "word-lamp",
+              "label": "lamp",
+              "image": "img-lamp",
+              "audio": "aud-en-lamp"
+            }
+          ],
+          "correctSkillId": "word-table"
+        },
+        {
+          "id": "u03-my-home-l2-a3",
+          "ordinal": 2,
+          "family": "PICTURE_MATCHING",
+          "prompt": "Find the chair.",
+          "promptAsset": "aud-en-prompt-find-the",
+          "choices": [
+            {
+              "skillId": "word-bed",
+              "label": "bed",
+              "image": "img-bed",
+              "audio": "aud-en-bed"
+            },
+            {
+              "skillId": "word-chair",
+              "label": "chair",
+              "image": "img-chair",
+              "audio": "aud-en-chair"
+            },
+            {
+              "skillId": "word-table",
+              "label": "table",
+              "image": "img-table",
+              "audio": "aud-en-table"
+            },
+            {
+              "skillId": "word-lamp",
+              "label": "lamp",
+              "image": "img-lamp",
+              "audio": "aud-en-lamp"
+            }
+          ],
+          "correctSkillId": "word-chair"
+        },
+        {
+          "id": "u03-my-home-l2-a4",
+          "ordinal": 3,
+          "family": "LETTER_AND_SOUND",
+          "prompt": "Which one starts with L?",
+          "promptAsset": "aud-en-prompt-which-one-starts-with",
+          "choices": [
+            {
+              "skillId": "word-lamp",
+              "label": "lamp",
+              "image": "img-lamp",
+              "audio": "aud-en-lamp"
+            },
+            {
+              "skillId": "word-chair",
+              "label": "chair",
+              "image": "img-chair",
+              "audio": "aud-en-chair"
+            }
+          ],
+          "correctSkillId": "word-lamp",
+          "letterSkillId": "letter-l",
+          "letterAsset": "aud-en-letter-l"
+        },
+        {
+          "id": "u03-my-home-l2-a5",
+          "ordinal": 4,
+          "family": "SAY_WITH_PIP",
+          "prompt": "Say it with me: bed.",
+          "promptAsset": "aud-en-prompt-say-with-me",
+          "choices": [
+            {
+              "skillId": "word-bed",
+              "label": "bed",
+              "image": "img-bed",
+              "audio": "aud-en-bed"
+            },
+            {
+              "skillId": "word-chair",
+              "label": "chair",
+              "image": "img-chair",
+              "audio": "aud-en-chair"
+            },
+            {
+              "skillId": "word-table",
+              "label": "table",
+              "image": "img-table",
+              "audio": "aud-en-table"
+            },
+            {
+              "skillId": "word-lamp",
+              "label": "lamp",
+              "image": "img-lamp",
+              "audio": "aud-en-lamp"
+            }
+          ]
+        },
+        {
+          "id": "u03-my-home-l2-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Where is the lamp?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-bed",
+              "label": "bed",
+              "image": "img-bed",
+              "audio": "aud-en-bed"
+            },
+            {
+              "skillId": "word-chair",
+              "label": "chair",
+              "image": "img-chair",
+              "audio": "aud-en-chair"
+            },
+            {
+              "skillId": "word-table",
+              "label": "table",
+              "image": "img-table",
+              "audio": "aud-en-table"
+            },
+            {
+              "skillId": "word-lamp",
+              "label": "lamp",
+              "image": "img-lamp",
+              "audio": "aud-en-lamp"
+            }
+          ],
+          "correctSkillId": "word-lamp"
+        }
+      ]
+    },
+    {
+      "id": "u03-my-home-l3",
+      "ordinal": 2,
+      "kind": "TEACHING",
+      "teaches": [
+        "word-bowl",
+        "word-spoon",
+        "word-cup",
+        "word-rice"
+      ],
+      "letters": [
+        "letter-r",
+        "letter-s"
+      ],
+      "coPlay": {
+        "title": "Lay the table",
+        "instruction": "Set out a bowl, a spoon and a cup before dinner and name each one in English.",
+        "titleVi": "Dọn bàn ăn",
+        "instructionVi": "Trước bữa ăn, cùng bé bày chén, muỗng, ly và gọi tên từng thứ bằng tiếng Anh."
+      },
+      "activities": [
+        {
+          "id": "u03-my-home-l3-a1",
+          "ordinal": 0,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where is the bowl?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-bowl",
+              "label": "bowl",
+              "image": "img-bowl",
+              "audio": "aud-en-bowl"
+            },
+            {
+              "skillId": "word-spoon",
+              "label": "spoon",
+              "image": "img-spoon",
+              "audio": "aud-en-spoon"
+            }
+          ],
+          "correctSkillId": "word-bowl"
+        },
+        {
+          "id": "u03-my-home-l3-a2",
+          "ordinal": 1,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where is the cup?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-cup",
+              "label": "cup",
+              "image": "img-cup",
+              "audio": "aud-en-cup"
+            },
+            {
+              "skillId": "word-rice",
+              "label": "rice",
+              "image": "img-rice",
+              "audio": "aud-en-rice"
+            }
+          ],
+          "correctSkillId": "word-cup"
+        },
+        {
+          "id": "u03-my-home-l3-a3",
+          "ordinal": 2,
+          "family": "PICTURE_MATCHING",
+          "prompt": "Find the spoon.",
+          "promptAsset": "aud-en-prompt-find-the",
+          "choices": [
+            {
+              "skillId": "word-bowl",
+              "label": "bowl",
+              "image": "img-bowl",
+              "audio": "aud-en-bowl"
+            },
+            {
+              "skillId": "word-spoon",
+              "label": "spoon",
+              "image": "img-spoon",
+              "audio": "aud-en-spoon"
+            },
+            {
+              "skillId": "word-cup",
+              "label": "cup",
+              "image": "img-cup",
+              "audio": "aud-en-cup"
+            },
+            {
+              "skillId": "word-rice",
+              "label": "rice",
+              "image": "img-rice",
+              "audio": "aud-en-rice"
+            }
+          ],
+          "correctSkillId": "word-spoon"
+        },
+        {
+          "id": "u03-my-home-l3-a4",
+          "ordinal": 3,
+          "family": "LETTER_AND_SOUND",
+          "prompt": "Which one starts with R?",
+          "promptAsset": "aud-en-prompt-which-one-starts-with",
+          "choices": [
+            {
+              "skillId": "word-rice",
+              "label": "rice",
+              "image": "img-rice",
+              "audio": "aud-en-rice"
+            },
+            {
+              "skillId": "word-bowl",
+              "label": "bowl",
+              "image": "img-bowl",
+              "audio": "aud-en-bowl"
+            }
+          ],
+          "correctSkillId": "word-rice",
+          "letterSkillId": "letter-r",
+          "letterAsset": "aud-en-letter-r"
+        },
+        {
+          "id": "u03-my-home-l3-a5",
+          "ordinal": 4,
+          "family": "SAY_WITH_PIP",
+          "prompt": "Say it with me: bowl.",
+          "promptAsset": "aud-en-prompt-say-with-me",
+          "choices": [
+            {
+              "skillId": "word-bowl",
+              "label": "bowl",
+              "image": "img-bowl",
+              "audio": "aud-en-bowl"
+            },
+            {
+              "skillId": "word-spoon",
+              "label": "spoon",
+              "image": "img-spoon",
+              "audio": "aud-en-spoon"
+            },
+            {
+              "skillId": "word-cup",
+              "label": "cup",
+              "image": "img-cup",
+              "audio": "aud-en-cup"
+            },
+            {
+              "skillId": "word-rice",
+              "label": "rice",
+              "image": "img-rice",
+              "audio": "aud-en-rice"
+            }
+          ]
+        },
+        {
+          "id": "u03-my-home-l3-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Where is the rice?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-bowl",
+              "label": "bowl",
+              "image": "img-bowl",
+              "audio": "aud-en-bowl"
+            },
+            {
+              "skillId": "word-spoon",
+              "label": "spoon",
+              "image": "img-spoon",
+              "audio": "aud-en-spoon"
+            },
+            {
+              "skillId": "word-cup",
+              "label": "cup",
+              "image": "img-cup",
+              "audio": "aud-en-cup"
+            },
+            {
+              "skillId": "word-rice",
+              "label": "rice",
+              "image": "img-rice",
+              "audio": "aud-en-rice"
+            }
+          ],
+          "correctSkillId": "word-rice"
+        }
+      ]
+    },
+    {
+      "id": "u03-my-home-l4",
+      "ordinal": 3,
+      "kind": "TEACHING",
+      "teaches": [
+        "word-window",
+        "word-fan",
+        "word-clock",
+        "word-pillow"
+      ],
+      "letters": [
+        "letter-p",
+        "letter-w"
+      ],
+      "coPlay": {
+        "title": "I spy at home",
+        "instruction": "Say a word and let your child run to it: window, fan, clock, pillow.",
+        "titleVi": "Tìm đồ trong nhà",
+        "instructionVi": "Nói một từ và để bé chạy tới đó: window, fan, clock, pillow."
+      },
+      "activities": [
+        {
+          "id": "u03-my-home-l4-a1",
+          "ordinal": 0,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where is the window?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-window",
+              "label": "window",
+              "image": "img-window",
+              "audio": "aud-en-window"
+            },
+            {
+              "skillId": "word-fan",
+              "label": "fan",
+              "image": "img-fan",
+              "audio": "aud-en-fan"
+            }
+          ],
+          "correctSkillId": "word-window"
+        },
+        {
+          "id": "u03-my-home-l4-a2",
+          "ordinal": 1,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Where is the clock?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-clock",
+              "label": "clock",
+              "image": "img-clock",
+              "audio": "aud-en-clock"
+            },
+            {
+              "skillId": "word-pillow",
+              "label": "pillow",
+              "image": "img-pillow",
+              "audio": "aud-en-pillow"
+            }
+          ],
+          "correctSkillId": "word-clock"
+        },
+        {
+          "id": "u03-my-home-l4-a3",
+          "ordinal": 2,
+          "family": "PICTURE_MATCHING",
+          "prompt": "Find the fan.",
+          "promptAsset": "aud-en-prompt-find-the",
+          "choices": [
+            {
+              "skillId": "word-window",
+              "label": "window",
+              "image": "img-window",
+              "audio": "aud-en-window"
+            },
+            {
+              "skillId": "word-fan",
+              "label": "fan",
+              "image": "img-fan",
+              "audio": "aud-en-fan"
+            },
+            {
+              "skillId": "word-clock",
+              "label": "clock",
+              "image": "img-clock",
+              "audio": "aud-en-clock"
+            },
+            {
+              "skillId": "word-pillow",
+              "label": "pillow",
+              "image": "img-pillow",
+              "audio": "aud-en-pillow"
+            }
+          ],
+          "correctSkillId": "word-fan"
+        },
+        {
+          "id": "u03-my-home-l4-a4",
+          "ordinal": 3,
+          "family": "LETTER_AND_SOUND",
+          "prompt": "Which one starts with P?",
+          "promptAsset": "aud-en-prompt-which-one-starts-with",
+          "choices": [
+            {
+              "skillId": "word-pillow",
+              "label": "pillow",
+              "image": "img-pillow",
+              "audio": "aud-en-pillow"
+            },
+            {
+              "skillId": "word-clock",
+              "label": "clock",
+              "image": "img-clock",
+              "audio": "aud-en-clock"
+            }
+          ],
+          "correctSkillId": "word-pillow",
+          "letterSkillId": "letter-p",
+          "letterAsset": "aud-en-letter-p"
+        },
+        {
+          "id": "u03-my-home-l4-a5",
+          "ordinal": 4,
+          "family": "SAY_WITH_PIP",
+          "prompt": "Say it with me: window.",
+          "promptAsset": "aud-en-prompt-say-with-me",
+          "choices": [
+            {
+              "skillId": "word-window",
+              "label": "window",
+              "image": "img-window",
+              "audio": "aud-en-window"
+            },
+            {
+              "skillId": "word-fan",
+              "label": "fan",
+              "image": "img-fan",
+              "audio": "aud-en-fan"
+            },
+            {
+              "skillId": "word-clock",
+              "label": "clock",
+              "image": "img-clock",
+              "audio": "aud-en-clock"
+            },
+            {
+              "skillId": "word-pillow",
+              "label": "pillow",
+              "image": "img-pillow",
+              "audio": "aud-en-pillow"
+            }
+          ]
+        },
+        {
+          "id": "u03-my-home-l4-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Where is the pillow?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-window",
+              "label": "window",
+              "image": "img-window",
+              "audio": "aud-en-window"
+            },
+            {
+              "skillId": "word-fan",
+              "label": "fan",
+              "image": "img-fan",
+              "audio": "aud-en-fan"
+            },
+            {
+              "skillId": "word-clock",
+              "label": "clock",
+              "image": "img-clock",
+              "audio": "aud-en-clock"
+            },
+            {
+              "skillId": "word-pillow",
+              "label": "pillow",
+              "image": "img-pillow",
+              "audio": "aud-en-pillow"
+            }
+          ],
+          "correctSkillId": "word-pillow"
+        }
+      ]
+    },
+    {
+      "id": "u03-my-home-l5",
+      "ordinal": 4,
+      "kind": "REVIEW",
+      "teaches": [],
+      "letters": [],
+      "coPlay": {
+        "title": "Home word hunt",
+        "instruction": "Name a room and see how fast your child can find something in it.",
+        "titleVi": "Đi tìm từ trong nhà",
+        "instructionVi": "Nói tên một phòng và xem bé tìm được thứ gì trong đó nhanh thế nào."
+      },
+      "activities": [
+        {
+          "id": "u03-my-home-l5-a1",
+          "ordinal": 0,
+          "family": "REVIEW",
+          "prompt": "Where is the kitchen?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-bedroom",
+              "label": "bedroom",
+              "image": "img-bedroom",
+              "audio": "aud-en-bedroom"
+            },
+            {
+              "skillId": "word-bathroom",
+              "label": "bathroom",
+              "image": "img-bathroom",
+              "audio": "aud-en-bathroom"
+            },
+            {
+              "skillId": "word-kitchen",
+              "label": "kitchen",
+              "image": "img-kitchen",
+              "audio": "aud-en-kitchen"
+            },
+            {
+              "skillId": "word-door",
+              "label": "door",
+              "image": "img-door",
+              "audio": "aud-en-door"
+            }
+          ],
+          "correctSkillId": "word-kitchen"
+        },
+        {
+          "id": "u03-my-home-l5-a2",
+          "ordinal": 1,
+          "family": "REVIEW",
+          "prompt": "Where is the chair?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-bed",
+              "label": "bed",
+              "image": "img-bed",
+              "audio": "aud-en-bed"
+            },
+            {
+              "skillId": "word-chair",
+              "label": "chair",
+              "image": "img-chair",
+              "audio": "aud-en-chair"
+            },
+            {
+              "skillId": "word-table",
+              "label": "table",
+              "image": "img-table",
+              "audio": "aud-en-table"
+            },
+            {
+              "skillId": "word-lamp",
+              "label": "lamp",
+              "image": "img-lamp",
+              "audio": "aud-en-lamp"
+            }
+          ],
+          "correctSkillId": "word-chair"
+        },
+        {
+          "id": "u03-my-home-l5-a3",
+          "ordinal": 2,
+          "family": "REVIEW",
+          "prompt": "Where is the spoon?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-bowl",
+              "label": "bowl",
+              "image": "img-bowl",
+              "audio": "aud-en-bowl"
+            },
+            {
+              "skillId": "word-spoon",
+              "label": "spoon",
+              "image": "img-spoon",
+              "audio": "aud-en-spoon"
+            },
+            {
+              "skillId": "word-cup",
+              "label": "cup",
+              "image": "img-cup",
+              "audio": "aud-en-cup"
+            },
+            {
+              "skillId": "word-rice",
+              "label": "rice",
+              "image": "img-rice",
+              "audio": "aud-en-rice"
+            }
+          ],
+          "correctSkillId": "word-spoon"
+        },
+        {
+          "id": "u03-my-home-l5-a4",
+          "ordinal": 3,
+          "family": "REVIEW",
+          "prompt": "Where is the clock?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-window",
+              "label": "window",
+              "image": "img-window",
+              "audio": "aud-en-window"
+            },
+            {
+              "skillId": "word-fan",
+              "label": "fan",
+              "image": "img-fan",
+              "audio": "aud-en-fan"
+            },
+            {
+              "skillId": "word-clock",
+              "label": "clock",
+              "image": "img-clock",
+              "audio": "aud-en-clock"
+            },
+            {
+              "skillId": "word-pillow",
+              "label": "pillow",
+              "image": "img-pillow",
+              "audio": "aud-en-pillow"
+            }
+          ],
+          "correctSkillId": "word-clock"
+        },
+        {
+          "id": "u03-my-home-l5-a5",
+          "ordinal": 4,
+          "family": "REVIEW",
+          "prompt": "Where is the cup?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-door",
+              "label": "door",
+              "image": "img-door",
+              "audio": "aud-en-door"
+            },
+            {
+              "skillId": "word-bed",
+              "label": "bed",
+              "image": "img-bed",
+              "audio": "aud-en-bed"
+            },
+            {
+              "skillId": "word-cup",
+              "label": "cup",
+              "image": "img-cup",
+              "audio": "aud-en-cup"
+            },
+            {
+              "skillId": "word-fan",
+              "label": "fan",
+              "image": "img-fan",
+              "audio": "aud-en-fan"
+            }
+          ],
+          "correctSkillId": "word-cup"
+        },
+        {
+          "id": "u03-my-home-l5-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Where is the window?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-bathroom",
+              "label": "bathroom",
+              "image": "img-bathroom",
+              "audio": "aud-en-bathroom"
+            },
+            {
+              "skillId": "word-lamp",
+              "label": "lamp",
+              "image": "img-lamp",
+              "audio": "aud-en-lamp"
+            },
+            {
+              "skillId": "word-rice",
+              "label": "rice",
+              "image": "img-rice",
+              "audio": "aud-en-rice"
+            },
+            {
+              "skillId": "word-window",
+              "label": "window",
+              "image": "img-window",
+              "audio": "aud-en-window"
+            }
+          ],
+          "correctSkillId": "word-window"
+        }
+      ]
+    }
+  ]
+}

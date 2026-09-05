@@ -16,6 +16,11 @@
       "id": "u02-my-family",
       "ordinal": 1,
       "file": "units/u02-my-family.json"
+    },
+    {
+      "id": "u03-my-home",
+      "ordinal": 2,
+      "file": "units/u03-my-home.json"
     }
   ],
   "supportPhrases": [
