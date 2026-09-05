@@ -119,6 +119,8 @@ class FakeProgressRepository(
     private val progress = MutableStateFlow<DomainResult<ProfileProgress>>(
         DomainResult.Success(DomainBuilders.profileProgress())
     )
+    private val perProfile =
+        mutableMapOf<ProfileId, MutableStateFlow<DomainResult<ProfileProgress>>>()
     private val failure = NextFailure()
     private val checkpoints = mutableListOf<PersistCheckpoint>()
     private val starts = mutableListOf<StartSession>()
@@ -139,8 +141,20 @@ class FakeProgressRepository(
     /** Every session completion requested, as a snapshot. */
     val completed: List<CompleteSession> get() = completions.toList()
 
+    /**
+     * One shared answer, for the many screens that read a single child's progress.
+     *
+     * [setProgressFor] is the per-child version, for the one screen that reads several at once.
+     */
     fun setProgress(value: ProfileProgress) {
         progress.value = DomainResult.Success(value)
+    }
+
+    /** One child's own progress. Anybody this was not called for still gets the shared answer. */
+    fun setProgressFor(profileId: ProfileId, value: ProfileProgress) {
+        perProfile
+            .getOrPut(profileId) { MutableStateFlow(progress.value) }
+            .value = DomainResult.Success(value)
     }
 
     fun setReadFailure(error: DomainError) {
@@ -150,7 +164,7 @@ class FakeProgressRepository(
     fun failNext(error: DomainError) = failure.queue(error)
 
     override fun observeProfileProgress(profileId: ProfileId): Flow<DomainResult<ProfileProgress>> =
-        progress.asStateFlow()
+        (perProfile[profileId] ?: progress).asStateFlow()
 
     /** Where a child left a lesson, for a test that wants one resumed. */
     fun setOpenCheckpoint(checkpoint: LessonCheckpoint?) {

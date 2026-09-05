@@ -89,14 +89,20 @@ Solving the gate lands on the overview, which is where the information architect
 caregiver who has just come through the door. It briefly landed on settings instead, while the
 overview had no ViewModel and would have met them with a recovery panel. P3-T8 moved it back.
 
-**Three things the caregiver area still owes.** A profile's detail line shows the child's age and
-not the count of finished adventures the draft also puts there, which needs each child's progress
-rather than the selected one's. Editing a name and changing a picture are reported by profile
-management and have no destination to go to. And:
+**One thing the caregiver area still owes.** Editing a name and changing a picture are reported by
+profile management and have no destination to go to. Both need something this app has never built:
+a way to type on a television. `CreateProfileAction.ChangeNameRequested` has the same gap and says
+in as many words that renaming belongs here rather than in setup, so one text-entry surface answers
+both, and what that surface should be is a question for the approved draft before it is a question
+for the code.
 
-**The overview shows two summaries where the approved draft has three.** The third names a unit to
-come back to and nothing derives one yet, so it is left out rather than filled in with something
-that is not a unit.
+**The overview draws the draft's three summaries.** The third names the unit holding the most words
+that wanted another go, and is absent when none do: a practice suggestion for a child with nothing
+to practise would be a deficit invented to fill a card.
+
+**A profile's detail line carries its own count.** One progress subscription per child, which is
+affordable because this television holds four. A child who has finished nothing reads as their age
+alone, because the zero the other branch would print is the same zero the overview refuses to draw.
 
 **The co-play suggestion has a source.** Each lesson in the packaged unit carries its own
 `coPlay`, written in English and Vietnamese, and both places the design puts one read it: the

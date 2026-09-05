@@ -490,6 +490,18 @@ internal fun LiveCaregiverOverview(profileId: ProfileId?, modifier: Modifier = M
                             value = counts.wordsMet.toString(),
                             note = caregiverText(CaregiverR.string.overview_words_note)
                         )
+                    ) + listOfNotNull(
+                        // The draft's third card, which names a unit rather than counting
+                        // something. Absent when no word is waiting for another go.
+                        state.unitToPractise?.let { unit ->
+                            OverviewSummary(
+                                label = caregiverText(
+                                    CaregiverR.string.overview_practice_label
+                                ),
+                                value = unit,
+                                note = caregiverText(CaregiverR.string.overview_practice_note)
+                            )
+                        }
                     ),
                     recentWords = state.recentWords
                 )
@@ -504,10 +516,9 @@ internal fun LiveCaregiverOverview(profileId: ProfileId?, modifier: Modifier = M
 /**
  * The children on this television, live.
  *
- * The detail line carries the age and not the count of finished adventures the approved draft also
- * puts there. That count needs each child's progress rather than this child's, and fetching one
- * flow per profile to fill in a subtitle is a larger change than this screen is. It is recorded as
- * owed rather than quietly dropped.
+ * The detail line carries the age and, once there is one to report, the count of finished
+ * adventures the approved draft puts beside it. A child with none reads as their age alone: the
+ * zero the other branch would print is the same zero the overview refuses to draw.
  */
 @Composable
 internal fun LiveProfileManagement(
@@ -526,10 +537,19 @@ internal fun LiveProfileManagement(
                     id = child.id.value,
                     name = child.nickname,
                     avatar = child.avatarId.value,
-                    detail = caregiverText(
-                        CaregiverR.string.profiles_detail_age,
-                        child.ageBand.years()
-                    )
+                    detail = state.adventuresFinished[child.id]
+                        ?.takeIf { it > 0 }
+                        ?.let { finished ->
+                            caregiverText(
+                                CaregiverR.string.profiles_detail,
+                                child.ageBand.years(),
+                                finished
+                            )
+                        }
+                        ?: caregiverText(
+                            CaregiverR.string.profiles_detail_age,
+                            child.ageBand.years()
+                        )
                 )
             },
             selectedId = state.selectedId?.value,

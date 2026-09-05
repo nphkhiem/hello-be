@@ -7,11 +7,13 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.domain.model.AppSettings
 import com.nphkhiem.englishforyourchildren.domain.model.AvatarId
+import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.domain.result.DomainError
 import com.nphkhiem.englishforyourchildren.domain.result.DomainResult
 import com.nphkhiem.englishforyourchildren.testsupport.DomainBuilders
 import com.nphkhiem.englishforyourchildren.testsupport.FakeProfileRepository
+import com.nphkhiem.englishforyourchildren.testsupport.FakeProgressRepository
 import com.nphkhiem.englishforyourchildren.testsupport.FakeSettingsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.TestScope
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.Test
  */
 class ProfileManagementViewModelTest {
     private lateinit var profiles: FakeProfileRepository
+    private lateinit var progress: FakeProgressRepository
     private lateinit var settings: FakeSettingsRepository
 
     @AfterEach
@@ -93,6 +96,24 @@ class ProfileManagementViewModelTest {
     private fun stored(): AppSettings =
         (settings.current as DomainResult.Success<AppSettings>).value
 
+    @Test
+    fun givenEachChildsPractice_whenTheScreenOpens_thenTheirOwnCountIsBesideTheirOwnName() =
+        management { model ->
+            // One subscription per child rather than one for the television. A single count shared
+            // between profiles would tell a caregiver that the child who has done nothing has done
+            // as much as the child who has done two.
+            assertThat(model.state.value.adventuresFinished[ProfileId(FIRST)]).isEqualTo(2)
+        }
+
+    @Test
+    fun givenAChildWhoHasFinishedNothing_whenTheScreenOpens_thenTheirCountIsZeroNotMissing() =
+        management { model ->
+            // Zero is a fact this screen knows; what to do about a zero is the host's decision, and
+            // it draws the age alone. A missing count here would be indistinguishable from storage
+            // that would not read.
+            assertThat(model.state.value.adventuresFinished[ProfileId(SECOND)]).isEqualTo(0)
+        }
+
     private fun management(
         selected: ProfileId? = ProfileId(SECOND),
         body: suspend TestScope.(ProfileManagementViewModel) -> Unit
@@ -109,12 +130,26 @@ class ProfileManagementViewModelTest {
                 )
             )
         )
+        progress = FakeProgressRepository()
+        progress.setProgressFor(
+            ProfileId(FIRST),
+            DomainBuilders.profileProgress(
+                profileId = ProfileId(FIRST),
+                lessonsCompleted = setOf(LessonId("u01-my-body-l1"), LessonId("u01-my-body-l2"))
+            )
+        )
+        progress.setProgressFor(
+            ProfileId(SECOND),
+            DomainBuilders.profileProgress(profileId = ProfileId(SECOND))
+        )
         settings = FakeSettingsRepository(AppSettings.DEFAULT.copy(selectedProfileId = selected))
 
         val store = ViewModelStore()
         val model = ViewModelProvider(
             store,
-            viewModelFactory { initializer { ProfileManagementViewModel(profiles, settings) } }
+            viewModelFactory {
+                initializer { ProfileManagementViewModel(profiles, progress, settings) }
+            }
         )[ProfileManagementViewModel::class.java]
 
         try {

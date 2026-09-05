@@ -19,6 +19,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.EpochMillis
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.domain.model.SkillId
+import com.nphkhiem.englishforyourchildren.domain.model.UnitId
 import com.nphkhiem.englishforyourchildren.testsupport.DomainBuilders
 import com.nphkhiem.englishforyourchildren.testsupport.FakeCurriculumRepository
 import com.nphkhiem.englishforyourchildren.testsupport.FakeProfileRepository
@@ -172,11 +173,70 @@ class CaregiverOverviewViewModelTest {
             assertThat(model.state.value.suggestion).isNull()
         }
 
+    @Test
+    fun givenWordsThatNeededHelp_whenTheOverviewOpens_thenItNamesTheUnitTheyLiveIn() =
+        overview(attempts = listOf(neededHelp(EYES_ACTIVITY))) { model ->
+            // The one distinction this summary may draw, followed through: not that the child was
+            // wrong, but that these words are worth another go, and here is where they are.
+            assertThat(model.state.value.unitToPractise).isEqualTo("My Body")
+        }
+
+    @Test
+    fun givenNothingWaitingForAnotherGo_whenTheOverviewOpens_thenNoUnitIsNamed() =
+        overview(attempts = listOf(metWord(EYES_ACTIVITY))) { model ->
+            // A practice suggestion for a child with nothing to practise is a deficit invented to
+            // fill a card, which is the one thing this panel may never do.
+            assertThat(model.state.value.unitToPractise).isNull()
+        }
+
+    @Test
+    fun givenTwoUnitsWithWordsWaiting_whenTheOverviewOpens_thenItNamesTheOneWithMore() = overview(
+        course = twoUnits(),
+        attempts = listOf(
+            neededHelp(SECOND_UNIT_EYES),
+            neededHelp(SECOND_UNIT_EARS)
+        )
+    ) { model ->
+        assertThat(model.state.value.unitToPractise).isEqualTo(SECOND_THEME)
+    }
+
+    /** Two units whose words are all waiting, so which one is named is decided by how many. */
+    private fun twoUnits() = DomainBuilders.course(
+        units = listOf(
+            DomainBuilders.courseUnit(
+                lessons = listOf(
+                    DomainBuilders.lesson(
+                        teaches = listOf(SkillId("word-nose")),
+                        activities = listOf(asking(EYES_ACTIVITY, ordinal = 0, correct = "nose"))
+                    )
+                )
+            ),
+            DomainBuilders.courseUnit(
+                id = UnitId(SECOND_UNIT),
+                ordinal = 1,
+                theme = SECOND_THEME,
+                word = "family",
+                lessons = listOf(
+                    DomainBuilders.lesson(
+                        id = LessonId("$SECOND_UNIT-l1"),
+                        unitId = UnitId(SECOND_UNIT),
+                        teaches = listOf(SkillId("word-eyes"), SkillId("word-ears")),
+                        activities = listOf(
+                            asking(SECOND_UNIT_EYES, ordinal = 0, correct = "eyes"),
+                            asking(SECOND_UNIT_EARS, ordinal = 1, correct = "ears")
+                        )
+                    )
+                )
+            )
+        )
+    )
+
     private fun courseWithWords() = DomainBuilders.course(
         units = listOf(
             DomainBuilders.courseUnit(
                 lessons = listOf(
                     DomainBuilders.lesson(
+                        teaches = listOf(SkillId("word-eyes"), SkillId("word-ears")),
                         activities = listOf(
                             asking(EYES_ACTIVITY, ordinal = 0, correct = "eyes"),
                             asking(EARS_ACTIVITY, ordinal = 1, correct = "ears")
@@ -285,6 +345,10 @@ class CaregiverOverviewViewModelTest {
         const val EARS_ACTIVITY = "u01-my-body-l1-a2"
         const val SECOND_LESSON = "u01-my-body-l2"
         const val SECOND_LESSON_ACTIVITY = "u01-my-body-l2-a1"
+        const val SECOND_UNIT = "u02-my-family"
+        const val SECOND_THEME = "My Family"
+        const val SECOND_UNIT_EYES = "u02-my-family-l1-a1"
+        const val SECOND_UNIT_EARS = "u02-my-family-l1-a2"
         const val FIRST_IDEA = "Touch and name"
         const val SECOND_IDEA = "Count together"
         const val NOW = 1_756_000_000_000
