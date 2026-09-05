@@ -147,6 +147,23 @@ class FirstLessonJourneyTest {
     }
 
     @Test
+    fun givenAFinishedLesson_whenTheChildOpensTheNextOne_thenTheyGetAQuestionAndNotAStorybook() {
+        // The second lesson is where a shared ViewModel showed: it still held the first lesson's
+        // finished state, the host read that as this lesson being over, and a child pressing
+        // Lesson 2 was sent straight to a celebration for a lesson they had not opened. Nothing
+        // caught it because no journey had ever opened two lessons in a row.
+        createChild()
+        walkTheFirstLesson()
+
+        tv.press(tv.string("play_together_decline"))
+        tv.awaitText(SECOND_LESSON)
+        tv.press(SECOND_LESSON)
+
+        // A question, which only the lesson screen offers.
+        tv.awaitText(tv.string("lesson_skip"))
+    }
+
+    @Test
     fun givenAChildWithNoAdventureBehindThem_whenTheyOpenFreePlay_thenItExplainsRatherThanFails() {
         // This used to assert that free play landed on the missing-content recovery, because it had
         // no live screen. It has one now, and a library with nothing in it is a sentence about what
@@ -170,6 +187,18 @@ class FirstLessonJourneyTest {
         tv.awaitText(tv.string("home_start"))
     }
 
+    private fun walkTheFirstLesson() {
+        tv.press(tv.string("home_start"))
+        tv.awaitText(FIRST_LESSON)
+        tv.press(FIRST_LESSON)
+
+        repeat(ACTIVITIES) {
+            tv.awaitText(tv.string("lesson_skip"))
+            tv.press(tv.string("lesson_skip"))
+        }
+        tv.awaitText(tv.string("celebration_done"))
+    }
+
     private fun createChild() {
         tv.press(AGE)
         tv.press(tv.string("create_submit"))
@@ -190,6 +219,7 @@ class FirstLessonJourneyTest {
         /** The code the fallback used to show a child. It must appear nowhere they can reach. */
         const val DATABASE_CODE = "DB-OPEN-01"
         const val FIRST_LESSON = "Lesson 1"
+        const val SECOND_LESSON = "Lesson 2"
         const val FIRST_LESSON_ID = "u01-my-body-l1"
 
         /** What the shipped first lesson declares it teaches. */

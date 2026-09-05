@@ -17,7 +17,8 @@ import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeChoiceFeedback
  */
 internal object LessonUiMapper {
 
-    fun preparing() = LessonUiState(
+    fun preparing(lessonId: String = "") = LessonUiState(
+        lessonId = lessonId,
         // Nothing is being asked yet, so no shape is being drawn. Listen-and-choose is the arbitrary
         // one this never reaches: the host shows the loading surface while the phase is PREPARING.
         kind = LessonActivityKind.LISTEN_AND_CHOOSE,
@@ -40,6 +41,7 @@ internal object LessonUiMapper {
     fun map(state: LessonSessionState, unitTheme: String = ""): LessonUiState {
         val content = state.currentActivity.content
         return LessonUiState(
+            lessonId = state.lesson.id.value,
             unitName = unitTheme,
             activityTitle = title(state.currentActivity.family),
             prompt = content?.prompt.orEmpty(),

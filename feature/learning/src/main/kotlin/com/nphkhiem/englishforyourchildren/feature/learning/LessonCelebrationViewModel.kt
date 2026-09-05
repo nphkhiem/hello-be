@@ -40,17 +40,17 @@ class LessonCelebrationViewModel @Inject constructor(
     private val settings: SettingsRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(
-        CelebrationUiState(
-            unitWord = "",
-            words = emptyList(),
-            revealed = false,
-            saveConfirmed = false
-        )
-    )
+    private val _state = MutableStateFlow(EMPTY)
     val state: StateFlow<CelebrationUiState> = _state.asStateFlow()
 
     suspend fun start(profileId: ProfileId, lessonId: LessonId, courseVersion: CourseVersion) {
+        // Emptied before anything is read, because this ViewModel outlives the page that asked for
+        // it. Without this the storybook opens on the last lesson's words and offers the last
+        // lesson's activity, and the offer takes focus, so a caregiver is asked about a lesson that
+        // finished some time ago. Its sibling bug sent a child to a celebration they had not
+        // earned; see the lesson host.
+        _state.value = EMPTY
+
         val lesson = curriculum.getLesson(lessonId, courseVersion)
         if (lesson !is DomainResult.Success) return
 
@@ -84,6 +84,16 @@ class LessonCelebrationViewModel @Inject constructor(
         title = language.read(title, titleVietnamese),
         instruction = language.read(instruction, instructionVietnamese)
     )
+
+    private companion object {
+        /** A page about no lesson, which is where every celebration starts. */
+        val EMPTY = CelebrationUiState(
+            unitWord = "",
+            words = emptyList(),
+            revealed = false,
+            saveConfirmed = false
+        )
+    }
 
     /**
      * Nothing says the words are in the storybook until storage says the lesson is finished.

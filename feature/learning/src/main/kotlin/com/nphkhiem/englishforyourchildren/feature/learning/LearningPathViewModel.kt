@@ -9,6 +9,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.CourseUnit
 import com.nphkhiem.englishforyourchildren.domain.model.Lesson
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
+import com.nphkhiem.englishforyourchildren.domain.model.UnitId
 import com.nphkhiem.englishforyourchildren.domain.progression.LearningPath
 import com.nphkhiem.englishforyourchildren.domain.progression.LessonStanding
 import com.nphkhiem.englishforyourchildren.domain.progression.ObserveLearningPathUseCase
@@ -42,6 +43,15 @@ class LearningPathViewModel @Inject constructor(
     private val _state = MutableStateFlow(EMPTY)
     val state: StateFlow<LearningPathUiState> = _state.asStateFlow()
 
+    /**
+     * Which unit the child is looking at, or null while that is still the course's decision.
+     *
+     * Once they have paged somewhere it is theirs, and a write landing underneath them does not
+     * move them: a path that jumped to the next unit the moment a lesson was recorded would take
+     * the screen away from a child who was reading it.
+     */
+    private val chosenUnit = MutableStateFlow<UnitId?>(null)
+
     private val _unavailable = MutableStateFlow(false)
     val unavailable: StateFlow<Boolean> = _unavailable.asStateFlow()
 
@@ -52,10 +62,11 @@ class LearningPathViewModel @Inject constructor(
             combine(
                 curriculum.observeCourse(),
                 learningPath(profileId),
-                profiles.observeProfiles()
-            ) { course, path, people ->
-                Triple(course, path, people)
-            }.collect { (course, path, people) ->
+                profiles.observeProfiles(),
+                chosenUnit
+            ) { course, path, people, chosen ->
+                Reading(course, path, people, chosen)
+            }.collect { (course, path, people, chosen) ->
                 if (course !is DomainResult.Success) {
                     _unavailable.value = true
                     return@collect
@@ -66,27 +77,70 @@ class LearningPathViewModel @Inject constructor(
                 _state.value = map(
                     course = course.value,
                     path = (path as? DomainResult.Success)?.value,
-                    child = child
+                    child = child,
+                    chosen = chosen
                 )
             }
         }
     }
 
+    /** The child asks for the unit on either side; there is nothing to ask for at the ends. */
+    fun showPreviousUnit() {
+        _state.value.previousUnit?.let { chosenUnit.value = UnitId(it.unitId) }
+    }
+
+    fun showNextUnit() {
+        _state.value.nextUnit?.let { chosenUnit.value = UnitId(it.unitId) }
+    }
+
     private fun map(
         course: Course,
         path: LearningPath?,
-        child: ChildProfile?
+        child: ChildProfile?,
+        chosen: UnitId?
     ): LearningPathUiState {
-        val unit = course.units.firstOrNull() ?: return EMPTY
+        val index = course.units.indexOfShown(chosen, path)
+        val unit = course.units.getOrNull(index) ?: return EMPTY
         return LearningPathUiState(
             profileName = child?.nickname.orEmpty(),
             profileAvatar = child?.avatarId?.value.orEmpty(),
             unit = unit.toPage(course.units.size, path),
-            previousUnit = null,
-            nextUnit = null,
+            previousUnit = course.units.getOrNull(index - 1)?.toSummary(),
+            nextUnit = course.units.getOrNull(index + 1)?.toSummary(),
             pendingSave = false
         )
     }
+
+    /**
+     * Where the child paged to, or where they are up to, or the beginning.
+     *
+     * The offer is what decides when nobody has paged anywhere, so a child who finished a unit
+     * yesterday opens on the next one rather than on a page of finished lessons they have to walk
+     * past. A chosen unit the course no longer has falls back the same way, because content can
+     * move under a child and a screen that showed nothing would be the worse answer.
+     *
+     * A child who has finished everything has no offer to follow, and sending them back to unit one
+     * would take them furthest from what they just did. They stay at the end. A path that will not
+     * read at all is a different thing and still opens at the beginning.
+     */
+    private fun List<CourseUnit>.indexOfShown(chosen: UnitId?, path: LearningPath?): Int {
+        indexOfFirst { it.id == chosen }.let { if (it >= 0) return it }
+        indexOfFirst { unit -> unit.lessons.any { it.id == path?.recommended } }
+            .let { if (it >= 0) return it }
+        if (path != null && path.recommended == null) return lastIndex
+        return 0
+    }
+
+    private fun CourseUnit.toSummary() =
+        UnitSummary(unitId = id.value, unitNumber = ordinal + 1, theme = theme)
+
+    /** Four things read together, which `combine` cannot express as a pair. */
+    private data class Reading(
+        val course: DomainResult<Course>,
+        val path: DomainResult<LearningPath>,
+        val people: DomainResult<List<ChildProfile>>,
+        val chosen: UnitId?
+    )
 
     private fun CourseUnit.toPage(unitCount: Int, path: LearningPath?) = UnitPageState(
         unitId = id.value,

@@ -110,6 +110,7 @@ class LessonRulesTest {
             AnswerOption(id = "bed", label = "bed")
         )
     ) = LessonUiState(
+        lessonId = "u01-my-body-l1",
         kind = LessonActivityKind.LISTEN_AND_CHOOSE,
         unitName = "My Home",
         activityTitle = "Listen and choose",

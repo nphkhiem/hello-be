@@ -21,6 +21,7 @@ object LessonFixtures {
     fun prompting(): LessonUiState = answering().copy(phase = LessonPhase.PROMPTING)
 
     fun answering(): LessonUiState = LessonUiState(
+        lessonId = "u03-my-home-l1",
         kind = LessonActivityKind.LISTEN_AND_CHOOSE,
         unitName = "My Home",
         activityTitle = "Listen and choose",
