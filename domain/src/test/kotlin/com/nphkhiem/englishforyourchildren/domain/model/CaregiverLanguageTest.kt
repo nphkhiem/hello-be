@@ -34,6 +34,39 @@ class CaregiverLanguageTest {
     }
 
     @Test
+    fun givenBothLanguagesAreWanted_whenContentIsRead_thenBothAreThereAndSoIsTheMiddleDot() {
+        // The same join the approved caregiver strings used when they carried both languages
+        // themselves, so an authored suggestion and the heading above it read as one thing.
+        assertThat(CaregiverLanguage.BOTH.read("Touch and name", "Chạm và gọi tên"))
+            .isEqualTo("Touch and name · Chạm và gọi tên")
+    }
+
+    @Test
+    fun givenOneLanguageIsWanted_whenContentIsRead_thenOnlyThatOneIsThere() {
+        assertThat(CaregiverLanguage.ENGLISH.read("Touch and name", "Chạm và gọi tên"))
+            .isEqualTo("Touch and name")
+        assertThat(CaregiverLanguage.VIETNAMESE.read("Touch and name", "Chạm và gọi tên"))
+            .isEqualTo("Chạm và gọi tên")
+    }
+
+    @Test
+    fun givenContentNobodyHasTranslated_whenVietnameseIsWanted_thenTheEnglishStandsAlone() {
+        // Words a caregiver may not read beat an empty line. This is what makes it safe to package
+        // a unit before a translator has seen it.
+        assertThat(CaregiverLanguage.VIETNAMESE.read("Touch and name", "")).isEqualTo(
+            "Touch and name"
+        )
+    }
+
+    @Test
+    fun givenContentNobodyHasTranslated_whenBothAreWanted_thenNothingIsSaidTwice() {
+        // Joining a sentence to itself reads as a stutter rather than as bilingual.
+        assertThat(CaregiverLanguage.BOTH.read("Touch and name", "")).isEqualTo("Touch and name")
+        assertThat(CaregiverLanguage.BOTH.read("Touch and name", "Touch and name"))
+            .isEqualTo("Touch and name")
+    }
+
+    @Test
     fun givenSomethingNoVersionOfThisAppEverWrote_whenItIsReadBack_thenItFallsBack() {
         // A preference is not a child's work. One that will not read falls back to a usable
         // default, which is the same choice the settings file's corruption handler already made.

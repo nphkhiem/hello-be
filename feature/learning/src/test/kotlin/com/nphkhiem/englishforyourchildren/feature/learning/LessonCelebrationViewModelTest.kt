@@ -7,6 +7,8 @@ import com.nphkhiem.englishforyourchildren.domain.model.ActivityFamily
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityId
 import com.nphkhiem.englishforyourchildren.domain.model.AnswerChoice
 import com.nphkhiem.englishforyourchildren.domain.model.AssetId
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
+import com.nphkhiem.englishforyourchildren.domain.model.CoPlayIdea
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.EpochMillis
 import com.nphkhiem.englishforyourchildren.domain.model.Lesson
@@ -17,6 +19,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.UnitId
 import com.nphkhiem.englishforyourchildren.testsupport.DomainBuilders
 import com.nphkhiem.englishforyourchildren.testsupport.FakeCurriculumRepository
 import com.nphkhiem.englishforyourchildren.testsupport.FakeProgressRepository
+import com.nphkhiem.englishforyourchildren.testsupport.FakeSettingsRepository
 import com.nphkhiem.englishforyourchildren.testsupport.FakeTimeProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -30,6 +33,7 @@ import org.junit.jupiter.api.Test
 class LessonCelebrationViewModelTest {
     private val curriculum = FakeCurriculumRepository()
     private val progress = FakeProgressRepository(timeProvider = FakeTimeProvider(EpochMillis(NOW)))
+    private val settings = FakeSettingsRepository()
 
     @BeforeEach
     fun useTestDispatcher() {
@@ -91,8 +95,38 @@ class LessonCelebrationViewModelTest {
             assertThat(model.state.value.playTogether).isNull()
         }
 
+    @Test
+    fun givenTheLessonHasSomethingToDoTogether_whenTheCelebrationOpens_thenItIsOffered() = runTest {
+        // The idea belongs to the lesson whose words it practises, so it comes from the
+        // content rather than from a string beside the buttons.
+        curriculum.setLesson(lesson(coPlay = DomainBuilders.coPlayIdea()))
+
+        val model = started()
+
+        // Both languages, because that is the caregiver default and the one mode that cannot
+        // strand a caregiver who reads only one of them.
+        assertThat(model.state.value.playTogether?.title)
+            .isEqualTo("Touch and name · Chạm và gọi tên")
+    }
+
+    @Test
+    fun givenACaregiverWhoReadsVietnamese_whenAnIdeaIsOffered_thenItIsInTheirLanguage() = runTest {
+        // The one thing on this page addressed to a grown-up has to be readable by one. Everything
+        // else here stays English, because being English is what it is for.
+        settings.updateCaregiverLanguage(CaregiverLanguage.VIETNAMESE)
+        curriculum.setLesson(lesson(coPlay = DomainBuilders.coPlayIdea()))
+
+        val model = started()
+
+        assertThat(model.state.value.playTogether?.title).isEqualTo("Chạm và gọi tên")
+    }
+
     private suspend fun started(): LessonCelebrationViewModel {
-        val model = LessonCelebrationViewModel(curriculum = curriculum, progress = progress)
+        val model = LessonCelebrationViewModel(
+            curriculum = curriculum,
+            progress = progress,
+            settings = settings
+        )
         model.start(
             profileId = ProfileId(PROFILE),
             lessonId = LessonId(LESSON),
@@ -101,12 +135,13 @@ class LessonCelebrationViewModelTest {
         return model
     }
 
-    private fun lesson() = Lesson(
+    private fun lesson(coPlay: CoPlayIdea? = null) = Lesson(
         id = LessonId(LESSON),
         unitId = UnitId(UNIT),
         ordinal = 0,
         teaches = listOf(SkillId("word-eyes"), SkillId("word-ears")),
-        activities = listOf(activity())
+        activities = listOf(activity()),
+        coPlay = coPlay
     )
 
     private fun activity() = Activity(

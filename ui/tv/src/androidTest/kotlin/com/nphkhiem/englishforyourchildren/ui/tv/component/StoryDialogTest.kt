@@ -2,6 +2,8 @@ package com.nphkhiem.englishforyourchildren.ui.tv.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -21,6 +23,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
@@ -191,14 +194,29 @@ class StoryDialogTest {
         composeTestRule.onNodeWithText(TITLE).assertDoesNotExist()
     }
 
-    private fun setDialogStage(): MutableState<Boolean> {
+    @Test
+    fun givenTwoLanguagesOfDescription_whenTheDialogRunsOutOfRoom_thenBothChoicesAreStillThere() {
+        // The caregiver area speaks both languages, so an authored instruction arrives at roughly
+        // twice the height this dialog was drawn against, and the scaffold slot it sits in is a
+        // hard bound. The choices are the part that may never be lost: a child who cannot see
+        // "Maybe later" cannot decline.
+        setDialogStage(description = BILINGUAL, stage = Modifier.fillMaxWidth().height(SHORT_STAGE))
+
+        composeTestRule.onNodeWithText(KEEP_LEARNING).assertIsDisplayed()
+        composeTestRule.onNodeWithText(STOP_FOR_NOW).assertIsDisplayed()
+    }
+
+    private fun setDialogStage(
+        description: String = DESCRIPTION,
+        stage: Modifier = Modifier.fillMaxSize()
+    ): MutableState<Boolean> {
         lateinit var open: MutableState<Boolean>
         composeTestRule.setContent {
             HelloBeTheme {
                 open = remember { mutableStateOf(false) }
                 val restorer = rememberHelloBeFocusRestorer()
 
-                Box(Modifier.fillMaxSize()) {
+                Box(stage) {
                     HelloBeAction(
                         label = OPENER,
                         onClick = { open.value = true },
@@ -207,7 +225,7 @@ class StoryDialogTest {
                     if (open.value) {
                         StoryDialog(
                             title = TITLE,
-                            description = DESCRIPTION,
+                            description = description,
                             pipDescription = PIP,
                             focusRestorer = restorer,
                             safeAction = { modifier ->
@@ -249,5 +267,13 @@ class StoryDialogTest {
         const val TOLERANCE = 0.5f
         const val PIP = "Pip is waiting with you"
         const val PRESSES_PER_DIRECTION = 3
+
+        /** An authored co-play instruction as a caregiver reading both languages receives it. */
+        const val BILINGUAL =
+            "Sit facing your child. Say \u201Ceyes\u201D and touch your own eyes, then let them " +
+                "copy you. Do ears, nose and mouth the same way. \u00B7 Ng\u1ED3i \u0111\u1ED1i " +
+                "di\u1EC7n b\u00E9. N\u00F3i \u201Ceyes\u201D v\u00E0 ch\u1EA1m v\u00E0o " +
+                "m\u1EAFt m\u00ECnh, r\u1ED3i \u0111\u1EC3 b\u00E9 l\u00E0m theo."
+        val SHORT_STAGE = 420.dp
     }
 }

@@ -6,6 +6,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.ActivityFamily
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityId
 import com.nphkhiem.englishforyourchildren.domain.model.AnswerChoice
 import com.nphkhiem.englishforyourchildren.domain.model.AssetId
+import com.nphkhiem.englishforyourchildren.domain.model.CoPlayIdea
 import com.nphkhiem.englishforyourchildren.domain.model.Course
 import com.nphkhiem.englishforyourchildren.domain.model.CourseId
 import com.nphkhiem.englishforyourchildren.domain.model.CourseUnit
@@ -68,7 +69,15 @@ class CurriculumJsonParser @Inject constructor() {
         unitId = UnitId(unitId),
         ordinal = ordinal,
         teaches = teaches.map { SkillId(it) },
-        activities = activities.sortedBy { it.ordinal }.map { it.toDomain() }
+        activities = activities.sortedBy { it.ordinal }.map { it.toDomain() },
+        coPlay = coPlay?.toDomain()
+    )
+
+    private fun CoPlayDto.toDomain() = CoPlayIdea(
+        title = title,
+        instruction = instruction,
+        titleVietnamese = titleVi,
+        instructionVietnamese = instructionVi
     )
 
     private fun ActivityDto.toDomain(): Activity {

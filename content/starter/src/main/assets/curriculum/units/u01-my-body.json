@@ -20,6 +20,12 @@
         "letter-e",
         "letter-m"
       ],
+      "coPlay": {
+        "title": "Touch and name",
+        "instruction": "Say “eyes” and touch your own, then let your child copy you. Try ears, nose and mouth.",
+        "titleVi": "Chạm và gọi tên",
+        "instructionVi": "Nói “eyes” rồi chạm vào mắt mình, để bé làm theo. Thử với ears, nose và mouth."
+      },
       "activities": [
         {
           "id": "u01-my-body-l1-a1",
@@ -206,6 +212,12 @@
         "letter-h",
         "letter-f"
       ],
+      "coPlay": {
+        "title": "Count together",
+        "instruction": "Count your fingers together in English, then sit down and count toes.",
+        "titleVi": "Cùng nhau đếm",
+        "instructionVi": "Cùng bé đếm ngón tay bằng tiếng Anh, rồi ngồi xuống đếm ngón chân."
+      },
       "activities": [
         {
           "id": "u01-my-body-l2-a1",
@@ -392,6 +404,12 @@
         "letter-b",
         "letter-t"
       ],
+      "coPlay": {
+        "title": "Pat and say",
+        "instruction": "Pat your head and say “head”, then hair, tummy and back. Let your child lead a round.",
+        "titleVi": "Vỗ và nói",
+        "instructionVi": "Vỗ lên đầu và nói “head”, rồi tóc, bụng, lưng. Để bé dẫn một lượt."
+      },
       "activities": [
         {
           "id": "u01-my-body-l3-a1",
@@ -578,6 +596,12 @@
         "letter-a",
         "letter-k"
       ],
+      "coPlay": {
+        "title": "Stretch and wiggle",
+        "instruction": "Stretch your arms, shake your legs, bend your knees, then smile to show your teeth.",
+        "titleVi": "Vươn vai và lắc lư",
+        "instructionVi": "Vươn hai tay, lắc chân, gập đầu gối, rồi cười tươi khoe răng."
+      },
       "activities": [
         {
           "id": "u01-my-body-l4-a1",
@@ -756,6 +780,12 @@
       "kind": "REVIEW",
       "teaches": [],
       "letters": [],
+      "coPlay": {
+        "title": "Body word hunt",
+        "instruction": "Say a body word in English and see how fast your child can touch it. Then swap over.",
+        "titleVi": "Đi tìm từ về cơ thể",
+        "instructionVi": "Nói một từ về cơ thể bằng tiếng Anh, xem bé chạm nhanh thế nào. Rồi đổi vai."
+      },
       "activities": [
         {
           "id": "u01-my-body-l5-a1",

@@ -2,7 +2,12 @@ package com.nphkhiem.englishforyourchildren.feature.caregiver
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nphkhiem.englishforyourchildren.domain.model.ActivityAttempt
+import com.nphkhiem.englishforyourchildren.domain.model.Answerable
+import com.nphkhiem.englishforyourchildren.domain.model.CoPlayIdea
+import com.nphkhiem.englishforyourchildren.domain.model.Course
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
+import com.nphkhiem.englishforyourchildren.domain.model.SkillId
 import com.nphkhiem.englishforyourchildren.domain.progression.tallySkills
 import com.nphkhiem.englishforyourchildren.domain.repository.CurriculumRepository
 import com.nphkhiem.englishforyourchildren.domain.repository.ProfileRepository
@@ -41,6 +46,13 @@ data class CaregiverOverviewState(
     val profileName: String,
     val counts: OverviewCounts?,
     val recentWords: List<String>,
+    /**
+     * The one thing to try away from the television, as the content author wrote it.
+     *
+     * Both languages, not one: which of them a caregiver reads is settled where the screen is
+     * drawn, because that is where the caregiver language is provided.
+     */
+    val suggestion: CoPlayIdea?,
     val pendingSave: Boolean,
     val unreadable: Boolean
 )
@@ -64,6 +76,7 @@ class CaregiverOverviewViewModel @Inject constructor(
             profileName = "",
             counts = null,
             recentWords = emptyList(),
+            suggestion = null,
             pendingSave = false,
             unreadable = false
         )
@@ -105,6 +118,7 @@ class CaregiverOverviewViewModel @Inject constructor(
                         },
                         // The word as the child saw it on the card. An id is a key, not a word.
                         recentWords = met.keys.mapNotNull { labels[it] },
+                        suggestion = suggestionAfter(course.value, practice.value.attempts),
                         pendingSave = practice.value.openCheckpoint != null,
                         unreadable = false
                     )
@@ -112,15 +126,29 @@ class CaregiverOverviewViewModel @Inject constructor(
         }
     }
 
-    private fun labelsIn(
-        course: com.nphkhiem.englishforyourchildren.domain.model.Course
-    ): Map<com.nphkhiem.englishforyourchildren.domain.model.SkillId, String> = course.units
+    /**
+     * The idea belonging to whatever the child was doing most recently.
+     *
+     * Attempts rather than finished lessons, because the finished ones are a set with no order to
+     * them and a child who stopped halfway through a lesson still deserves the idea that goes with
+     * it. Null where they have never practised, where the lesson has no idea written for it, or
+     * where the activity is not in the course any more, all of which are the same thing to a
+     * caregiver: there is nothing to suggest today.
+     */
+    private fun suggestionAfter(course: Course, attempts: List<ActivityAttempt>): CoPlayIdea? {
+        val latest = attempts.maxByOrNull { it.at.value }?.activityId ?: return null
+        return course.units
+            .flatMap { it.lessons }
+            .firstOrNull { lesson -> lesson.activities.any { it.id == latest } }
+            ?.coPlay
+    }
+
+    private fun labelsIn(course: Course): Map<SkillId, String> = course.units
         .flatMap { it.lessons }
         .flatMap { it.activities }
         .mapNotNull { it.content }
         .flatMap { content ->
-            (content as? com.nphkhiem.englishforyourchildren.domain.model.Answerable)
-                ?.choices.orEmpty()
+            (content as? Answerable)?.choices.orEmpty()
         }
         .associate { it.skillId to it.label }
 }

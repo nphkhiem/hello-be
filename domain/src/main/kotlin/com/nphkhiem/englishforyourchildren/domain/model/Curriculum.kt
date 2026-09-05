@@ -38,6 +38,29 @@ data class Activity(
 }
 
 /**
+ * One thing a caregiver and child can do away from the television, written in both languages.
+ *
+ * Content rather than copy. It names a real chair or a real pair of hands, so it cannot be written
+ * in a string resource beside the buttons: it belongs to the lesson whose words it practises, and
+ * a unit written next year brings its own.
+ *
+ * The Vietnamese is carried here rather than looked up because the person being addressed is the
+ * caregiver, and the caregiver area speaks both languages. The child-facing prompts around it stay
+ * English on purpose: being English is what they are for.
+ */
+data class CoPlayIdea(
+    val title: String,
+    val instruction: String,
+    val titleVietnamese: String = "",
+    val instructionVietnamese: String = ""
+) {
+    init {
+        require(title.isNotBlank()) { "A play-together idea needs a name" }
+        require(instruction.isNotBlank()) { "A play-together idea needs something to do" }
+    }
+}
+
+/**
  * A sitting's worth of activities, in the order a child meets them.
  *
  * Position in [activities] is that order, and the ordinals have to agree with it. A correct set of
@@ -54,7 +77,15 @@ data class Lesson(
      * Empty on a review lesson, which teaches nothing new and gathers up what came before.
      */
     val teaches: List<SkillId> = emptyList(),
-    val activities: List<Activity>
+    val activities: List<Activity>,
+    /**
+     * The off-screen activity offered once this lesson is finished, or null where none is written.
+     *
+     * Null is a real state and not a gap to be filled in later: the design brief makes co-play
+     * optional, and a lesson with nothing worth doing away from the screen should offer nothing
+     * rather than something generic.
+     */
+    val coPlay: CoPlayIdea? = null
 ) {
     init {
         require(ordinal >= 0) { "A lesson cannot come before the first one" }

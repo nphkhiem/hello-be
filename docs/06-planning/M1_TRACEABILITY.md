@@ -94,8 +94,24 @@ not the count of finished adventures the draft also puts there, which needs each
 rather than the selected one's. Editing a name and changing a picture are reported by profile
 management and have no destination to go to. And:
 
-**The overview shows two summaries where the approved draft has three, and no co-play suggestion.**
-The third summary names a unit to come back to and nothing derives one yet; the suggestion has no
-source at all. `CaregiverOverviewUiState` allows a null suggestion and calls it the brief's
-unavailable-content state, so this is the screen being honest rather than incomplete, but it is not
-the finished screen and a suggestion source is still owed.
+**The overview shows two summaries where the approved draft has three.** The third names a unit to
+come back to and nothing derives one yet, so it is left out rather than filled in with something
+that is not a unit.
+
+**The co-play suggestion has a source.** Each lesson in the packaged unit carries its own
+`coPlay`, written in English and Vietnamese, and both places the design puts one read it: the
+celebration offers the finished lesson's idea, and the overview offers the one belonging to
+whatever the child practised most recently. Null still means what the state says it means, and now
+it happens for a reason a caregiver would recognise: nobody has practised yet, or the lesson offers
+nothing away from the screen.
+
+Giving the panel a real suggestion made it taller than the stage, which it had been asserted never
+to be. It scrolls now, at every font scale rather than only above 1.3, and its cards take focus so
+that a remote can drive the scroll. Focus on a card here buys reading rather than pressing: nothing
+on this panel is an action, and a card bringing itself into view is the only thing on a television
+that moves a scroll.
+
+What that suggestion still owes is the voice. The design brief asks for "spoken and written
+caregiver instruction" and only the written half exists: no recording is referenced, so the prompt
+has nothing to play and does not pretend otherwise. That is a recording to commission alongside the
+sixteen illustrations, not a second thing to build.

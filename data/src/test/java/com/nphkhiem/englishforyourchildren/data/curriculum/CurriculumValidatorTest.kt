@@ -87,7 +87,11 @@ class CurriculumValidatorTest {
         units = listOf(UnitRefDto(id = UNIT, ordinal = 0, file = "units/$UNIT.json"))
     )
 
-    private fun unit(activity: ActivityDto = activity(), lessonId: String = LESSON) = UnitDto(
+    private fun unit(
+        activity: ActivityDto = activity(),
+        lessonId: String = LESSON,
+        coPlay: CoPlayDto? = null
+    ) = UnitDto(
         schemaVersion = SCHEMA,
         id = UNIT,
         ordinal = 0,
@@ -99,10 +103,41 @@ class CurriculumValidatorTest {
                 ordinal = 0,
                 kind = "TEACHING",
                 teaches = listOf(SKILL),
-                activities = listOf(activity)
+                activities = listOf(activity),
+                coPlay = coPlay
             )
         )
     )
+
+    @Test
+    fun givenAPlayTogetherIdeaWithNothingToDo_whenItIsChecked_thenItIsReported() {
+        // A lesson may offer nothing away from the screen. One that says it offers something and
+        // then has nothing to say would reach a caregiver as an empty card.
+        val empty = unit(coPlay = CoPlayDto(title = "Touch and name", instruction = " "))
+
+        val problems = validator.validate(course(), listOf(empty), REFERENCED_ASSETS)
+
+        assertThat(problems.map { it.toString() })
+            .contains("$LESSON: a play-together idea with nothing to do")
+    }
+
+    @Test
+    fun givenAPlayTogetherIdeaWithNoName_whenItIsChecked_thenItIsReported() {
+        val nameless = unit(coPlay = CoPlayDto(title = "", instruction = "Touch your eyes."))
+
+        val problems = validator.validate(course(), listOf(nameless), REFERENCED_ASSETS)
+
+        assertThat(problems.map { it.toString() })
+            .contains("$LESSON: a play-together idea with no name")
+    }
+
+    @Test
+    fun givenALessonOfferingNothingAwayFromTheScreen_whenItIsChecked_thenThatIsNotAProblem() {
+        // Optional means optional. The default bundle in every other test here has no idea at all.
+        val problems = validator.validate(course(), listOf(unit()), REFERENCED_ASSETS)
+
+        assertThat(problems).isEmpty()
+    }
 
     private fun activity(
         id: String = ACTIVITY,

@@ -7,6 +7,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
+import com.nphkhiem.englishforyourchildren.domain.model.read
 import java.util.Locale
 
 /**
@@ -52,10 +53,9 @@ fun Context.caregiverText(
     val english = inLocale(ENGLISH).read(id, formatArgs)
     if (language == CaregiverLanguage.ENGLISH) return english
 
-    val vietnamese = inLocale(VIETNAMESE).read(id, formatArgs)
-    if (language == CaregiverLanguage.VIETNAMESE) return vietnamese
-
-    return if (vietnamese == english) english else "$english$JOIN$vietnamese"
+    // Android hands back the English one for a string with no Vietnamese yet, and the domain rule
+    // treats that repetition the same way it treats a blank: the English stands alone.
+    return language.read(english, inLocale(VIETNAMESE).read(id, formatArgs))
 }
 
 private fun Context.read(@StringRes id: Int, formatArgs: Array<out Any>): String =
@@ -67,7 +67,5 @@ private fun Context.inLocale(language: String): Context {
     return createConfigurationContext(configuration)
 }
 
-/** English, then Vietnamese, joined the way the approved strings already joined them. */
-private const val JOIN = " · "
 private const val ENGLISH = "en"
 private const val VIETNAMESE = "vi"

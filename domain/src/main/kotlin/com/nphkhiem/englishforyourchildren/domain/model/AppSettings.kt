@@ -31,6 +31,28 @@ enum class CaregiverLanguage(val stored: String) {
 }
 
 /**
+ * The same sentence, in whichever language or languages the caregiver reads.
+ *
+ * [CaregiverLanguage.BOTH] joins the two with the middle dot the approved caregiver strings already
+ * used when they carried both languages themselves. A Vietnamese that is missing, or that is only
+ * the English over again, stands as the English alone: joining a sentence to itself reads as a
+ * stutter rather than as bilingual, and a caregiver who asked for Vietnamese and has none written
+ * yet is better served by words they may not read than by an empty line.
+ *
+ * This is the rule for text that arrives already written in both languages, which is content. A
+ * string resource resolves through the caregiver module instead, and then joins with this.
+ */
+fun CaregiverLanguage.read(english: String, vietnamese: String): String {
+    if (this == CaregiverLanguage.ENGLISH) return english
+    if (vietnamese.isBlank() || vietnamese == english) return english
+    if (this == CaregiverLanguage.VIETNAMESE) return vietnamese
+    return "$english$CAREGIVER_JOIN$vietnamese"
+}
+
+/** English, then Vietnamese, joined the way the approved caregiver strings already joined them. */
+const val CAREGIVER_JOIN = " · "
+
+/**
  * Everything a caregiver can change, and the profile the television is currently on.
  *
  * The six switches are exactly the six the built caregiver settings screen offers. A setting that

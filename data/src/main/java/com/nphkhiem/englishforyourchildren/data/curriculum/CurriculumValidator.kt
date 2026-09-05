@@ -110,6 +110,18 @@ class CurriculumValidator @Inject constructor() {
                 problems += ContentProblem(lessonWhere, "a lesson with nothing in it")
             }
 
+            // A lesson need not offer anything to do away from the screen. One that says it does,
+            // and then has nothing to say, would reach a caregiver as an empty card.
+            lesson.coPlay?.let { idea ->
+                if (idea.title.isBlank()) {
+                    problems += ContentProblem(lessonWhere, "a play-together idea with no name")
+                }
+                if (idea.instruction.isBlank()) {
+                    problems +=
+                        ContentProblem(lessonWhere, "a play-together idea with nothing to do")
+                }
+            }
+
             lesson.activities.forEach { activity ->
                 problems += validateActivity(activity, assets)
             }

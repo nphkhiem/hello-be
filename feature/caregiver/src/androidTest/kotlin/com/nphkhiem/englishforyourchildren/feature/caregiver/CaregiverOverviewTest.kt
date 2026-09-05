@@ -9,6 +9,7 @@ import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
@@ -105,6 +106,30 @@ class CaregiverOverviewTest {
     }
 
     @Test
+    fun givenASuggestionOnAFullPanel_whenACaregiverLooksForIt_thenTheyCanReachIt() {
+        // Everything here carries two languages, so a real suggestion under a real summary is
+        // taller than the stage. What it may never be is unreachable: the instruction is the whole
+        // of what a caregiver can act on, and it used to lose its height and be clipped away with
+        // nothing to say that it had been.
+        composeTestRule.setContent {
+            HelloBeTheme {
+                Box(
+                    modifier = Modifier.size(
+                        HelloBeLayout.referenceWidth,
+                        HelloBeLayout.referenceHeight
+                    )
+                ) {
+                    CaregiverOverviewScreen(state = CaregiverFixtures.overviewLongCopy())
+                }
+            }
+        }
+
+        composeTestRule.onNodeWithText(CaregiverFixtures.LONG_HINT)
+            .performScrollTo()
+            .assertIsDisplayed()
+    }
+
+    @Test
     fun givenAnotherProfile_whenTheOverviewIsDrawn_thenEveryLineNamesThatProfile() {
         setOverview(CaregiverFixtures.overviewLongCopy())
 
@@ -142,10 +167,13 @@ class CaregiverOverviewTest {
     }
 
     @Test
-    fun givenTheFullestOverview_whenItIsDrawn_thenNothingSitsBelowTheStage() {
-        // Nothing on this panel is focusable, so a scrolling container could never be moved by a
-        // remote and anything below the fold would be unreachable rather than merely unseen. The
-        // panel does not scroll, so it has to fit, and the fullest state is the one that proves it.
+    fun givenTheFullestOverviewInsideItsChrome_whenACaregiverReadsDown_thenNothingIsStranded() {
+        // This used to assert the opposite: that the panel fits the stage, because nothing on it
+        // took focus and a scrolling container no remote can move strands whatever is below the
+        // fold. It stopped fitting when the suggestion got a source, and it cannot be made to fit
+        // again at caregiver density with every label in two languages. So the cards take focus
+        // instead, and the rule this holds is the one that always mattered: a caregiver can reach
+        // the last line.
         composeTestRule.setContent {
             HelloBeTheme {
                 Box(
@@ -161,11 +189,9 @@ class CaregiverOverviewTest {
             }
         }
 
-        val lastLine = composeTestRule
-            .onNodeWithText(CaregiverFixtures.LONG_HINT)
-            .getUnclippedBoundsInRoot()
-
-        assertThat(lastLine.bottom.value).isAtMost(HelloBeLayout.referenceHeight.value)
+        composeTestRule.onNodeWithText(CaregiverFixtures.LONG_HINT)
+            .performScrollTo()
+            .assertIsDisplayed()
     }
 
     private fun setOverview(state: CaregiverOverviewUiState) {

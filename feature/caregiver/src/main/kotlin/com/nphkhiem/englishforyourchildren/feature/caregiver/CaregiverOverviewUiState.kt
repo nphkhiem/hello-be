@@ -1,6 +1,10 @@
 package com.nphkhiem.englishforyourchildren.feature.caregiver
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.ReadOnlyComposable
+import com.nphkhiem.englishforyourchildren.domain.model.CoPlayIdea
+import com.nphkhiem.englishforyourchildren.domain.model.read
 
 /**
  * One plain-language line about practice.
@@ -18,6 +22,23 @@ data class OverviewSummary(val label: String, val value: String, val note: Strin
 /** The one thing to try away from the television. */
 @Immutable
 data class CoPlaySuggestion(val title: String, val instruction: String)
+
+/**
+ * A content author's idea, read the way the rest of this area is read.
+ *
+ * The idea arrives carrying both languages, so this is a choice between them rather than a lookup.
+ * It sits beside [caregiverText] because it answers the same question that function does, and a
+ * caregiver reading a suggestion in one language and its heading in another would be the bug.
+ */
+@Composable
+@ReadOnlyComposable
+fun coPlaySuggestion(idea: CoPlayIdea): CoPlaySuggestion {
+    val language = LocalCaregiverLanguage.current
+    return CoPlaySuggestion(
+        title = language.read(idea.title, idea.titleVietnamese),
+        instruction = language.read(idea.instruction, idea.instructionVietnamese)
+    )
+}
 
 /**
  * What there is to say about a profile's practice.
