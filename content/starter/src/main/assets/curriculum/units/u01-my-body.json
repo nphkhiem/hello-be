@@ -20,6 +20,12 @@
         "letter-e",
         "letter-m"
       ],
+      "coPlay": {
+        "title": "Touch and name",
+        "instruction": "Sit facing your child. Say “eyes” and touch your own eyes, then let them copy you. Do ears, nose and mouth the same way.",
+        "titleVi": "Chạm và gọi tên",
+        "instructionVi": "Ngồi đối diện bé. Nói “eyes” và chạm vào mắt mình, rồi để bé làm theo. Làm tương tự với ears, nose và mouth."
+      },
       "activities": [
         {
           "id": "u01-my-body-l1-a1",
@@ -206,6 +212,12 @@
         "letter-h",
         "letter-f"
       ],
+      "coPlay": {
+        "title": "Count together",
+        "instruction": "Hold up your hands and count the fingers in English together, then sit down and count toes. Ten of each is plenty for one go.",
+        "titleVi": "Cùng nhau đếm",
+        "instructionVi": "Giơ hai bàn tay lên, cùng bé đếm ngón tay bằng tiếng Anh, rồi ngồi xuống đếm ngón chân. Mười ngón mỗi bên là đủ cho một lượt."
+      },
       "activities": [
         {
           "id": "u01-my-body-l2-a1",
@@ -392,6 +404,12 @@
         "letter-b",
         "letter-t"
       ],
+      "coPlay": {
+        "title": "Pat and say",
+        "instruction": "Pat your head and say “head”, then your hair, tummy and back. Go slowly first and a little faster after, and let your child lead a round.",
+        "titleVi": "Vỗ và nói",
+        "instructionVi": "Vỗ nhẹ lên đầu và nói “head”, rồi đến tóc, bụng và lưng. Làm chậm trước rồi nhanh dần, và để bé dẫn một lượt."
+      },
       "activities": [
         {
           "id": "u01-my-body-l3-a1",
@@ -578,6 +596,12 @@
         "letter-a",
         "letter-k"
       ],
+      "coPlay": {
+        "title": "Stretch and wiggle",
+        "instruction": "Stand up and stretch your arms, shake your legs, bend your knees, then smile to show your teeth. Say each word out loud as you go.",
+        "titleVi": "Vươn vai và lắc lư",
+        "instructionVi": "Đứng dậy vươn hai cánh tay, lắc chân, gập đầu gối, rồi cười tươi khoe hàm răng. Vừa làm vừa nói to từng từ."
+      },
       "activities": [
         {
           "id": "u01-my-body-l4-a1",
@@ -756,6 +780,12 @@
       "kind": "REVIEW",
       "teaches": [],
       "letters": [],
+      "coPlay": {
+        "title": "Body word hunt",
+        "instruction": "Say a body word in English and see how quickly your child can touch it. Then swap over and let them call the words for you.",
+        "titleVi": "Đi tìm từ về cơ thể",
+        "instructionVi": "Nói một từ về cơ thể bằng tiếng Anh và xem bé chạm đúng chỗ nhanh thế nào. Rồi đổi vai để bé gọi từ cho mình."
+      },
       "activities": [
         {
           "id": "u01-my-body-l5-a1",

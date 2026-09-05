@@ -3,12 +3,16 @@ package com.nphkhiem.englishforyourchildren.feature.learning
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nphkhiem.englishforyourchildren.domain.model.Answerable
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
+import com.nphkhiem.englishforyourchildren.domain.model.CoPlayIdea
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.Lesson
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
+import com.nphkhiem.englishforyourchildren.domain.model.read
 import com.nphkhiem.englishforyourchildren.domain.repository.CurriculumRepository
 import com.nphkhiem.englishforyourchildren.domain.repository.ProgressRepository
+import com.nphkhiem.englishforyourchildren.domain.repository.SettingsRepository
 import com.nphkhiem.englishforyourchildren.domain.result.DomainResult
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -32,7 +36,8 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class LessonCelebrationViewModel @Inject constructor(
     private val curriculum: CurriculumRepository,
-    private val progress: ProgressRepository
+    private val progress: ProgressRepository,
+    private val settings: SettingsRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
@@ -54,11 +59,31 @@ class LessonCelebrationViewModel @Inject constructor(
             ?.firstOrNull { it.id == lesson.value.unitId }
 
         _state.update {
-            it.copy(unitWord = unit?.word.orEmpty(), words = learnedWords(lesson.value))
+            it.copy(
+                unitWord = unit?.word.orEmpty(),
+                words = learnedWords(lesson.value),
+                playTogether = lesson.value.coPlay?.offeredIn(caregiverLanguage())
+            )
         }
 
         watchTheWriteLand(profileId, lessonId)
     }
+
+    /**
+     * The caregiver's own language, on a screen that is otherwise the child's.
+     *
+     * The one thing here addressed to a grown-up is the thing that has to be readable by one. A
+     * setting that will not read falls back to both languages, which is the only mode that cannot
+     * strand a caregiver who reads just one of them.
+     */
+    private suspend fun caregiverLanguage(): CaregiverLanguage =
+        (settings.observeSettings().first() as? DomainResult.Success)
+            ?.value?.caregiverLanguage ?: CaregiverLanguage.BOTH
+
+    private fun CoPlayIdea.offeredIn(language: CaregiverLanguage) = PlayTogetherActivity(
+        title = language.read(title, titleVietnamese),
+        instruction = language.read(instruction, instructionVietnamese)
+    )
 
     /**
      * Nothing says the words are in the storybook until storage says the lesson is finished.

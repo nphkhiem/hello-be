@@ -11,6 +11,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.AttemptOutcome
 import com.nphkhiem.englishforyourchildren.domain.model.AvatarId
 import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.domain.model.ChildProfile
+import com.nphkhiem.englishforyourchildren.domain.model.CoPlayIdea
 import com.nphkhiem.englishforyourchildren.domain.model.Course
 import com.nphkhiem.englishforyourchildren.domain.model.CourseId
 import com.nphkhiem.englishforyourchildren.domain.model.CourseUnit
@@ -76,8 +77,28 @@ object DomainBuilders {
         id: LessonId = LessonId("u01-my-body-l1"),
         unitId: UnitId = UnitId("u01-my-body"),
         ordinal: Int = 0,
-        activities: List<Activity> = spine()
-    ) = Lesson(id = id, unitId = unitId, ordinal = ordinal, activities = activities)
+        activities: List<Activity> = spine(),
+        coPlay: CoPlayIdea? = null
+    ) = Lesson(
+        id = id,
+        unitId = unitId,
+        ordinal = ordinal,
+        activities = activities,
+        coPlay = coPlay
+    )
+
+    /** Null by default above, because a lesson is allowed to offer nothing away from the screen. */
+    fun coPlayIdea(
+        title: String = "Touch and name",
+        instruction: String = "Say “eyes” and touch your own, then let your child copy you.",
+        titleVietnamese: String = "Chạm và gọi tên",
+        instructionVietnamese: String = "Nói “eyes” và chạm vào mắt mình, rồi để bé làm theo."
+    ) = CoPlayIdea(
+        title = title,
+        instruction = instruction,
+        titleVietnamese = titleVietnamese,
+        instructionVietnamese = instructionVietnamese
+    )
 
     fun courseUnit(
         id: UnitId = UnitId("u01-my-body"),

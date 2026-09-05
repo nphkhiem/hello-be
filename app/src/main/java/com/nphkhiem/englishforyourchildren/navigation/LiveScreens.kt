@@ -50,6 +50,7 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementVi
 import com.nphkhiem.englishforyourchildren.feature.caregiver.R as CaregiverR
 import com.nphkhiem.englishforyourchildren.feature.caregiver.SettingId
 import com.nphkhiem.englishforyourchildren.feature.caregiver.caregiverText
+import com.nphkhiem.englishforyourchildren.feature.caregiver.coPlaySuggestion
 import com.nphkhiem.englishforyourchildren.feature.caregiver.languageName
 import com.nphkhiem.englishforyourchildren.feature.caregiver.languageNamed
 import com.nphkhiem.englishforyourchildren.feature.caregiver.settingRows
@@ -454,11 +455,13 @@ internal fun LiveCaregiverShell(
 /**
  * The caregiver's view of their child's practice, live.
  *
- * Two summaries rather than the approved three. The third names a unit to come back to, and
- * nothing derives one yet; the co-play suggestion is missing for the same reason, and the state
- * says outright that null there is the brief's unavailable-content state rather than an error.
- * Showing what can be counted and leaving out what cannot be is the honest version of this screen
- * until a suggestion has a source.
+ * Two summaries rather than the approved three. The third names a unit to come back to and nothing
+ * derives one yet, so it is left out: showing what can be counted and leaving out what cannot be is
+ * the honest version of this screen.
+ *
+ * The suggestion is the lesson's own, written by whoever wrote the lesson, and null where the child
+ * has not practised or the lesson offers nothing. The state calls that the brief's
+ * unavailable-content state rather than an error, which is what it is.
  */
 @Composable
 internal fun LiveCaregiverOverview(profileId: ProfileId?, modifier: Modifier = Modifier) {
@@ -491,7 +494,7 @@ internal fun LiveCaregiverOverview(profileId: ProfileId?, modifier: Modifier = M
                     recentWords = state.recentWords
                 )
             },
-            suggestion = null,
+            suggestion = state.suggestion?.let { coPlaySuggestion(it) },
             pendingSave = state.pendingSave
         ),
         modifier = modifier

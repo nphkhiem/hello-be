@@ -14,7 +14,9 @@ import com.nphkhiem.englishforyourchildren.domain.model.ActivityInstanceId
 import com.nphkhiem.englishforyourchildren.domain.model.AnswerChoice
 import com.nphkhiem.englishforyourchildren.domain.model.AssetId
 import com.nphkhiem.englishforyourchildren.domain.model.AttemptOutcome
+import com.nphkhiem.englishforyourchildren.domain.model.Course
 import com.nphkhiem.englishforyourchildren.domain.model.EpochMillis
+import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.domain.model.SkillId
 import com.nphkhiem.englishforyourchildren.testsupport.DomainBuilders
@@ -116,6 +118,60 @@ class CaregiverOverviewViewModelTest {
         }
     }
 
+    @Test
+    fun givenPractice_whenTheOverviewOpens_thenItSuggestsWhatGoesWithTheLatestSession() = overview(
+        attempts = listOf(
+            metWord(EYES_ACTIVITY, at = NOW),
+            metWord(SECOND_LESSON_ACTIVITY, at = NOW + A_MINUTE)
+        )
+    ) { model ->
+        // The latest, not the first. A caregiver reading this after two sessions wants the
+        // idea that goes with the one their child just did.
+        assertThat(model.state.value.suggestion?.title).isEqualTo(SECOND_IDEA)
+    }
+
+    @Test
+    fun givenAnEarlierSessionCameLast_whenTheOverviewOpens_thenTheSuggestionFollowsTheClock() =
+        overview(
+            attempts = listOf(
+                metWord(SECOND_LESSON_ACTIVITY, at = NOW),
+                metWord(EYES_ACTIVITY, at = NOW + A_MINUTE)
+            )
+        ) { model ->
+            // Storage may hand back attempts in any order, so the answer has to come from the time
+            // on them rather than from their position in the list.
+            assertThat(model.state.value.suggestion?.title).isEqualTo(FIRST_IDEA)
+        }
+
+    @Test
+    fun givenAChildWhoHasNeverPractised_whenTheOverviewOpens_thenThereIsNothingToSuggest() =
+        overview { model ->
+            // The brief's unavailable-content state. A suggestion invented for a child who has done
+            // nothing yet would be about no lesson at all.
+            assertThat(model.state.value.suggestion).isNull()
+        }
+
+    @Test
+    fun givenALessonOfferingNothingAwayFromTheScreen_whenItIsPractised_thenNothingIsSuggested() =
+        overview(
+            course = DomainBuilders.course(
+                units = listOf(
+                    DomainBuilders.courseUnit(
+                        lessons = listOf(
+                            DomainBuilders.lesson(
+                                activities = listOf(
+                                    asking(EYES_ACTIVITY, ordinal = 0, correct = "eyes")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            attempts = listOf(metWord(EYES_ACTIVITY))
+        ) { model ->
+            assertThat(model.state.value.suggestion).isNull()
+        }
+
     private fun courseWithWords() = DomainBuilders.course(
         units = listOf(
             DomainBuilders.courseUnit(
@@ -124,7 +180,16 @@ class CaregiverOverviewViewModelTest {
                         activities = listOf(
                             asking(EYES_ACTIVITY, ordinal = 0, correct = "eyes"),
                             asking(EARS_ACTIVITY, ordinal = 1, correct = "ears")
-                        )
+                        ),
+                        coPlay = DomainBuilders.coPlayIdea(title = FIRST_IDEA)
+                    ),
+                    DomainBuilders.lesson(
+                        id = LessonId(SECOND_LESSON),
+                        ordinal = 1,
+                        activities = listOf(
+                            asking(SECOND_LESSON_ACTIVITY, ordinal = 0, correct = "nose")
+                        ),
+                        coPlay = DomainBuilders.coPlayIdea(title = SECOND_IDEA)
                     )
                 )
             )
@@ -144,7 +209,7 @@ class CaregiverOverviewViewModelTest {
         content = ActivityContent.ListeningSelection(
             prompt = "Where are the $correct?",
             promptAsset = null,
-            choices = listOf(choice("eyes"), choice("ears")),
+            choices = listOf(choice("eyes"), choice("ears"), choice("nose")),
             correct = SkillId("word-$correct")
         )
     )
@@ -156,12 +221,13 @@ class CaregiverOverviewViewModelTest {
         audio = AssetId("aud-en-$word")
     )
 
-    private fun metWord(activity: String = EYES_ACTIVITY) = DomainBuilders.activityAttempt(
-        activityId = ActivityId(activity),
-        activityInstance = ActivityInstanceId("$activity-1"),
-        outcome = AttemptOutcome.CORRECT,
-        at = EpochMillis(NOW)
-    )
+    private fun metWord(activity: String = EYES_ACTIVITY, at: Long = NOW) =
+        DomainBuilders.activityAttempt(
+            activityId = ActivityId(activity),
+            activityInstance = ActivityInstanceId("$activity-1"),
+            outcome = AttemptOutcome.CORRECT,
+            at = EpochMillis(at)
+        )
 
     /** A word the child got to with Pip's help, which is still a word they met. */
     private fun neededHelp(activity: String) = DomainBuilders.activityAttempt(
@@ -181,13 +247,14 @@ class CaregiverOverviewViewModelTest {
 
     private fun overview(
         attempts: List<ActivityAttempt> = emptyList(),
-        completed: Set<com.nphkhiem.englishforyourchildren.domain.model.LessonId> = emptySet(),
+        completed: Set<LessonId> = emptySet(),
+        course: Course = courseWithWords(),
         body: suspend TestScope.(CaregiverOverviewViewModel) -> Unit
     ) = runTest {
         Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
         // A course whose activity actually names skills. Without content there is nothing for an
         // attempt to have been practice of, and every count would be zero for the wrong reason.
-        curriculum.setCourse(courseWithWords())
+        curriculum.setCourse(course)
         profiles.setProfiles(listOf(DomainBuilders.childProfile()))
         progress.setProgress(
             DomainBuilders.profileProgress(
@@ -216,6 +283,11 @@ class CaregiverOverviewViewModelTest {
         const val PROFILE = "p1"
         const val EYES_ACTIVITY = "u01-my-body-l1-a1"
         const val EARS_ACTIVITY = "u01-my-body-l1-a2"
+        const val SECOND_LESSON = "u01-my-body-l2"
+        const val SECOND_LESSON_ACTIVITY = "u01-my-body-l2-a1"
+        const val FIRST_IDEA = "Touch and name"
+        const val SECOND_IDEA = "Count together"
         const val NOW = 1_756_000_000_000
+        const val A_MINUTE = 60_000L
     }
 }

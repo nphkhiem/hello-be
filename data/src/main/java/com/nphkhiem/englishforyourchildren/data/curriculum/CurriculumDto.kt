@@ -43,7 +43,22 @@ data class LessonDto(
     val kind: String,
     val teaches: List<String> = emptyList(),
     val letters: List<String> = emptyList(),
-    val activities: List<ActivityDto>
+    val activities: List<ActivityDto>,
+    val coPlay: CoPlayDto? = null
+)
+
+/**
+ * The off-screen activity a finished lesson offers, in both languages.
+ *
+ * The Vietnamese fields default to empty so a unit written before a translator saw it still parses;
+ * what happens to an empty one is the caregiver language's rule and not this file's.
+ */
+@Serializable
+data class CoPlayDto(
+    val title: String,
+    val instruction: String,
+    val titleVi: String = "",
+    val instructionVi: String = ""
 )
 
 @Serializable

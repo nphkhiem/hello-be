@@ -75,6 +75,31 @@ class StarterContentTest {
     }
 
     @Test
+    fun givenEveryShippedSession_whenItEnds_thenThereIsSomethingToDoAwayFromTheTelevision() {
+        // The information architecture puts one off-screen suggestion on the caregiver overview and
+        // the brief offers one after every celebration. Both read the lesson, so a lesson without
+        // one is a caregiver shown nothing.
+        val ideas = units.single().lessons.map { it.coPlay }
+
+        assertThat(ideas).hasSize(5)
+        assertThat(ideas.all { it != null }).isTrue()
+    }
+
+    @Test
+    fun givenEveryShippedIdea_whenACaregiverReadsIt_thenItIsThereInBothLanguages() {
+        // The person being addressed is the caregiver, and the caregiver area speaks both. An idea
+        // in English alone would be a card a Vietnamese-speaking parent cannot act on.
+        val ideas = units.single().lessons.mapNotNull { it.coPlay }
+
+        ideas.forEach { idea ->
+            assertThat(idea.titleVi).isNotEmpty()
+            assertThat(idea.instructionVi).isNotEmpty()
+            assertThat(idea.titleVi).isNotEqualTo(idea.title)
+            assertThat(idea.instructionVi).isNotEqualTo(idea.instruction)
+        }
+    }
+
+    @Test
     fun givenTheShippedContent_whenItsGraphIsChecked_thenNothingIsWrongExceptMissingFiles() {
         // Everything that is this bundle's own fault has to be clean. The asset problems are a
         // different kind: they are work nobody has done yet, and they are counted separately below.
@@ -144,8 +169,9 @@ class StarterContentTest {
 
     @Test
     fun givenNoRecordingsExist_whenTheBundleBecomesDomain_thenEveryPromptIsStillSilent() {
-        // Content referencing a recording nobody has made is content, not an error. This is the
-        // state the app is in, and it has to be a state it can hold.
+        // Content referencing a recording nobody has made is content, not an error. This reads
+        // the shipping bundle, which still has no media in it: the twenty-eight placeholder
+        // recordings live in the debug source set, where a release build cannot reach them.
         val prompts = parser.toDomain(course, units).units
             .flatMap { it.lessons }
             .flatMap { it.activities }
@@ -156,9 +182,9 @@ class StarterContentTest {
 
     @Test
     fun givenNoMediaExists_whenTheGraphIsChecked_thenNothingIsBrokenAndOnlyFilesAreOwed() {
-        // The distinction that lets the app run today. Every asset is missing, and none of that is
-        // the content being wrong: a lesson opens, the words are on screen, and the files are a
-        // release gate rather than a runtime one.
+        // The distinction that lets the app run today. Every shipping asset is missing, and none
+        // of that is the content being wrong: a lesson opens, the words are on screen, and the
+        // files are a release gate rather than a runtime one.
         val problems = validator.validate(course, units, availableAssets = emptySet())
 
         assertThat(problems.filter { it.kind == ContentProblem.Kind.BROKEN_GRAPH }).isEmpty()
