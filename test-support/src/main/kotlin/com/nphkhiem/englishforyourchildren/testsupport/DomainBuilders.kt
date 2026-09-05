@@ -77,12 +77,14 @@ object DomainBuilders {
         id: LessonId = LessonId("u01-my-body-l1"),
         unitId: UnitId = UnitId("u01-my-body"),
         ordinal: Int = 0,
+        teaches: List<SkillId> = emptyList(),
         activities: List<Activity> = spine(),
         coPlay: CoPlayIdea? = null
     ) = Lesson(
         id = id,
         unitId = unitId,
         ordinal = ordinal,
+        teaches = teaches,
         activities = activities,
         coPlay = coPlay
     )

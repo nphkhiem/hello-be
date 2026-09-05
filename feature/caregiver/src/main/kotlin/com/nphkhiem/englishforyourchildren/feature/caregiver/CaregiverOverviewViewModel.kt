@@ -6,8 +6,10 @@ import com.nphkhiem.englishforyourchildren.domain.model.ActivityAttempt
 import com.nphkhiem.englishforyourchildren.domain.model.Answerable
 import com.nphkhiem.englishforyourchildren.domain.model.CoPlayIdea
 import com.nphkhiem.englishforyourchildren.domain.model.Course
+import com.nphkhiem.englishforyourchildren.domain.model.CourseUnit
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.domain.model.SkillId
+import com.nphkhiem.englishforyourchildren.domain.model.SkillProgress
 import com.nphkhiem.englishforyourchildren.domain.progression.tallySkills
 import com.nphkhiem.englishforyourchildren.domain.repository.CurriculumRepository
 import com.nphkhiem.englishforyourchildren.domain.repository.ProfileRepository
@@ -53,6 +55,14 @@ data class CaregiverOverviewState(
      * drawn, because that is where the caregiver language is provided.
      */
     val suggestion: CoPlayIdea?,
+    /**
+     * The theme of the unit worth going back to, or null when nothing is.
+     *
+     * A name rather than a count, which is why the summary that draws it takes a string. Null when
+     * no word is waiting for another go: a practice suggestion offered to a child with nothing to
+     * practise would be a deficit invented to fill a card.
+     */
+    val unitToPractise: String?,
     val pendingSave: Boolean,
     val unreadable: Boolean
 )
@@ -77,6 +87,7 @@ class CaregiverOverviewViewModel @Inject constructor(
             counts = null,
             recentWords = emptyList(),
             suggestion = null,
+            unitToPractise = null,
             pendingSave = false,
             unreadable = false
         )
@@ -119,6 +130,7 @@ class CaregiverOverviewViewModel @Inject constructor(
                         // The word as the child saw it on the card. An id is a key, not a word.
                         recentWords = met.keys.mapNotNull { labels[it] },
                         suggestion = suggestionAfter(course.value, practice.value.attempts),
+                        unitToPractise = unitWorthAnotherGo(course.value, met),
                         pendingSave = practice.value.openCheckpoint != null,
                         unreadable = false
                     )
@@ -142,6 +154,26 @@ class CaregiverOverviewViewModel @Inject constructor(
             .firstOrNull { lesson -> lesson.activities.any { it.id == latest } }
             ?.coPlay
     }
+
+    /**
+     * The unit holding the most words that wanted another go.
+     *
+     * The one distinction this summary is allowed to draw, followed through: not that a child was
+     * wrong, but that these words are worth coming back to, and here is where they live. Ties go to
+     * the unit that comes first in the course, so the same history always names the same unit.
+     */
+    private fun unitWorthAnotherGo(course: Course, met: Map<SkillId, SkillProgress>): String? {
+        val waiting = met.filterValues { it.reviewNeeded }.keys
+        if (waiting.isEmpty()) return null
+
+        return course.units
+            .maxByOrNull { unit -> unit.skills().count { it in waiting } }
+            ?.takeIf { unit -> unit.skills().any { it in waiting } }
+            ?.theme
+    }
+
+    /** Every word a unit is about, which is what its lessons say they teach. */
+    private fun CourseUnit.skills(): List<SkillId> = lessons.flatMap { it.teaches }
 
     private fun labelsIn(course: Course): Map<SkillId, String> = course.units
         .flatMap { it.lessons }
