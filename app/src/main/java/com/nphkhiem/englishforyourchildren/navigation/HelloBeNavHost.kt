@@ -210,6 +210,9 @@ fun HelloBeNavHost(
         is HelloBeKey.ChildHome -> if (content == null) {
             LiveChildHome(
                 profileId = key.profileId,
+                onContinue = { lesson ->
+                    push(HelloBeKey.Lesson(profileId = key.profileId, lessonId = lesson))
+                },
                 onLearningPath = { push(HelloBeKey.LearningPath(profileId = key.profileId)) },
                 onFreePlay = { push(HelloBeKey.FreePlay(profileId = key.profileId)) },
                 onSwitchProfile = {

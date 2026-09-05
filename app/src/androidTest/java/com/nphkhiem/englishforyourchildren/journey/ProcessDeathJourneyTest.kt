@@ -147,7 +147,7 @@ class ProcessDeathJourneyTest {
 
         switchOff()
         switchOn()
-        openLessonOneFromHome()
+        continueLessonOneFromHome()
 
         // Off the disk, into a ViewModel that has never seen this child before.
         tv.awaitText(SECOND_QUESTION)
@@ -169,7 +169,7 @@ class ProcessDeathJourneyTest {
 
         switchOff()
         switchOn()
-        openLessonOneFromHome()
+        continueLessonOneFromHome()
 
         // Still the second question. Nothing on this television ever wrote it down, and a pending
         // checkpoint that came back would be the app resurrecting work it told the child it had not
@@ -208,9 +208,22 @@ class ProcessDeathJourneyTest {
     /** With one child stored, the app opens on their home. See `resolveEntry`. */
     private fun openLessonOneFromHome() {
         tv.awaitText(tv.string("home_start"))
+        // One press, because that is what the dominant control does now: it opens the lesson the
+        // progression policy names rather than the page that lists them.
         tv.press(tv.string("home_start"))
-        tv.awaitText(FIRST_LESSON)
-        tv.press(FIRST_LESSON)
+    }
+
+    /**
+     * The same control, saying the other thing.
+     *
+     * A child with a checkpoint behind them is offered Continue rather than a first adventure, so a
+     * television coming back on has to be met on those words. That the label changes at all is the
+     * returning-learner state, and this journey is the only place that crosses a process death to
+     * see it.
+     */
+    private fun continueLessonOneFromHome() {
+        tv.awaitText(tv.string("home_continue"))
+        tv.press(tv.string("home_continue"))
     }
 
     private companion object {

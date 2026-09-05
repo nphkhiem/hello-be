@@ -112,10 +112,20 @@ private class ForwardingProgressDao(private val current: () -> ProgressDao) : Pr
     override suspend fun deleteCheckpoints(profileId: String) =
         current().deleteCheckpoints(profileId)
 
+    override suspend fun deleteCheckpointsFor(profileId: String, lessonId: String) =
+        current().deleteCheckpointsFor(profileId, lessonId)
+
     override suspend fun deleteLessonProgress(profileId: String) =
         current().deleteLessonProgress(profileId)
 
     override suspend fun deleteSkills(profileId: String) = current().deleteSkills(profileId)
+
+    override suspend fun completeLesson(
+        sessionId: String,
+        lessonId: String,
+        profileId: String,
+        completedAt: Long
+    ) = current().completeLesson(sessionId, lessonId, profileId, completedAt)
 
     override suspend fun deleteAllFor(profileId: String) = current().deleteAllFor(profileId)
 }

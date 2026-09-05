@@ -37,7 +37,13 @@ interface ProgressDao {
     @Query("SELECT * FROM activity_attempt WHERE profileId = :profileId")
     fun observeAttempts(profileId: String): Flow<List<ActivityAttemptEntity>>
 
-    @Query("SELECT * FROM lesson_checkpoint WHERE profileId = :profileId")
+    /**
+     * Newest first, because "the" open checkpoint is singular and a child is in the latest one.
+     *
+     * Without an order this returned whatever the table felt like, so which lesson a child was
+     * offered to carry on with depended on row layout.
+     */
+    @Query("SELECT * FROM lesson_checkpoint WHERE profileId = :profileId ORDER BY updatedAt DESC")
     fun observeCheckpoints(profileId: String): Flow<List<LessonCheckpointEntity>>
 
     @Query("SELECT * FROM lesson_progress WHERE profileId = :profileId")
@@ -81,6 +87,11 @@ interface ProgressDao {
         upsertCheckpoint(checkpoint)
     }
 
+    @Query(
+        "DELETE FROM lesson_checkpoint WHERE profileId = :profileId AND lessonId = :lessonId"
+    )
+    suspend fun deleteCheckpointsFor(profileId: String, lessonId: String)
+
     @Query("DELETE FROM lesson_session WHERE profileId = :profileId")
     suspend fun deleteSessions(profileId: String)
 
@@ -95,6 +106,41 @@ interface ProgressDao {
 
     @Query("DELETE FROM skill_progress WHERE profileId = :profileId")
     suspend fun deleteSkills(profileId: String)
+
+    /**
+     * A lesson finished, written down in one go.
+     *
+     * The checkpoint goes with it. A checkpoint is where a child can be put back into a lesson, and
+     * once they have finished it there is nowhere to put them back into: a row that outlives its
+     * lesson makes the whole profile look permanently half-saved, which is what child home and the
+     * caregiver overview were both reporting for ever.
+     */
+    @Transaction
+    suspend fun completeLesson(
+        sessionId: String,
+        lessonId: String,
+        profileId: String,
+        completedAt: Long
+    ) {
+        findSession(sessionId)?.let { session ->
+            upsertSession(
+                session.copy(
+                    status = "COMPLETED",
+                    currentActivityInstanceId = null,
+                    completedAt = completedAt
+                )
+            )
+        }
+        upsertLessonProgress(
+            LessonProgressEntity(
+                profileId = profileId,
+                lessonId = lessonId,
+                completed = true,
+                updatedAt = completedAt
+            )
+        )
+        deleteCheckpointsFor(profileId, lessonId)
+    }
 
     /**
      * Everything one child has done, removed together.

@@ -58,6 +58,16 @@ class FreePlayViewModel @Inject constructor(
     /** Honoured once, when the library first has shelves to honour it with. */
     private var preferred: String? = null
 
+    /** Every shelf the child has earned, of which at most [SHELVES_IN_VIEW] are on screen. */
+    private var library: List<Shelf> = emptyList()
+
+    /** Which shelf the current view starts at. A position rather than a page number, so a shelf
+     * appearing or going does not shuffle a child onto a different view. */
+    private var firstInView: Int = 0
+
+    /** The word most recently pressed, which is where entry focus goes when a child comes back. */
+    private var lastPlayedObject: String? = null
+
     init {
         // Subscribed before anything can be played, for the reason the lesson gives: the event flow
         // keeps no replay, so a listener arriving after the first failure never learns of it.
@@ -114,11 +124,11 @@ class FreePlayViewModel @Inject constructor(
 
             is FreePlayAction.ObjectChosen -> say(action.objectId)
 
-            // Paging, leaving and switching profile belong to whoever hosts this screen. A library
-            // of one unit has nothing either side of it, and the rule for choosing which three
-            // shelves to show needs more than one unit to be about anything.
-            FreePlayAction.PreviousShelvesRequested,
-            FreePlayAction.NextShelvesRequested,
+            FreePlayAction.PreviousShelvesRequested -> page(-SHELVES_IN_VIEW)
+
+            FreePlayAction.NextShelvesRequested -> page(SHELVES_IN_VIEW)
+
+            // Leaving and switching profile belong to whoever hosts this screen.
             FreePlayAction.HomeRequested,
             FreePlayAction.SwitchProfileRequested -> Unit
         }
@@ -138,8 +148,22 @@ class FreePlayViewModel @Inject constructor(
      */
     private fun say(objectId: String) {
         val recording = recordings[SkillId(objectId)] ?: return
-        _state.value = _state.value.copy(speakingObjectId = objectId)
+        lastPlayedObject = objectId
+        _state.value = _state.value.copy(speakingObjectId = objectId).withView()
         viewModelScope.launch { playback.play(listOf(recording)) }
+    }
+
+    /**
+     * Move the view by a whole viewful, and no further than the library goes.
+     *
+     * Clamped rather than wrapped. A child pressing the same direction twice at the end of the
+     * library would otherwise find themselves back at the beginning without having asked to be,
+     * and there is no control drawn there to have caused it.
+     */
+    private fun page(by: Int) {
+        val last = ((library.size - 1) / SHELVES_IN_VIEW) * SHELVES_IN_VIEW
+        firstInView = (firstInView + by).coerceIn(0, maxOf(last, 0))
+        _state.value = _state.value.withView()
     }
 
     private fun FreePlayUiState.withLibrary(
@@ -147,20 +171,66 @@ class FreePlayViewModel @Inject constructor(
         finished: Set<LessonId>,
         child: ChildProfile?
     ): FreePlayUiState {
-        val shelves = course.units.mapNotNull { it.toShelf(course, finished) }
-        val remembered = preferred?.let { wanted -> shelves.firstOrNull { it.id == wanted } }
+        library = course.units.mapNotNull { it.toShelf(course, finished) }
+        val remembered = preferred?.let { wanted -> library.firstOrNull { it.id == wanted } }
         if (remembered != null) preferred = null
+
+        // A remembered shelf brings its view with it. Opening into a shelf on a page the child is
+        // not looking at would put them back on the shelves with the wrong ones on screen.
+        val opened =
+            remembered ?: openShelf?.let { open -> library.firstOrNull { it.id == open.id } }
+        opened?.let { shelf ->
+            val at = library.indexOfFirst { it.id == shelf.id }
+            if (at >= 0) firstInView = (at / SHELVES_IN_VIEW) * SHELVES_IN_VIEW
+        }
 
         return copy(
             profileName = child?.nickname.orEmpty(),
             profileAvatar = child?.avatarId?.value.orEmpty(),
-            shelves = shelves,
             // The open shelf is rebuilt from the new list so a word added by a lesson finished
             // elsewhere appears, and a shelf that has gone closes rather than lingering.
-            openShelf = remembered
-                ?: openShelf?.let { open -> shelves.firstOrNull { it.id == open.id } }
+            openShelf = opened
+        ).withView()
+    }
+
+    /**
+     * One viewful of shelves, and the names of what lies either side of it.
+     *
+     * The information architecture caps a view at three: more than that on one page is the endless
+     * feed its stop condition names, and a child cannot choose between things they cannot take in.
+     * The shelves either side are named rather than counted, because a control that said "more"
+     * would tell a child nothing about where it goes.
+     */
+    private fun FreePlayUiState.withView(): FreePlayUiState {
+        if (library.isEmpty()) {
+            return copy(shelves = emptyList(), previousShelf = null, nextShelf = null)
+        }
+        firstInView = firstInView.coerceIn(0, maxOf(library.size - 1, 0))
+        val end = minOf(firstInView + SHELVES_IN_VIEW, library.size)
+
+        return copy(
+            shelves = library.subList(firstInView, end).map { it.marked() },
+            previousShelf = library.getOrNull(firstInView - 1)?.summary(),
+            nextShelf = library.getOrNull(end)?.summary()
         )
     }
+
+    /**
+     * The shelf holding the last word played, said out loud in the state.
+     *
+     * `freePlayFocusTarget` has read this since the shelves were drawn and nothing ever wrote it,
+     * so entry focus always went to the first shelf. The information architecture asks for the last
+     * played one.
+     */
+    private fun Shelf.marked(): Shelf {
+        val holdsIt = objects.any { it.id == lastPlayedObject }
+        return copy(
+            lastPlayed = holdsIt,
+            lastPlayedObjectId = if (holdsIt) lastPlayedObject else null
+        )
+    }
+
+    private fun Shelf.summary() = ShelfSummary(id = id, name = name)
 
     /**
      * A unit with nothing finished in it is not an empty shelf; it is not a shelf.
@@ -208,6 +278,9 @@ class FreePlayViewModel @Inject constructor(
         }
 
     private companion object {
+        /** Up to three story shelves in one view, per `INFORMATION_ARCHITECTURE.md`. */
+        const val SHELVES_IN_VIEW = 3
+
         val EMPTY = FreePlayUiState(
             profileName = "",
             profileAvatar = "",
