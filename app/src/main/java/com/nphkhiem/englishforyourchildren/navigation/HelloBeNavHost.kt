@@ -416,14 +416,14 @@ fun HelloBeNavHost(
         is HelloBeKey.CaregiverGate -> if (content == null) {
             CaregiverLanguageScope {
                 LiveAdultGate(
-                    // Settings rather than the dashboard, for now. The overview's ViewModel is
-                    // P3-T8's, and landing there today would reward solving the gate with a
-                    // recovery panel. `M1_TRACEABILITY.md` records this so T8 moves it back rather
-                    // than inheriting it.
+                    // The overview, which is where the information architecture puts a caregiver
+                    // who has just come through the door. It briefly landed on settings instead,
+                    // while the overview had no ViewModel and would have met them with a recovery
+                    // panel.
                     onOpened = {
                         replaceAll(
                             resolved.dropLast(1) +
-                                HelloBeKey.CaregiverSettings(profileId = key.profileId)
+                                HelloBeKey.CaregiverDashboard(profileId = key.profileId)
                         )
                     },
                     modifier = modifier
@@ -450,9 +450,21 @@ fun HelloBeNavHost(
             )
         }
 
-        is HelloBeKey.CaregiverDashboard -> content?.let {
+        is HelloBeKey.CaregiverDashboard -> if (content == null) {
+            CaregiverLanguageScope {
+                LiveCaregiverShell(
+                    profileId = key.profileId,
+                    section = CaregiverSection.OVERVIEW,
+                    onSection = { section -> push(sectionKey(section, key.profileId)) },
+                    onReturn = {
+                        replaceAll(afterCaregiverSessionClosed(key.profileId, caregiverOrigin))
+                    },
+                    modifier = modifier
+                ) { LiveCaregiverOverview(profileId = key.profileId) }
+            }
+        } else {
             CaregiverShell(
-                content = it,
+                content = content,
                 profileId = key.profileId,
                 section = CaregiverSection.OVERVIEW,
                 onSection = { section -> push(sectionKey(section, key.profileId)) },
@@ -460,8 +472,8 @@ fun HelloBeNavHost(
                     replaceAll(afterCaregiverSessionClosed(key.profileId, caregiverOrigin))
                 },
                 modifier = modifier
-            ) { CaregiverOverviewScreen(state = it.caregiverOverview(key.profileId)) }
-        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
+            ) { CaregiverOverviewScreen(state = content.caregiverOverview(key.profileId)) }
+        }
 
         is HelloBeKey.CaregiverSettings -> if (content == null) {
             CaregiverLanguageScope {

@@ -86,7 +86,12 @@ adult gate and caregiver settings went live in P3-T7. What remains is the caregi
 profile management and both destructive confirmations, which are P3-T8. Pressing those still
 reaches a resting-page recovery rather than the screen.
 
-**Solving the gate lands on Settings, not the Overview, and that is temporary.** The overview's
-ViewModel is P3-T8's, so landing there today would reward a caregiver for solving the gate by
-showing them a recovery panel. The wiring in `HelloBeNavHost` says so beside itself, and T8 moves it
-back rather than inheriting it.
+Solving the gate lands on the overview, which is where the information architecture puts a
+caregiver who has just come through the door. It briefly landed on settings instead, while the
+overview had no ViewModel and would have met them with a recovery panel. P3-T8 moved it back.
+
+**The overview shows two summaries where the approved draft has three, and no co-play suggestion.**
+The third summary names a unit to come back to and nothing derives one yet; the suggestion has no
+source at all. `CaregiverOverviewUiState` allows a null suggestion and calls it the brief's
+unavailable-content state, so this is the screen being honest rather than incomplete, but it is not
+the finished screen and a suggestion source is still owed.

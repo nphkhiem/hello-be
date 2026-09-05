@@ -20,6 +20,9 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateScreen
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateUiState
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateViewModel
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverLanguageViewModel
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverOverviewScreen
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverOverviewUiState
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverOverviewViewModel
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverScaffold
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSection
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSettingsAction
@@ -31,6 +34,8 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellState
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellViewModel
 import com.nphkhiem.englishforyourchildren.feature.caregiver.GateChallenge
 import com.nphkhiem.englishforyourchildren.feature.caregiver.LocalCaregiverLanguage
+import com.nphkhiem.englishforyourchildren.feature.caregiver.OverviewProgress
+import com.nphkhiem.englishforyourchildren.feature.caregiver.OverviewSummary
 import com.nphkhiem.englishforyourchildren.feature.caregiver.R as CaregiverR
 import com.nphkhiem.englishforyourchildren.feature.caregiver.SettingId
 import com.nphkhiem.englishforyourchildren.feature.caregiver.caregiverText
@@ -431,5 +436,52 @@ internal fun LiveCaregiverShell(
         },
         modifier = modifier,
         content = body
+    )
+}
+
+/**
+ * The caregiver's view of their child's practice, live.
+ *
+ * Two summaries rather than the approved three. The third names a unit to come back to, and
+ * nothing derives one yet; the co-play suggestion is missing for the same reason, and the state
+ * says outright that null there is the brief's unavailable-content state rather than an error.
+ * Showing what can be counted and leaving out what cannot be is the honest version of this screen
+ * until a suggestion has a source.
+ */
+@Composable
+internal fun LiveCaregiverOverview(profileId: ProfileId?, modifier: Modifier = Modifier) {
+    val model: CaregiverOverviewViewModel = hiltViewModel()
+    val state by model.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(profileId) { profileId?.let { model.start(it) } }
+
+    val counts = state.counts
+    CaregiverOverviewScreen(
+        state = CaregiverOverviewUiState(
+            profileName = state.profileName,
+            period = caregiverText(CaregiverR.string.overview_period),
+            progress = when {
+                counts == null -> OverviewProgress.NewProfile
+
+                else -> OverviewProgress.Practiced(
+                    summaries = listOf(
+                        OverviewSummary(
+                            label = caregiverText(CaregiverR.string.overview_adventures_label),
+                            value = counts.lessonsFinished.toString(),
+                            note = caregiverText(CaregiverR.string.overview_adventures_note)
+                        ),
+                        OverviewSummary(
+                            label = caregiverText(CaregiverR.string.overview_words_label),
+                            value = counts.wordsMet.toString(),
+                            note = caregiverText(CaregiverR.string.overview_words_note)
+                        )
+                    ),
+                    recentWords = state.recentWords
+                )
+            },
+            suggestion = null,
+            pendingSave = state.pendingSave
+        ),
+        modifier = modifier
     )
 }

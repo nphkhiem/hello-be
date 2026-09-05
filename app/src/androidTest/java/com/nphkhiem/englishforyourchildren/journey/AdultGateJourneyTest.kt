@@ -138,7 +138,10 @@ class AdultGateJourneyTest {
         tv.awaitText(CORRECT.toString())
         tv.press(CORRECT.toString())
 
-        // Settings, not the overview: see the comment beside the wiring in `HelloBeNavHost`.
+        // The gate opens onto the overview, so settings is one press along the rail from here.
+        tv.awaitText(caregiver(CaregiverR.string.caregiver_settings))
+        tv.press(caregiver(CaregiverR.string.caregiver_settings))
+
         tv.awaitText(caregiver(CaregiverR.string.settings_captions_title))
         val before = storedCaptions()
         tv.press(caregiver(CaregiverR.string.settings_captions_title))
