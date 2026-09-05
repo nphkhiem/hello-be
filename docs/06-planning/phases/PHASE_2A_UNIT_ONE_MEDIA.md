@@ -135,8 +135,11 @@ American English, which the chosen voice satisfies, but a synthetic Pip is a pla
 - [x] Twenty-two more for unit two, to the same specification and under the same licence position,
       when P3-T4 packaged My Family on 5 September 2026: sixteen words, five letters, one prompt
       stem. This ticket is where that route was decided and where it is licensed, so their ledger
-      rows point here. Fifty placeholder recordings in the debug source set now, which a release
-      build still cannot reach.
+      rows point here.
+- [x] Twenty more for unit three the same day, when P3-T5 packaged My Home: sixteen words and four
+      letters, and no prompt stem, because a home is full of things and `where is` was already
+      recorded. Seventy placeholder recordings in the debug source set now, which a release build
+      still cannot reach.
 - [x] Ledger rows for every one of them.
 - [ ] Vietnamese support phrases reviewed by a native speaker before packaging. Not generated and
       not packaged: this ticket's own rule was review before packaging, and holding them is what

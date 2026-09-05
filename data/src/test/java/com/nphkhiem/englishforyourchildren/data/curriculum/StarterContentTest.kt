@@ -30,8 +30,22 @@ class StarterContentTest {
 
     @Test
     fun givenTheShippedUnits_whenTheyAreRead_thenTheyAreTheApprovedThemesInOrder() {
-        assertThat(units.map { it.id }).containsExactly("u01-my-body", "u02-my-family").inOrder()
-        assertThat(units.map { it.theme }).containsExactly("My Body", "My Family").inOrder()
+        assertThat(units.map { it.id })
+            .containsExactly("u01-my-body", "u02-my-family", "u03-my-home")
+            .inOrder()
+        assertThat(units.map { it.theme })
+            .containsExactly("My Body", "My Family", "My Home")
+            .inOrder()
+    }
+
+    @Test
+    fun givenTheWholeCourse_whenItIsCounted_thenItIsThreeUnitsAndFifteenSessions() {
+        // The slice this phase is for, counted at the only place that can see all of it. A unit
+        // that fails to load is a unit that quietly stops being taught, and nothing else here
+        // would notice it was gone.
+        assertThat(units).hasSize(3)
+        assertThat(units.flatMap { it.lessons }).hasSize(15)
+        assertThat(course.units.map { it.id }).isEqualTo(units.map { it.id })
     }
 
     @Test
@@ -191,7 +205,7 @@ class StarterContentTest {
         // Deriving one by trimming "My Body" would be code inventing child-facing copy.
         val words = parser.toDomain(course, units).units.map { it.word }
 
-        assertThat(words).containsExactly("body", "family").inOrder()
+        assertThat(words).containsExactly("body", "family", "home").inOrder()
     }
 
     @Test
@@ -211,7 +225,11 @@ class StarterContentTest {
                 "letter-s",
                 "letter-g",
                 "letter-u",
-                "letter-w"
+                "letter-w",
+                "letter-d",
+                "letter-l",
+                "letter-r",
+                "letter-p"
             )
             .inOrder()
     }
@@ -343,6 +361,6 @@ class StarterContentTest {
         val ASSETS = File("../content/starter/src/main/assets")
         val DEBUG_ASSETS = File("../content/starter/src/debug/assets")
         const val DEVELOPMENT_LEDGER = "attribution/attributions-development.json"
-        const val EXPECTED_ASSET_COUNT = 77
+        const val EXPECTED_ASSET_COUNT = 113
     }
 }

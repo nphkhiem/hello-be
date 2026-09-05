@@ -23,8 +23,8 @@
       "coPlay": {
         "title": "Point at the photo",
         "instruction": "Look at a family photo together and say “mother” and “father” as you point.",
-        "titleVi": "Chỉ vào ảnh",
-        "instructionVi": "Cùng xem ảnh gia đình, vừa chỉ vừa nói “mother” và “father”."
+        "titleVi": "Chỉ vào hình",
+        "instructionVi": "Cùng xem hình gia đình, vừa chỉ vừa nói “mother” và “father”."
       },
       "activities": [
         {
@@ -216,7 +216,7 @@
         "title": "Call the grandparents",
         "instruction": "Find a photo of grandmother and grandfather and say each word out loud together.",
         "titleVi": "Gọi ông bà",
-        "instructionVi": "Tìm ảnh ông bà, rồi cùng bé nói to “grandmother” và “grandfather”."
+        "instructionVi": "Tìm hình ông bà, rồi cùng bé nói to “grandmother” và “grandfather”."
       },
       "activities": [
         {
@@ -408,7 +408,7 @@
         "title": "Boy or girl?",
         "instruction": "Point at people in a photo and ask “boy?” or “girl?”. Let your child answer.",
         "titleVi": "Boy hay girl?",
-        "instructionVi": "Chỉ vào từng người trong ảnh và hỏi “boy?” hay “girl?”. Để bé trả lời."
+        "instructionVi": "Chỉ vào từng người trong hình và hỏi “boy?” hay “girl?”. Để bé trả lời."
       },
       "activities": [
         {
@@ -783,8 +783,8 @@
       "coPlay": {
         "title": "The family photo game",
         "instruction": "Hold up a family photo and say a word. See who your child points to.",
-        "titleVi": "Trò chơi ảnh gia đình",
-        "instructionVi": "Giơ ảnh gia đình lên và nói một từ. Xem bé chỉ vào ai."
+        "titleVi": "Trò chơi hình gia đình",
+        "instructionVi": "Giơ hình gia đình lên và nói một từ. Xem bé chỉ vào ai."
       },
       "activities": [
         {
