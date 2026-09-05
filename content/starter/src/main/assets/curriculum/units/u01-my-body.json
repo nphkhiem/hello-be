@@ -509,7 +509,7 @@
               "audio": "aud-en-back"
             }
           ],
-          "correctSkillId": "word-head",
+          "correctSkillId": "word-back",
           "letterSkillId": "letter-b",
           "letterAsset": "aud-en-letter-b"
         },

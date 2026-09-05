@@ -1,0 +1,997 @@
+{
+  "schemaVersion": 2,
+  "id": "u02-my-family",
+  "ordinal": 1,
+  "theme": "My Family",
+  "word": "family",
+  "scenery": "A family kitchen at dinner time",
+  "lessons": [
+    {
+      "id": "u02-my-family-l1",
+      "ordinal": 0,
+      "kind": "TEACHING",
+      "teaches": [
+        "word-mother",
+        "word-father",
+        "word-sister",
+        "word-brother"
+      ],
+      "letters": [
+        "letter-s",
+        "letter-m"
+      ],
+      "coPlay": {
+        "title": "Point at the photo",
+        "instruction": "Look at a family photo together and say “mother” and “father” as you point.",
+        "titleVi": "Chỉ vào ảnh",
+        "instructionVi": "Cùng xem ảnh gia đình, vừa chỉ vừa nói “mother” và “father”."
+      },
+      "activities": [
+        {
+          "id": "u02-my-family-l1-a1",
+          "ordinal": 0,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Who is the mother?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-mother",
+              "label": "mother",
+              "image": "img-mother",
+              "audio": "aud-en-mother"
+            },
+            {
+              "skillId": "word-father",
+              "label": "father",
+              "image": "img-father",
+              "audio": "aud-en-father"
+            }
+          ],
+          "correctSkillId": "word-mother"
+        },
+        {
+          "id": "u02-my-family-l1-a2",
+          "ordinal": 1,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Who is the sister?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-sister",
+              "label": "sister",
+              "image": "img-sister",
+              "audio": "aud-en-sister"
+            },
+            {
+              "skillId": "word-brother",
+              "label": "brother",
+              "image": "img-brother",
+              "audio": "aud-en-brother"
+            }
+          ],
+          "correctSkillId": "word-sister"
+        },
+        {
+          "id": "u02-my-family-l1-a3",
+          "ordinal": 2,
+          "family": "PICTURE_MATCHING",
+          "prompt": "Find the father.",
+          "promptAsset": "aud-en-prompt-find-the",
+          "choices": [
+            {
+              "skillId": "word-mother",
+              "label": "mother",
+              "image": "img-mother",
+              "audio": "aud-en-mother"
+            },
+            {
+              "skillId": "word-father",
+              "label": "father",
+              "image": "img-father",
+              "audio": "aud-en-father"
+            },
+            {
+              "skillId": "word-sister",
+              "label": "sister",
+              "image": "img-sister",
+              "audio": "aud-en-sister"
+            },
+            {
+              "skillId": "word-brother",
+              "label": "brother",
+              "image": "img-brother",
+              "audio": "aud-en-brother"
+            }
+          ],
+          "correctSkillId": "word-father"
+        },
+        {
+          "id": "u02-my-family-l1-a4",
+          "ordinal": 3,
+          "family": "LETTER_AND_SOUND",
+          "prompt": "Which one starts with S?",
+          "promptAsset": "aud-en-prompt-which-one-starts-with",
+          "choices": [
+            {
+              "skillId": "word-sister",
+              "label": "sister",
+              "image": "img-sister",
+              "audio": "aud-en-sister"
+            },
+            {
+              "skillId": "word-mother",
+              "label": "mother",
+              "image": "img-mother",
+              "audio": "aud-en-mother"
+            }
+          ],
+          "correctSkillId": "word-sister",
+          "letterSkillId": "letter-s",
+          "letterAsset": "aud-en-letter-s"
+        },
+        {
+          "id": "u02-my-family-l1-a5",
+          "ordinal": 4,
+          "family": "SAY_WITH_PIP",
+          "prompt": "Say it with me: mother.",
+          "promptAsset": "aud-en-prompt-say-with-me",
+          "choices": [
+            {
+              "skillId": "word-mother",
+              "label": "mother",
+              "image": "img-mother",
+              "audio": "aud-en-mother"
+            },
+            {
+              "skillId": "word-father",
+              "label": "father",
+              "image": "img-father",
+              "audio": "aud-en-father"
+            },
+            {
+              "skillId": "word-sister",
+              "label": "sister",
+              "image": "img-sister",
+              "audio": "aud-en-sister"
+            },
+            {
+              "skillId": "word-brother",
+              "label": "brother",
+              "image": "img-brother",
+              "audio": "aud-en-brother"
+            }
+          ]
+        },
+        {
+          "id": "u02-my-family-l1-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Who is the brother?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-mother",
+              "label": "mother",
+              "image": "img-mother",
+              "audio": "aud-en-mother"
+            },
+            {
+              "skillId": "word-father",
+              "label": "father",
+              "image": "img-father",
+              "audio": "aud-en-father"
+            },
+            {
+              "skillId": "word-sister",
+              "label": "sister",
+              "image": "img-sister",
+              "audio": "aud-en-sister"
+            },
+            {
+              "skillId": "word-brother",
+              "label": "brother",
+              "image": "img-brother",
+              "audio": "aud-en-brother"
+            }
+          ],
+          "correctSkillId": "word-brother"
+        }
+      ]
+    },
+    {
+      "id": "u02-my-family-l2",
+      "ordinal": 1,
+      "kind": "TEACHING",
+      "teaches": [
+        "word-grandmother",
+        "word-grandfather",
+        "word-baby",
+        "word-cousin"
+      ],
+      "letters": [
+        "letter-g",
+        "letter-c"
+      ],
+      "coPlay": {
+        "title": "Call the grandparents",
+        "instruction": "Find a photo of grandmother and grandfather and say each word out loud together.",
+        "titleVi": "Gọi ông bà",
+        "instructionVi": "Tìm ảnh ông bà, rồi cùng bé nói to “grandmother” và “grandfather”."
+      },
+      "activities": [
+        {
+          "id": "u02-my-family-l2-a1",
+          "ordinal": 0,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Who is the grandmother?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-grandmother",
+              "label": "grandmother",
+              "image": "img-grandmother",
+              "audio": "aud-en-grandmother"
+            },
+            {
+              "skillId": "word-grandfather",
+              "label": "grandfather",
+              "image": "img-grandfather",
+              "audio": "aud-en-grandfather"
+            }
+          ],
+          "correctSkillId": "word-grandmother"
+        },
+        {
+          "id": "u02-my-family-l2-a2",
+          "ordinal": 1,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Who is the baby?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-baby",
+              "label": "baby",
+              "image": "img-baby",
+              "audio": "aud-en-baby"
+            },
+            {
+              "skillId": "word-cousin",
+              "label": "cousin",
+              "image": "img-cousin",
+              "audio": "aud-en-cousin"
+            }
+          ],
+          "correctSkillId": "word-baby"
+        },
+        {
+          "id": "u02-my-family-l2-a3",
+          "ordinal": 2,
+          "family": "PICTURE_MATCHING",
+          "prompt": "Find the grandfather.",
+          "promptAsset": "aud-en-prompt-find-the",
+          "choices": [
+            {
+              "skillId": "word-grandmother",
+              "label": "grandmother",
+              "image": "img-grandmother",
+              "audio": "aud-en-grandmother"
+            },
+            {
+              "skillId": "word-grandfather",
+              "label": "grandfather",
+              "image": "img-grandfather",
+              "audio": "aud-en-grandfather"
+            },
+            {
+              "skillId": "word-baby",
+              "label": "baby",
+              "image": "img-baby",
+              "audio": "aud-en-baby"
+            },
+            {
+              "skillId": "word-cousin",
+              "label": "cousin",
+              "image": "img-cousin",
+              "audio": "aud-en-cousin"
+            }
+          ],
+          "correctSkillId": "word-grandfather"
+        },
+        {
+          "id": "u02-my-family-l2-a4",
+          "ordinal": 3,
+          "family": "LETTER_AND_SOUND",
+          "prompt": "Which one starts with G?",
+          "promptAsset": "aud-en-prompt-which-one-starts-with",
+          "choices": [
+            {
+              "skillId": "word-grandmother",
+              "label": "grandmother",
+              "image": "img-grandmother",
+              "audio": "aud-en-grandmother"
+            },
+            {
+              "skillId": "word-baby",
+              "label": "baby",
+              "image": "img-baby",
+              "audio": "aud-en-baby"
+            }
+          ],
+          "correctSkillId": "word-grandmother",
+          "letterSkillId": "letter-g",
+          "letterAsset": "aud-en-letter-g"
+        },
+        {
+          "id": "u02-my-family-l2-a5",
+          "ordinal": 4,
+          "family": "SAY_WITH_PIP",
+          "prompt": "Say it with me: grandmother.",
+          "promptAsset": "aud-en-prompt-say-with-me",
+          "choices": [
+            {
+              "skillId": "word-grandmother",
+              "label": "grandmother",
+              "image": "img-grandmother",
+              "audio": "aud-en-grandmother"
+            },
+            {
+              "skillId": "word-grandfather",
+              "label": "grandfather",
+              "image": "img-grandfather",
+              "audio": "aud-en-grandfather"
+            },
+            {
+              "skillId": "word-baby",
+              "label": "baby",
+              "image": "img-baby",
+              "audio": "aud-en-baby"
+            },
+            {
+              "skillId": "word-cousin",
+              "label": "cousin",
+              "image": "img-cousin",
+              "audio": "aud-en-cousin"
+            }
+          ]
+        },
+        {
+          "id": "u02-my-family-l2-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Who is the cousin?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-grandmother",
+              "label": "grandmother",
+              "image": "img-grandmother",
+              "audio": "aud-en-grandmother"
+            },
+            {
+              "skillId": "word-grandfather",
+              "label": "grandfather",
+              "image": "img-grandfather",
+              "audio": "aud-en-grandfather"
+            },
+            {
+              "skillId": "word-baby",
+              "label": "baby",
+              "image": "img-baby",
+              "audio": "aud-en-baby"
+            },
+            {
+              "skillId": "word-cousin",
+              "label": "cousin",
+              "image": "img-cousin",
+              "audio": "aud-en-cousin"
+            }
+          ],
+          "correctSkillId": "word-cousin"
+        }
+      ]
+    },
+    {
+      "id": "u02-my-family-l3",
+      "ordinal": 2,
+      "kind": "TEACHING",
+      "teaches": [
+        "word-aunt",
+        "word-uncle",
+        "word-boy",
+        "word-girl"
+      ],
+      "letters": [
+        "letter-u",
+        "letter-a"
+      ],
+      "coPlay": {
+        "title": "Boy or girl?",
+        "instruction": "Point at people in a photo and ask “boy?” or “girl?”. Let your child answer.",
+        "titleVi": "Boy hay girl?",
+        "instructionVi": "Chỉ vào từng người trong ảnh và hỏi “boy?” hay “girl?”. Để bé trả lời."
+      },
+      "activities": [
+        {
+          "id": "u02-my-family-l3-a1",
+          "ordinal": 0,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Who is the aunt?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-aunt",
+              "label": "aunt",
+              "image": "img-aunt",
+              "audio": "aud-en-aunt"
+            },
+            {
+              "skillId": "word-uncle",
+              "label": "uncle",
+              "image": "img-uncle",
+              "audio": "aud-en-uncle"
+            }
+          ],
+          "correctSkillId": "word-aunt"
+        },
+        {
+          "id": "u02-my-family-l3-a2",
+          "ordinal": 1,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Who is the boy?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-boy",
+              "label": "boy",
+              "image": "img-boy",
+              "audio": "aud-en-boy"
+            },
+            {
+              "skillId": "word-girl",
+              "label": "girl",
+              "image": "img-girl",
+              "audio": "aud-en-girl"
+            }
+          ],
+          "correctSkillId": "word-boy"
+        },
+        {
+          "id": "u02-my-family-l3-a3",
+          "ordinal": 2,
+          "family": "PICTURE_MATCHING",
+          "prompt": "Find the uncle.",
+          "promptAsset": "aud-en-prompt-find-the",
+          "choices": [
+            {
+              "skillId": "word-aunt",
+              "label": "aunt",
+              "image": "img-aunt",
+              "audio": "aud-en-aunt"
+            },
+            {
+              "skillId": "word-uncle",
+              "label": "uncle",
+              "image": "img-uncle",
+              "audio": "aud-en-uncle"
+            },
+            {
+              "skillId": "word-boy",
+              "label": "boy",
+              "image": "img-boy",
+              "audio": "aud-en-boy"
+            },
+            {
+              "skillId": "word-girl",
+              "label": "girl",
+              "image": "img-girl",
+              "audio": "aud-en-girl"
+            }
+          ],
+          "correctSkillId": "word-uncle"
+        },
+        {
+          "id": "u02-my-family-l3-a4",
+          "ordinal": 3,
+          "family": "LETTER_AND_SOUND",
+          "prompt": "Which one starts with U?",
+          "promptAsset": "aud-en-prompt-which-one-starts-with",
+          "choices": [
+            {
+              "skillId": "word-uncle",
+              "label": "uncle",
+              "image": "img-uncle",
+              "audio": "aud-en-uncle"
+            },
+            {
+              "skillId": "word-girl",
+              "label": "girl",
+              "image": "img-girl",
+              "audio": "aud-en-girl"
+            }
+          ],
+          "correctSkillId": "word-uncle",
+          "letterSkillId": "letter-u",
+          "letterAsset": "aud-en-letter-u"
+        },
+        {
+          "id": "u02-my-family-l3-a5",
+          "ordinal": 4,
+          "family": "SAY_WITH_PIP",
+          "prompt": "Say it with me: aunt.",
+          "promptAsset": "aud-en-prompt-say-with-me",
+          "choices": [
+            {
+              "skillId": "word-aunt",
+              "label": "aunt",
+              "image": "img-aunt",
+              "audio": "aud-en-aunt"
+            },
+            {
+              "skillId": "word-uncle",
+              "label": "uncle",
+              "image": "img-uncle",
+              "audio": "aud-en-uncle"
+            },
+            {
+              "skillId": "word-boy",
+              "label": "boy",
+              "image": "img-boy",
+              "audio": "aud-en-boy"
+            },
+            {
+              "skillId": "word-girl",
+              "label": "girl",
+              "image": "img-girl",
+              "audio": "aud-en-girl"
+            }
+          ]
+        },
+        {
+          "id": "u02-my-family-l3-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Who is the girl?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-aunt",
+              "label": "aunt",
+              "image": "img-aunt",
+              "audio": "aud-en-aunt"
+            },
+            {
+              "skillId": "word-uncle",
+              "label": "uncle",
+              "image": "img-uncle",
+              "audio": "aud-en-uncle"
+            },
+            {
+              "skillId": "word-boy",
+              "label": "boy",
+              "image": "img-boy",
+              "audio": "aud-en-boy"
+            },
+            {
+              "skillId": "word-girl",
+              "label": "girl",
+              "image": "img-girl",
+              "audio": "aud-en-girl"
+            }
+          ],
+          "correctSkillId": "word-girl"
+        }
+      ]
+    },
+    {
+      "id": "u02-my-family-l4",
+      "ordinal": 3,
+      "kind": "TEACHING",
+      "teaches": [
+        "word-man",
+        "word-woman",
+        "word-child",
+        "word-family"
+      ],
+      "letters": [
+        "letter-w",
+        "letter-f"
+      ],
+      "coPlay": {
+        "title": "Who is at home?",
+        "instruction": "Walk around the house and name whoever is home: “man”, “woman”, “child”.",
+        "titleVi": "Ai đang ở nhà?",
+        "instructionVi": "Đi một vòng quanh nhà và gọi tên từng người: “man”, “woman”, “child”."
+      },
+      "activities": [
+        {
+          "id": "u02-my-family-l4-a1",
+          "ordinal": 0,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Who is the man?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-man",
+              "label": "man",
+              "image": "img-man",
+              "audio": "aud-en-man"
+            },
+            {
+              "skillId": "word-woman",
+              "label": "woman",
+              "image": "img-woman",
+              "audio": "aud-en-woman"
+            }
+          ],
+          "correctSkillId": "word-man"
+        },
+        {
+          "id": "u02-my-family-l4-a2",
+          "ordinal": 1,
+          "family": "LISTEN_AND_CHOOSE",
+          "prompt": "Who is the child?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-child",
+              "label": "child",
+              "image": "img-child",
+              "audio": "aud-en-child"
+            },
+            {
+              "skillId": "word-family",
+              "label": "family",
+              "image": "img-family",
+              "audio": "aud-en-family"
+            }
+          ],
+          "correctSkillId": "word-child"
+        },
+        {
+          "id": "u02-my-family-l4-a3",
+          "ordinal": 2,
+          "family": "PICTURE_MATCHING",
+          "prompt": "Find the woman.",
+          "promptAsset": "aud-en-prompt-find-the",
+          "choices": [
+            {
+              "skillId": "word-man",
+              "label": "man",
+              "image": "img-man",
+              "audio": "aud-en-man"
+            },
+            {
+              "skillId": "word-woman",
+              "label": "woman",
+              "image": "img-woman",
+              "audio": "aud-en-woman"
+            },
+            {
+              "skillId": "word-child",
+              "label": "child",
+              "image": "img-child",
+              "audio": "aud-en-child"
+            },
+            {
+              "skillId": "word-family",
+              "label": "family",
+              "image": "img-family",
+              "audio": "aud-en-family"
+            }
+          ],
+          "correctSkillId": "word-woman"
+        },
+        {
+          "id": "u02-my-family-l4-a4",
+          "ordinal": 3,
+          "family": "LETTER_AND_SOUND",
+          "prompt": "Which one starts with W?",
+          "promptAsset": "aud-en-prompt-which-one-starts-with",
+          "choices": [
+            {
+              "skillId": "word-woman",
+              "label": "woman",
+              "image": "img-woman",
+              "audio": "aud-en-woman"
+            },
+            {
+              "skillId": "word-child",
+              "label": "child",
+              "image": "img-child",
+              "audio": "aud-en-child"
+            }
+          ],
+          "correctSkillId": "word-woman",
+          "letterSkillId": "letter-w",
+          "letterAsset": "aud-en-letter-w"
+        },
+        {
+          "id": "u02-my-family-l4-a5",
+          "ordinal": 4,
+          "family": "SAY_WITH_PIP",
+          "prompt": "Say it with me: man.",
+          "promptAsset": "aud-en-prompt-say-with-me",
+          "choices": [
+            {
+              "skillId": "word-man",
+              "label": "man",
+              "image": "img-man",
+              "audio": "aud-en-man"
+            },
+            {
+              "skillId": "word-woman",
+              "label": "woman",
+              "image": "img-woman",
+              "audio": "aud-en-woman"
+            },
+            {
+              "skillId": "word-child",
+              "label": "child",
+              "image": "img-child",
+              "audio": "aud-en-child"
+            },
+            {
+              "skillId": "word-family",
+              "label": "family",
+              "image": "img-family",
+              "audio": "aud-en-family"
+            }
+          ]
+        },
+        {
+          "id": "u02-my-family-l4-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Where is the family?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-man",
+              "label": "man",
+              "image": "img-man",
+              "audio": "aud-en-man"
+            },
+            {
+              "skillId": "word-woman",
+              "label": "woman",
+              "image": "img-woman",
+              "audio": "aud-en-woman"
+            },
+            {
+              "skillId": "word-child",
+              "label": "child",
+              "image": "img-child",
+              "audio": "aud-en-child"
+            },
+            {
+              "skillId": "word-family",
+              "label": "family",
+              "image": "img-family",
+              "audio": "aud-en-family"
+            }
+          ],
+          "correctSkillId": "word-family"
+        }
+      ]
+    },
+    {
+      "id": "u02-my-family-l5",
+      "ordinal": 4,
+      "kind": "REVIEW",
+      "teaches": [],
+      "letters": [],
+      "coPlay": {
+        "title": "The family photo game",
+        "instruction": "Hold up a family photo and say a word. See who your child points to.",
+        "titleVi": "Trò chơi ảnh gia đình",
+        "instructionVi": "Giơ ảnh gia đình lên và nói một từ. Xem bé chỉ vào ai."
+      },
+      "activities": [
+        {
+          "id": "u02-my-family-l5-a1",
+          "ordinal": 0,
+          "family": "REVIEW",
+          "prompt": "Who is the mother?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-mother",
+              "label": "mother",
+              "image": "img-mother",
+              "audio": "aud-en-mother"
+            },
+            {
+              "skillId": "word-father",
+              "label": "father",
+              "image": "img-father",
+              "audio": "aud-en-father"
+            },
+            {
+              "skillId": "word-sister",
+              "label": "sister",
+              "image": "img-sister",
+              "audio": "aud-en-sister"
+            },
+            {
+              "skillId": "word-brother",
+              "label": "brother",
+              "image": "img-brother",
+              "audio": "aud-en-brother"
+            }
+          ],
+          "correctSkillId": "word-mother"
+        },
+        {
+          "id": "u02-my-family-l5-a2",
+          "ordinal": 1,
+          "family": "REVIEW",
+          "prompt": "Who is the grandfather?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-grandmother",
+              "label": "grandmother",
+              "image": "img-grandmother",
+              "audio": "aud-en-grandmother"
+            },
+            {
+              "skillId": "word-grandfather",
+              "label": "grandfather",
+              "image": "img-grandfather",
+              "audio": "aud-en-grandfather"
+            },
+            {
+              "skillId": "word-baby",
+              "label": "baby",
+              "image": "img-baby",
+              "audio": "aud-en-baby"
+            },
+            {
+              "skillId": "word-cousin",
+              "label": "cousin",
+              "image": "img-cousin",
+              "audio": "aud-en-cousin"
+            }
+          ],
+          "correctSkillId": "word-grandfather"
+        },
+        {
+          "id": "u02-my-family-l5-a3",
+          "ordinal": 2,
+          "family": "REVIEW",
+          "prompt": "Who is the girl?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-aunt",
+              "label": "aunt",
+              "image": "img-aunt",
+              "audio": "aud-en-aunt"
+            },
+            {
+              "skillId": "word-uncle",
+              "label": "uncle",
+              "image": "img-uncle",
+              "audio": "aud-en-uncle"
+            },
+            {
+              "skillId": "word-boy",
+              "label": "boy",
+              "image": "img-boy",
+              "audio": "aud-en-boy"
+            },
+            {
+              "skillId": "word-girl",
+              "label": "girl",
+              "image": "img-girl",
+              "audio": "aud-en-girl"
+            }
+          ],
+          "correctSkillId": "word-girl"
+        },
+        {
+          "id": "u02-my-family-l5-a4",
+          "ordinal": 3,
+          "family": "REVIEW",
+          "prompt": "Who is the woman?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-man",
+              "label": "man",
+              "image": "img-man",
+              "audio": "aud-en-man"
+            },
+            {
+              "skillId": "word-woman",
+              "label": "woman",
+              "image": "img-woman",
+              "audio": "aud-en-woman"
+            },
+            {
+              "skillId": "word-child",
+              "label": "child",
+              "image": "img-child",
+              "audio": "aud-en-child"
+            },
+            {
+              "skillId": "word-family",
+              "label": "family",
+              "image": "img-family",
+              "audio": "aud-en-family"
+            }
+          ],
+          "correctSkillId": "word-woman"
+        },
+        {
+          "id": "u02-my-family-l5-a5",
+          "ordinal": 4,
+          "family": "REVIEW",
+          "prompt": "Who is the uncle?",
+          "promptAsset": "aud-en-prompt-who-is",
+          "choices": [
+            {
+              "skillId": "word-mother",
+              "label": "mother",
+              "image": "img-mother",
+              "audio": "aud-en-mother"
+            },
+            {
+              "skillId": "word-baby",
+              "label": "baby",
+              "image": "img-baby",
+              "audio": "aud-en-baby"
+            },
+            {
+              "skillId": "word-uncle",
+              "label": "uncle",
+              "image": "img-uncle",
+              "audio": "aud-en-uncle"
+            },
+            {
+              "skillId": "word-man",
+              "label": "man",
+              "image": "img-man",
+              "audio": "aud-en-man"
+            }
+          ],
+          "correctSkillId": "word-uncle"
+        },
+        {
+          "id": "u02-my-family-l5-a6",
+          "ordinal": 5,
+          "family": "REVIEW",
+          "prompt": "Where is the family?",
+          "promptAsset": "aud-en-prompt-where-is",
+          "choices": [
+            {
+              "skillId": "word-sister",
+              "label": "sister",
+              "image": "img-sister",
+              "audio": "aud-en-sister"
+            },
+            {
+              "skillId": "word-cousin",
+              "label": "cousin",
+              "image": "img-cousin",
+              "audio": "aud-en-cousin"
+            },
+            {
+              "skillId": "word-girl",
+              "label": "girl",
+              "image": "img-girl",
+              "audio": "aud-en-girl"
+            },
+            {
+              "skillId": "word-family",
+              "label": "family",
+              "image": "img-family",
+              "audio": "aud-en-family"
+            }
+          ],
+          "correctSkillId": "word-family"
+        }
+      ]
+    }
+  ]
+}

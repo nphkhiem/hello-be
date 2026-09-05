@@ -132,6 +132,11 @@ American English, which the chosen voice satisfies, but a synthetic Pip is a pla
 
 - [x] Twenty-eight generated to one specification: mono, 22050 Hz, AAC-LC in MP4, roughly 6 KB each
       and 172 KB for the lot. Sixteen words, eight letters, four prompt stems.
+- [x] Twenty-two more for unit two, to the same specification and under the same licence position,
+      when P3-T4 packaged My Family on 5 September 2026: sixteen words, five letters, one prompt
+      stem. This ticket is where that route was decided and where it is licensed, so their ledger
+      rows point here. Fifty placeholder recordings in the debug source set now, which a release
+      build still cannot reach.
 - [x] Ledger rows for every one of them.
 - [ ] Vietnamese support phrases reviewed by a native speaker before packaging. Not generated and
       not packaged: this ticket's own rule was review before packaging, and holding them is what
