@@ -81,14 +81,18 @@ One unit of a planned twelve. None of the roughly forty referenced media assets 
 lesson runs silent and answer cards show written words to a pre-reader. The attribution ledger is
 empty, deliberately, and stops a release.
 
-Destinations with no live screen, as Phase 3 works through them. Free play went live in #61. The
-adult gate and caregiver settings went live in P3-T7. What remains is the caregiver overview,
-profile management and both destructive confirmations, which are P3-T8. Pressing those still
-reaches a resting-page recovery rather than the screen.
+Every destination now has a live screen. Free play went live in #61, the adult gate and caregiver
+settings in P3-T7, and the overview, profile management and both destructive confirmations in
+P3-T8. Nothing in the app reaches the resting page any more except a genuine failure.
 
 Solving the gate lands on the overview, which is where the information architecture puts a
 caregiver who has just come through the door. It briefly landed on settings instead, while the
 overview had no ViewModel and would have met them with a recovery panel. P3-T8 moved it back.
+
+**Three things the caregiver area still owes.** A profile's detail line shows the child's age and
+not the count of finished adventures the draft also puts there, which needs each child's progress
+rather than the selected one's. Editing a name and changing a picture are reported by profile
+management and have no destination to go to. And:
 
 **The overview shows two summaries where the approved draft has three, and no co-play suggestion.**
 The third summary names a unit to come back to and nothing derives one yet; the suggestion has no

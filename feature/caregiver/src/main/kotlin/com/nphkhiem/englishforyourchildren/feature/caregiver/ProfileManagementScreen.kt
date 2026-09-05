@@ -4,9 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -176,7 +180,14 @@ private fun ProfileDetail(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = modifier.helloBeFocusGroup(),
+        // Scrollable, because every label here carries two languages and wraps to two lines, and
+        // the pane was measured against a single-language draft. Without this the last control is
+        // pushed past the foot of the pane and clipped, and the last control is delete.
+        //
+        // A scroll is safe here for the reason the overview gives for refusing one: every row in
+        // this pane takes focus, so moving the D-pad moves the scroll. Nothing ends up out of reach
+        // rather than merely out of sight.
+        modifier = modifier.verticalScroll(rememberScrollState()).helloBeFocusGroup(),
         verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space3)
     ) {
         Text(
@@ -205,9 +216,11 @@ private fun ProfileDetail(
             )
         }
 
-        // The separation the information architecture asks for, taking whatever room is left so
-        // delete sits at the foot of the pane rather than fourth in a list of four.
-        Box(modifier = Modifier.weight(1f))
+        // The separation the information architecture asks for. A fixed gap rather than the
+        // remaining room, because a weighted child inside a scrolling column has no room to be
+        // given: what mattered was that delete is set apart from the three routine actions, not
+        // that it sits exactly on the floor.
+        Spacer(modifier = Modifier.height(HelloBeTheme.spacing.space7))
 
         HelloBeAction(
             label = caregiverText(R.string.profiles_delete),

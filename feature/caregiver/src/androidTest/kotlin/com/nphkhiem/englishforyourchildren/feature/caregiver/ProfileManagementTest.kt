@@ -1,16 +1,22 @@
 package com.nphkhiem.englishforyourchildren.feature.caregiver
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.height
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.getBoundsInRoot
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasStateDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
@@ -143,6 +149,27 @@ class ProfileManagementTest {
     }
 
     @Test
+    fun givenAPaneShorterThanItsActions_whenItIsDrawn_thenDeleteCanStillBeReached() {
+        // The defect this exists for, as a property rather than a device size. Every label in the
+        // caregiver area carries two languages and wraps to two lines, so the detail pane fills
+        // sooner than the single-language draft it was measured against, and the control that fell
+        // off the foot of it was delete.
+        //
+        // The height forces that condition rather than waiting for a screen small enough to
+        // produce it. Without a scrolling pane there is nothing for `performScrollTo` to scroll and
+        // the control stays past the bottom.
+        composeTestRule.setContent {
+            HelloBeTheme {
+                Box(modifier = Modifier.height(SHORTER_THAN_ITS_CONTENT)) {
+                    ProfileManagementScreen(state = CaregiverFixtures.profiles(), onAction = {})
+                }
+            }
+        }
+
+        composeTestRule.onNodeWithText(delete()).performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
     fun givenTheSelectionHasGone_whenTheDetailIsDrawn_thenItShowsAChildThatExists() {
         // A caregiver can delete the profile that was selected. The detail pane must not offer
         // actions for a child who is no longer here.
@@ -216,4 +243,9 @@ class ProfileManagementTest {
 
     private fun persistenceFailed() =
         context.caregiverText(CaregiverLanguage.BOTH, R.string.profiles_persistence_failed)
+
+    private companion object {
+        /** Small enough that the detail pane cannot show every action at once. */
+        val SHORTER_THAN_ITS_CONTENT = 320.dp
+    }
 }

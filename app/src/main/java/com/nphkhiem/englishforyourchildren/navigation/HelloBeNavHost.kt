@@ -518,60 +518,108 @@ fun HelloBeNavHost(
             }
         }
 
-        is HelloBeKey.ProfileManagement -> content?.let {
-            CaregiverShell(
-                content = it,
-                profileId = key.selectedProfileId,
-                section = CaregiverSection.PROFILES,
-                onSection = { section ->
-                    replaceCaregiver(
-                        ::replaceAll,
-                        resolved,
-                        section,
-                        key.selectedProfileId
+        is HelloBeKey.ProfileManagement -> if (content == null) {
+            CaregiverLanguageScope {
+                LiveCaregiverShell(
+                    profileId = key.selectedProfileId,
+                    section = CaregiverSection.PROFILES,
+                    onSection = { section ->
+                        replaceCaregiver(::replaceAll, resolved, section, key.selectedProfileId)
+                    },
+                    onReturn = {
+                        replaceAll(
+                            afterCaregiverSessionClosed(key.selectedProfileId, caregiverOrigin)
+                        )
+                    },
+                    modifier = modifier
+                ) {
+                    LiveProfileManagement(
+                        onAdd = { push(HelloBeKey.ProfileCreate) },
+                        onDelete = { push(HelloBeKey.DeleteProfileConfirmation(it)) },
+                        onReset = { push(HelloBeKey.ResetProgressConfirmation(it)) }
                     )
-                },
-                onReturn = {
-                    replaceAll(
-                        afterCaregiverSessionClosed(key.selectedProfileId, caregiverOrigin)
-                    )
-                },
-                modifier = modifier
-            ) {
-                ProfileManagementScreen(
-                    state = it.profileManagement(key.selectedProfileId),
-                    onAction = { action ->
-                        when (action) {
-                            is ProfileManagementAction.DeleteProfileRequested -> push(
-                                HelloBeKey.DeleteProfileConfirmation(ProfileId(action.id))
-                            )
+                }
+            }
+        } else {
+            content.let {
+                CaregiverShell(
+                    content = it,
+                    profileId = key.selectedProfileId,
+                    section = CaregiverSection.PROFILES,
+                    onSection = { section ->
+                        replaceCaregiver(
+                            ::replaceAll,
+                            resolved,
+                            section,
+                            key.selectedProfileId
+                        )
+                    },
+                    onReturn = {
+                        replaceAll(
+                            afterCaregiverSessionClosed(key.selectedProfileId, caregiverOrigin)
+                        )
+                    },
+                    modifier = modifier
+                ) {
+                    ProfileManagementScreen(
+                        state = it.profileManagement(key.selectedProfileId),
+                        onAction = { action ->
+                            when (action) {
+                                is ProfileManagementAction.DeleteProfileRequested -> push(
+                                    HelloBeKey.DeleteProfileConfirmation(ProfileId(action.id))
+                                )
 
-                            is ProfileManagementAction.ResetProgressRequested -> push(
-                                HelloBeKey.ResetProgressConfirmation(ProfileId(action.id))
-                            )
+                                is ProfileManagementAction.ResetProgressRequested -> push(
+                                    HelloBeKey.ResetProgressConfirmation(ProfileId(action.id))
+                                )
 
-                            else -> Unit
+                                else -> Unit
+                            }
                         }
-                    }
+                    )
+                }
+            } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
+        }
+
+        is HelloBeKey.DeleteProfileConfirmation -> if (content == null) {
+            CaregiverLanguageScope {
+                LiveCaregiverConfirmation(
+                    kind = CaregiverConfirmationKind.DELETE_PROFILE,
+                    profileId = key.profileId,
+                    onFinished = { pop() },
+                    modifier = modifier
                 )
             }
-        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
-
-        is HelloBeKey.DeleteProfileConfirmation -> content?.let {
+        } else {
             Confirmation(
-                state = it.confirmation(CaregiverConfirmationKind.DELETE_PROFILE, key.profileId),
+                state = content.confirmation(
+                    CaregiverConfirmationKind.DELETE_PROFILE,
+                    key.profileId
+                ),
                 onFinished = { pop() },
                 modifier = modifier
             )
-        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
+        }
 
-        is HelloBeKey.ResetProgressConfirmation -> content?.let {
+        is HelloBeKey.ResetProgressConfirmation -> if (content == null) {
+            CaregiverLanguageScope {
+                LiveCaregiverConfirmation(
+                    kind = CaregiverConfirmationKind.RESET_PROGRESS,
+                    profileId = key.profileId,
+                    onFinished = { pop() },
+                    modifier = modifier
+                )
+            }
+        } else {
             Confirmation(
-                state = it.confirmation(CaregiverConfirmationKind.RESET_PROGRESS, key.profileId),
+                state = content.confirmation(
+                    CaregiverConfirmationKind.RESET_PROGRESS,
+                    key.profileId
+                ),
                 onFinished = { pop() },
                 modifier = modifier
             )
-        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
+        }
 
         is HelloBeKey.Recovery -> Recovery(
             key = key,

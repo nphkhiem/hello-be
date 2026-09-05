@@ -84,4 +84,5 @@
     <string name="overview_adventures_note">Số buổi bé đã hoàn thành</string>
     <string name="overview_words_label">Số từ bé đã gặp</string>
     <string name="overview_words_note">Đây không phải điểm số</string>
+    <string name="profiles_detail_age">%1$d tuổi</string>
 </resources>

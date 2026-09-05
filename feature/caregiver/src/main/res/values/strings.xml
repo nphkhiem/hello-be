@@ -97,4 +97,5 @@
     <string name="overview_adventures_note">Sessions completed</string>
     <string name="overview_words_label">Words encountered</string>
     <string name="overview_words_note">Not a test score</string>
+    <string name="profiles_detail_age">Age %1$d</string>
 </resources>
