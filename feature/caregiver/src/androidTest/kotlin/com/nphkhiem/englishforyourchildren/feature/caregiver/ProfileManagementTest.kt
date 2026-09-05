@@ -14,6 +14,7 @@ import androidx.compose.ui.test.requestFocus
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import org.junit.Rule
 import org.junit.Test
@@ -25,8 +26,9 @@ class ProfileManagementTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val resources
-        get() = InstrumentationRegistry.getInstrumentation().targetContext.resources
+    /** Strings are read the way the screens read them, in both languages. */
+    private val context
+        get() = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test
     fun givenTwoProfiles_whenTheListIsRead_thenEachChildIsNamedWithTheirOwnDetail() {
@@ -191,21 +193,27 @@ class ProfileManagementTest {
         }
     }
 
-    private fun capacity(used: Int) = resources.getString(R.string.profiles_capacity, used, 4)
+    private fun capacity(used: Int) =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.profiles_capacity, used, 4)
 
-    private fun add() = resources.getString(R.string.profiles_add)
+    private fun add() = context.caregiverText(CaregiverLanguage.BOTH, R.string.profiles_add)
 
-    private fun atLimit() = resources.getString(R.string.profiles_at_limit)
+    private fun atLimit() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.profiles_at_limit)
 
-    private fun editName() = resources.getString(R.string.profiles_edit_name)
+    private fun editName() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.profiles_edit_name)
 
-    private fun changePicture() = resources.getString(R.string.profiles_change_picture)
+    private fun changePicture() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.profiles_change_picture)
 
-    private fun reset() = resources.getString(R.string.profiles_reset)
+    private fun reset() = context.caregiverText(CaregiverLanguage.BOTH, R.string.profiles_reset)
 
-    private fun delete() = resources.getString(R.string.profiles_delete)
+    private fun delete() = context.caregiverText(CaregiverLanguage.BOTH, R.string.profiles_delete)
 
-    private fun emptyTitle() = resources.getString(R.string.profiles_empty_title)
+    private fun emptyTitle() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.profiles_empty_title)
 
-    private fun persistenceFailed() = resources.getString(R.string.profiles_persistence_failed)
+    private fun persistenceFailed() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.profiles_persistence_failed)
 }

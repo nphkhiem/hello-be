@@ -13,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
@@ -60,7 +59,7 @@ fun CaregiverSettingsScreen(
 
         groupsWithRows(state.rows).forEach { group ->
             Text(
-                text = stringResource(groupHeading(group)),
+                text = caregiverText(groupHeading(group)),
                 style = HelloBeTheme.typography.labelSmall,
                 color = HelloBeTheme.colors.textTertiary
             )
@@ -81,7 +80,7 @@ fun CaregiverSettingsScreen(
 
         if (canOfferRestore(state)) {
             HelloBeAction(
-                label = stringResource(R.string.settings_restore),
+                label = caregiverText(R.string.settings_restore),
                 onClick = { onAction(CaregiverSettingsAction.RestoreDefaultsRequested) },
                 tone = HelloBeActionTone.QUIET,
                 minHeight = HelloBeLayout.caregiverControlMinHeight
@@ -94,12 +93,12 @@ fun CaregiverSettingsScreen(
 private fun Head(state: CaregiverSettingsUiState) {
     Column(verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space2)) {
         Text(
-            text = stringResource(R.string.settings_title),
+            text = caregiverText(R.string.settings_title),
             style = HelloBeTheme.typography.headlineLarge,
             color = HelloBeTheme.colors.textPrimary
         )
         Text(
-            text = stringResource(R.string.settings_intro),
+            text = caregiverText(R.string.settings_intro),
             style = HelloBeTheme.typography.bodyMedium,
             color = HelloBeTheme.colors.textSecondary
         )
@@ -108,14 +107,14 @@ private fun Head(state: CaregiverSettingsUiState) {
             SettingsSaveStatus.Idle -> Unit
 
             SettingsSaveStatus.Saving -> Text(
-                text = stringResource(R.string.settings_saving),
+                text = caregiverText(R.string.settings_saving),
                 style = HelloBeTheme.typography.labelSmall,
                 color = HelloBeTheme.colors.textTertiary
             )
 
             // Said plainly. A caregiver who changed something has to know whether it held.
             SettingsSaveStatus.Failed -> Text(
-                text = stringResource(R.string.settings_save_failed),
+                text = caregiverText(R.string.settings_save_failed),
                 style = HelloBeTheme.typography.labelSmall,
                 color = HelloBeTheme.colors.errorContent
             )
@@ -189,9 +188,9 @@ private fun SettingRowCard(
 @Composable
 private fun settingValueText(value: SettingValue): String = when (value) {
     is SettingValue.Toggle -> if (value.on) {
-        stringResource(R.string.settings_on)
+        caregiverText(R.string.settings_on)
     } else {
-        stringResource(R.string.settings_off)
+        caregiverText(R.string.settings_off)
     }
 
     is SettingValue.Choice -> value.current

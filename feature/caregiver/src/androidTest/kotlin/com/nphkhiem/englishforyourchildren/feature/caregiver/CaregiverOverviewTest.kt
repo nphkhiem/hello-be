@@ -12,6 +12,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import org.junit.Rule
@@ -24,8 +25,9 @@ class CaregiverOverviewTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val resources
-        get() = InstrumentationRegistry.getInstrumentation().targetContext.resources
+    /** Strings are read the way the screens read them, in both languages. */
+    private val context
+        get() = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test
     fun givenAWeekWithPractice_whenTheOverviewIsRead_thenItDescribesItInPlainWords() {
@@ -174,15 +176,24 @@ class CaregiverOverviewTest {
         }
     }
 
-    private fun title() = resources.getString(R.string.overview_title, CaregiverFixtures.PROFILE)
+    private fun title() = context.caregiverText(
+        CaregiverLanguage.BOTH,
+        R.string.overview_title,
+        CaregiverFixtures.PROFILE
+    )
 
-    private fun localNote() = resources.getString(R.string.overview_local_note)
+    private fun localNote() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.overview_local_note)
 
-    private fun suggestionHeading() = resources.getString(R.string.overview_suggestion)
+    private fun suggestionHeading() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.overview_suggestion)
 
-    private fun newProfileTitle() = resources.getString(R.string.overview_new_profile_title)
+    private fun newProfileTitle() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.overview_new_profile_title)
 
-    private fun nothingRecentTitle() = resources.getString(R.string.overview_nothing_recent_title)
+    private fun nothingRecentTitle() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.overview_nothing_recent_title)
 
-    private fun pendingSave() = resources.getString(R.string.overview_pending_save)
+    private fun pendingSave() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.overview_pending_save)
 }

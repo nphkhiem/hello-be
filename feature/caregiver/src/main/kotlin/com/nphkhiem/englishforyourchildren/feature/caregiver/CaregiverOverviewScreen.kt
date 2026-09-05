@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Surface
 import androidx.tv.material3.SurfaceDefaults
 import androidx.tv.material3.Text
@@ -77,13 +76,13 @@ fun CaregiverOverviewScreen(state: CaregiverOverviewUiState, modifier: Modifier 
                 SummaryRow(summaries = summariesShown(progress.summaries))
 
             OverviewProgress.NewProfile -> Explanation(
-                title = stringResource(R.string.overview_new_profile_title),
-                hint = stringResource(R.string.overview_new_profile_hint, state.profileName)
+                title = caregiverText(R.string.overview_new_profile_title),
+                hint = caregiverText(R.string.overview_new_profile_hint, state.profileName)
             )
 
             OverviewProgress.NothingRecent -> Explanation(
-                title = stringResource(R.string.overview_nothing_recent_title),
-                hint = stringResource(R.string.overview_nothing_recent_hint, state.profileName)
+                title = caregiverText(R.string.overview_nothing_recent_title),
+                hint = caregiverText(R.string.overview_nothing_recent_hint, state.profileName)
             )
         }
 
@@ -126,18 +125,18 @@ private fun PanelHead(state: CaregiverOverviewUiState) {
             verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space2)
         ) {
             Text(
-                text = stringResource(R.string.overview_title, state.profileName),
+                text = caregiverText(R.string.overview_title, state.profileName),
                 style = HelloBeTheme.typography.headlineLarge,
                 color = HelloBeTheme.colors.textPrimary
             )
             Text(
-                text = stringResource(R.string.overview_local_note),
+                text = caregiverText(R.string.overview_local_note),
                 style = HelloBeTheme.typography.bodyMedium,
                 color = HelloBeTheme.colors.textSecondary
             )
             if (state.pendingSave) {
                 Text(
-                    text = stringResource(R.string.overview_pending_save),
+                    text = caregiverText(R.string.overview_pending_save),
                     style = HelloBeTheme.typography.labelSmall,
                     color = HelloBeTheme.colors.warningContent
                 )
@@ -186,7 +185,7 @@ private fun SummaryRow(summaries: List<OverviewSummary>) {
 private fun RecentWords(words: List<String>, modifier: Modifier = Modifier) {
     Panel(modifier = modifier) {
         Text(
-            text = stringResource(R.string.overview_recent),
+            text = caregiverText(R.string.overview_recent),
             style = HelloBeTheme.typography.titleSmall,
             color = HelloBeTheme.colors.textPrimary
         )
@@ -209,7 +208,7 @@ private fun RecentWords(words: List<String>, modifier: Modifier = Modifier) {
 private fun Suggestion(suggestion: CoPlaySuggestion, modifier: Modifier = Modifier) {
     Panel(modifier = modifier) {
         Text(
-            text = stringResource(R.string.overview_suggestion),
+            text = caregiverText(R.string.overview_suggestion),
             style = HelloBeTheme.typography.titleSmall,
             color = HelloBeTheme.colors.textPrimary
         )
@@ -270,7 +269,12 @@ private fun Panel(modifier: Modifier = Modifier, content: @Composable () -> Unit
 /**
  * The font scale above which the overview shows less at once.
  *
- * Measured rather than chosen: everything fits to about 1.4, and at 1.5 the instruction under the
- * suggestion loses its height entirely. The threshold sits just below where that begins.
+ * Measured rather than chosen, and re-measured when the caregiver area became bilingual. It used to
+ * be 1.4: everything fitted to about there and the instruction under the suggestion was the first
+ * thing to lose its height. Every label on this panel now carries two languages joined by a middle
+ * dot, so it runs out of stage sooner and the same failure arrives at 1.3.
+ *
+ * Measured against the bilingual mode on purpose, because that is the default and the longest a
+ * caregiver can make this screen. A television set to one language alone has room to spare.
  */
-private const val REDUCE_CONTENT_ABOVE = 1.4f
+private const val REDUCE_CONTENT_ABOVE = 1.3f

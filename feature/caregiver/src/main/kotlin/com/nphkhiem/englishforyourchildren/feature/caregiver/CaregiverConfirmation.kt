@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
@@ -52,7 +51,7 @@ fun CaregiverConfirmation(
     }
 
     StoryDialog(
-        title = stringResource(titleFor(state.kind), state.profileName),
+        title = caregiverText(titleFor(state.kind), state.profileName),
         description = descriptionFor(state),
         pipDescription = state.profileName,
         focusRestorer = focusRestorer,
@@ -60,7 +59,7 @@ fun CaregiverConfirmation(
         pip = { IdentityMark(state = state) },
         safeAction = { actionModifier ->
             HelloBeAction(
-                label = stringResource(keepLabelFor(state.kind)),
+                label = caregiverText(keepLabelFor(state.kind)),
                 onClick = { onAction(CaregiverConfirmationAction.Dismissed) },
                 tone = HelloBeActionTone.POSITIVE,
                 availability = availability(actionable),
@@ -73,14 +72,14 @@ fun CaregiverConfirmation(
                 // action again next to a line saying nothing changed would read as though the
                 // first press had half worked.
                 HelloBeAction(
-                    label = stringResource(R.string.confirm_retry),
+                    label = caregiverText(R.string.confirm_retry),
                     onClick = { onAction(CaregiverConfirmationAction.RetryRequested) },
                     tone = HelloBeActionTone.QUIET,
                     modifier = actionModifier
                 )
             } else {
                 HelloBeAction(
-                    label = stringResource(destructiveLabelFor(state.kind)),
+                    label = caregiverText(destructiveLabelFor(state.kind)),
                     onClick = { onAction(CaregiverConfirmationAction.Confirmed) },
                     tone = HelloBeActionTone.DESTRUCTIVE,
                     availability = availability(actionable),
@@ -109,7 +108,7 @@ private fun IdentityMark(state: CaregiverConfirmationState) {
                 CaregiverConfirmationKind.DELETE_PROFILE -> state.profileAvatar
 
                 CaregiverConfirmationKind.RESET_PROGRESS ->
-                    stringResource(R.string.confirm_reset_mark)
+                    caregiverText(R.string.confirm_reset_mark)
             },
             style = HelloBeTheme.typography.headlineLarge,
             color = HelloBeTheme.colors.textSecondary
@@ -126,12 +125,12 @@ private fun IdentityMark(state: CaregiverConfirmationState) {
 @Composable
 private fun descriptionFor(state: CaregiverConfirmationState): String = when (state.phase) {
     CaregiverConfirmationPhase.READY ->
-        stringResource(bodyFor(state.kind), state.profileName)
+        caregiverText(bodyFor(state.kind), state.profileName)
 
-    CaregiverConfirmationPhase.WORKING -> stringResource(workingFor(state.kind))
+    CaregiverConfirmationPhase.WORKING -> caregiverText(workingFor(state.kind))
 
     CaregiverConfirmationPhase.FAILED ->
-        stringResource(failedFor(state.kind), state.profileName)
+        caregiverText(failedFor(state.kind), state.profileName)
 }
 
 private fun availability(actionable: Boolean): HelloBeAvailability =

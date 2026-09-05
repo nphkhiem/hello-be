@@ -119,17 +119,14 @@ object CaregiverFixtures {
                 id = SettingId.VIETNAMESE_HELP,
                 group = SettingGroup.LANGUAGE,
                 title = VIETNAMESE_HELP,
-                consequence = "Appears after the third difficulty · Hỗ trợ tiếng Việt",
-                value = SettingValue.Choice(
-                    current = AUTOMATIC,
-                    options = listOf(AUTOMATIC, "Always", "Never")
-                )
+                consequence = VIETNAMESE_HELP_CONSEQUENCE,
+                value = SettingValue.Toggle(on = true)
             ),
             SettingRow(
                 id = SettingId.CAREGIVER_LANGUAGE,
                 group = SettingGroup.LANGUAGE,
                 title = CAREGIVER_LANGUAGE,
-                consequence = "Ngôn ngữ dành cho phụ huynh",
+                consequence = CAREGIVER_LANGUAGE_CONSEQUENCE,
                 value = SettingValue.Choice(
                     current = BOTH_LANGUAGES,
                     options = listOf("English", "Tiếng Việt", BOTH_LANGUAGES)
@@ -306,7 +303,8 @@ object CaregiverFixtures {
     const val REDUCED_MOTION = "Reduced motion"
     const val HIGH_CONTRAST = "High contrast"
     const val BACKGROUND_MUSIC = "Background music"
-    const val AUTOMATIC = "Automatic"
+    const val VIETNAMESE_HELP_CONSEQUENCE = "Appears only after the third try at a question"
+    const val CAREGIVER_LANGUAGE_CONSEQUENCE = "Changes this area only, never the lessons"
     const val BOTH_LANGUAGES = "English + Tiếng Việt"
     const val PERIOD = "This week"
     const val NOT_A_SCORE = "Not a test score"

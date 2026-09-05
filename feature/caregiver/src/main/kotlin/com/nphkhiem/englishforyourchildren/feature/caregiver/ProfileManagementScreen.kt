@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
@@ -84,19 +83,19 @@ private fun Head(state: ProfileManagementUiState, onAction: (ProfileManagementAc
             verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space2)
         ) {
             Text(
-                text = stringResource(R.string.profiles_title),
+                text = caregiverText(R.string.profiles_title),
                 style = HelloBeTheme.typography.headlineLarge,
                 color = HelloBeTheme.colors.textPrimary
             )
             Text(
-                text = stringResource(R.string.profiles_local),
+                text = caregiverText(R.string.profiles_local),
                 style = HelloBeTheme.typography.bodyMedium,
                 color = HelloBeTheme.colors.textSecondary
             )
             Text(
                 // Capacity in words rather than a bar. The draft puts it in the header chrome;
                 // it sits here instead so the shell stays one shape for every section.
-                text = stringResource(
+                text = caregiverText(
                     R.string.profiles_capacity,
                     capacityUsed(state),
                     MAX_PROFILES
@@ -106,7 +105,7 @@ private fun Head(state: ProfileManagementUiState, onAction: (ProfileManagementAc
             )
             if (state.persistenceFailed) {
                 Text(
-                    text = stringResource(R.string.profiles_persistence_failed),
+                    text = caregiverText(R.string.profiles_persistence_failed),
                     style = HelloBeTheme.typography.labelSmall,
                     color = HelloBeTheme.colors.errorContent
                 )
@@ -114,7 +113,7 @@ private fun Head(state: ProfileManagementUiState, onAction: (ProfileManagementAc
         }
 
         HelloBeAction(
-            label = stringResource(R.string.profiles_add),
+            label = caregiverText(R.string.profiles_add),
             onClick = { onAction(ProfileManagementAction.AddProfileRequested) },
             tone = HelloBeActionTone.SECONDARY,
             // Focusable at the limit so the reason can be read, never clickable. The same rule
@@ -127,7 +126,7 @@ private fun Head(state: ProfileManagementUiState, onAction: (ProfileManagementAc
             stateDescription = if (roomForMore) {
                 null
             } else {
-                stringResource(R.string.profiles_at_limit)
+                caregiverText(R.string.profiles_at_limit)
             },
             minHeight = HelloBeLayout.caregiverControlMinHeight
         )
@@ -152,7 +151,7 @@ private fun ProfileList(
             SettingRowControl(
                 title = profile.name,
                 consequence = if (profile.id == selected.id) {
-                    stringResource(R.string.profiles_selected)
+                    caregiverText(R.string.profiles_selected)
                 } else {
                     profile.detail
                 },
@@ -198,7 +197,7 @@ private fun ProfileDetail(
             R.string.profiles_reset to ProfileManagementAction.ResetProgressRequested(profile.id)
         ).forEach { (label, action) ->
             HelloBeAction(
-                label = stringResource(label),
+                label = caregiverText(label),
                 onClick = { onAction(action) },
                 tone = HelloBeActionTone.QUIET,
                 minHeight = HelloBeLayout.caregiverControlMinHeight,
@@ -211,7 +210,7 @@ private fun ProfileDetail(
         Box(modifier = Modifier.weight(1f))
 
         HelloBeAction(
-            label = stringResource(R.string.profiles_delete),
+            label = caregiverText(R.string.profiles_delete),
             onClick = { onAction(ProfileManagementAction.DeleteProfileRequested(profile.id)) },
             tone = HelloBeActionTone.DESTRUCTIVE,
             minHeight = HelloBeLayout.caregiverControlMinHeight,
@@ -232,12 +231,12 @@ private fun EmptyLibrary() {
         )
     ) {
         Text(
-            text = stringResource(R.string.profiles_empty_title),
+            text = caregiverText(R.string.profiles_empty_title),
             style = HelloBeTheme.typography.headlineMedium,
             color = HelloBeTheme.colors.textPrimary
         )
         Text(
-            text = stringResource(R.string.profiles_empty_hint),
+            text = caregiverText(R.string.profiles_empty_hint),
             style = HelloBeTheme.typography.bodyLarge,
             color = HelloBeTheme.colors.textSecondary
         )

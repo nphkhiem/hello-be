@@ -413,26 +413,42 @@ fun HelloBeNavHost(
             )
         }
 
-        is HelloBeKey.CaregiverGate -> content?.let {
+        is HelloBeKey.CaregiverGate -> if (content == null) {
+            CaregiverLanguageScope {
+                LiveAdultGate(
+                    // Settings rather than the dashboard, for now. The overview's ViewModel is
+                    // P3-T8's, and landing there today would reward solving the gate with a
+                    // recovery panel. `M1_TRACEABILITY.md` records this so T8 moves it back rather
+                    // than inheriting it.
+                    onOpened = {
+                        replaceAll(
+                            resolved.dropLast(1) +
+                                HelloBeKey.CaregiverSettings(profileId = key.profileId)
+                        )
+                    },
+                    modifier = modifier
+                )
+            }
+        } else {
             AdultGateScreen(
-                state = it.adultGate(),
+                state = content.adultGate(),
                 onAction = { action ->
                     // The host judges the answer. The gate reports which position was pressed and
                     // never decides whether it opens, which is why the screen may know the correct
                     // index without being the thing that lets anyone through.
-                    val challenge = it.adultGate().challenge
+                    val challenge = content.adultGate().challenge
                     if (action is AdultGateAction.AnswerChosen &&
                         action.index == challenge.correctIndex
                     ) {
                         replaceAll(
                             resolved.dropLast(1) +
-                                HelloBeKey.CaregiverDashboard(profileId = key.profileId)
+                                HelloBeKey.CaregiverSettings(profileId = key.profileId)
                         )
                     }
                 },
                 modifier = modifier
             )
-        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
+        }
 
         is HelloBeKey.CaregiverDashboard -> content?.let {
             CaregiverShell(
@@ -447,9 +463,29 @@ fun HelloBeNavHost(
             ) { CaregiverOverviewScreen(state = it.caregiverOverview(key.profileId)) }
         } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
 
-        is HelloBeKey.CaregiverSettings -> content?.let {
+        is HelloBeKey.CaregiverSettings -> if (content == null) {
+            CaregiverLanguageScope {
+                LiveCaregiverShell(
+                    profileId = key.profileId,
+                    section = CaregiverSection.SETTINGS,
+                    onSection = { section ->
+                        replaceCaregiver(::replaceAll, resolved, section, key.profileId)
+                    },
+                    onReturn = {
+                        replaceAll(afterCaregiverSessionClosed(key.profileId, caregiverOrigin))
+                    },
+                    modifier = modifier
+                ) {
+                    LiveCaregiverSettings(
+                        onBack = {
+                            replaceAll(afterCaregiverSessionClosed(key.profileId, caregiverOrigin))
+                        }
+                    )
+                }
+            }
+        } else {
             CaregiverShell(
-                content = it,
+                content = content,
                 profileId = key.profileId,
                 section = CaregiverSection.SETTINGS,
                 onSection = { section ->
@@ -460,15 +496,15 @@ fun HelloBeNavHost(
                 },
                 modifier = modifier
             ) {
-                // Settings changes are the data layer's to apply. Navigation has nothing to do
-                // when one arrives, and saying so with an empty handler is clearer than a check
-                // that can only ever be true.
+                // The fixture surface shows the screen without storage behind it, so a change has
+                // nowhere to go and saying so with an empty handler is clearer than a check that
+                // can only ever be true.
                 CaregiverSettingsScreen(
-                    state = it.caregiverSettings(),
+                    state = content.caregiverSettings(),
                     onAction = {}
                 )
             }
-        } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
+        }
 
         is HelloBeKey.ProfileManagement -> content?.let {
             CaregiverShell(

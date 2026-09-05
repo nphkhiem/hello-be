@@ -13,6 +13,7 @@ import androidx.compose.ui.test.requestFocus
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
+import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import org.junit.Rule
 import org.junit.Test
@@ -24,8 +25,9 @@ class CaregiverRecoveryTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    private val resources
-        get() = InstrumentationRegistry.getInstrumentation().targetContext.resources
+    /** Strings are read the way the screens read them, in both languages. */
+    private val context
+        get() = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test
     fun givenTheDataWillNotOpen_whenItIsRead_thenRetryIsFocusedAndResetIsNot() {
@@ -99,16 +101,20 @@ class CaregiverRecoveryTest {
         }
     }
 
-    private fun retry() = resources.getString(R.string.recovery_db_retry)
+    private fun retry() = context.caregiverText(CaregiverLanguage.BOTH, R.string.recovery_db_retry)
 
-    private fun reviewReset() = resources.getString(R.string.recovery_db_review_reset)
+    private fun reviewReset() =
+        context.caregiverText(CaregiverLanguage.BOTH, R.string.recovery_db_review_reset)
 
-    private fun title() = resources.getString(R.string.recovery_db_title)
+    private fun title() = context.caregiverText(CaregiverLanguage.BOTH, R.string.recovery_db_title)
 
-    private fun body() = resources.getString(R.string.recovery_db_body)
+    private fun body() = context.caregiverText(CaregiverLanguage.BOTH, R.string.recovery_db_body)
 
-    private fun code() =
-        resources.getString(R.string.recovery_db_code, CaregiverFixtures.RECOVERY_CODE)
+    private fun code() = context.caregiverText(
+        CaregiverLanguage.BOTH,
+        R.string.recovery_db_code,
+        CaregiverFixtures.RECOVERY_CODE
+    )
 
     private companion object {
         const val POUNDING = 5

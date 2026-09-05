@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
@@ -55,7 +54,7 @@ fun CaregiverScaffold(
         header = {
             StoryHeader(
                 modifier = Modifier.fillMaxWidth(),
-                title = stringResource(R.string.caregiver_area),
+                title = caregiverText(R.string.caregiver_area),
                 action = {
                     Text(
                         text = state.profileName,
@@ -103,14 +102,14 @@ private fun SectionRail(
         verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space3)
     ) {
         Text(
-            text = stringResource(R.string.caregiver_rail_title, state.profileName),
+            text = caregiverText(R.string.caregiver_rail_title, state.profileName),
             style = HelloBeTheme.typography.labelSmall,
             color = HelloBeTheme.colors.textTertiary
         )
 
         CaregiverSection.entries.forEach { section ->
             HelloBeAction(
-                label = stringResource(sectionLabel(section)),
+                label = caregiverText(sectionLabel(section)),
                 onClick = { onAction(CaregiverShellAction.SectionChosen(section)) },
                 tone = if (section == state.section) {
                     HelloBeActionTone.SECONDARY
@@ -136,7 +135,7 @@ private fun SectionRail(
         Box(modifier = Modifier.weight(1f))
 
         HelloBeAction(
-            label = stringResource(R.string.caregiver_return),
+            label = caregiverText(R.string.caregiver_return),
             onClick = { onAction(CaregiverShellAction.ReturnToChildRequested) },
             tone = HelloBeActionTone.QUIET,
             minHeight = HelloBeLayout.caregiverControlMinHeight,
