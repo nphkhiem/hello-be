@@ -76,7 +76,7 @@
     <!-- A code with no child data in it, shown only on a caregiver surface. The trailing clause is
          part of the approved copy and is what tells a caregiver the code is safe to read out. -->
     <string name="recovery_db_code">Recovery code: %1$s · contains no child data</string>
-    <string name="gate_question">What is %1$d + %2$d?</string>
+    <string name="gate_question">%1$d + %2$d = ?</string>
     <string name="settings_vietnamese_help_title">Vietnamese help</string>
     <string name="settings_vietnamese_help_consequence">Appears only after the third try at a question</string>
     <string name="settings_caregiver_language_title">Caregiver language</string>

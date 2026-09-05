@@ -62,6 +62,18 @@ class CaregiverTextTest {
     }
 
     @Test
+    fun givenTheGateQuestion_whenBothLanguagesAreChosen_thenTheSumIsAskedOnce() {
+        // The sum is the question, and arithmetic reads the same to either reader. It used to be
+        // "What is %1$d + %2$d?", which the bilingual join turned into the numbers twice over:
+        // "What is 19 + 44? · 19 + 44 bằng bao nhiêu?". Written the same way in both files, it is
+        // asked once.
+        val both = context.caregiverText(CaregiverLanguage.BOTH, R.string.gate_question, 19, 44)
+
+        assertThat(both).isEqualTo("19 + 44 = ?")
+        assertThat(both).doesNotContain("·")
+    }
+
+    @Test
     fun givenAStringTakingAnArgument_whenItIsRead_thenTheArgumentSurvivesTheLanguageChoice() {
         val read =
             context.caregiverText(CaregiverLanguage.BOTH, R.string.caregiver_rail_title, CHILD)

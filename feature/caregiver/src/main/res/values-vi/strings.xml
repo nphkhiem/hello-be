@@ -63,7 +63,7 @@
     <string name="recovery_db_retry">Thử lại</string>
     <string name="recovery_db_review_reset">Xem cách đặt lại</string>
     <string name="recovery_db_code">Mã khôi phục: %1$s · không chứa dữ liệu của bé</string>
-    <string name="gate_question">%1$d + %2$d bằng bao nhiêu?</string>
+    <string name="gate_question">%1$d + %2$d = ?</string>
     <string name="settings_vietnamese_help_title">Trợ giúp tiếng Việt</string>
     <string name="settings_vietnamese_help_consequence">Chỉ hiện sau khi bé thử ba lần</string>
     <string name="settings_caregiver_language_title">Ngôn ngữ cho phụ huynh</string>
