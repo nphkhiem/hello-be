@@ -104,7 +104,10 @@ class LessonRecoveryJourneyTest {
 
         stopForNow()
 
-        tv.press(FIRST_LESSON)
+        // Back through the dominant control, which is where a child who stopped actually returns
+        // from. Continue is the acceptance criterion this journey is really about: it has to land
+        // on the checkpoint rather than at the top of the lesson.
+        tv.press(tv.string("home_continue"))
 
         // Not "Where are the eyes?". Coming back to the first question is the thing the dialog
         // promises will not happen.
@@ -126,9 +129,9 @@ class LessonRecoveryJourneyTest {
         tv.press(AGE)
         tv.press(tv.string("create_submit"))
         tv.awaitText(tv.string("home_start"))
+        // One press, because that is what the dominant control does now: it opens the lesson the
+        // progression policy names rather than the page that lists them.
         tv.press(tv.string("home_start"))
-        tv.awaitText(FIRST_LESSON)
-        tv.press(FIRST_LESSON)
         tv.awaitText(FIRST_QUESTION)
     }
 
@@ -136,7 +139,8 @@ class LessonRecoveryJourneyTest {
         pressBack()
         tv.awaitText(tv.string("stop_for_now_title"))
         tv.press(tv.string("stop_for_now_stop"))
-        tv.awaitText(FIRST_LESSON)
+        // Home, because that is where the lesson was opened from now that one press opens it.
+        tv.awaitText(tv.string("home_continue"))
     }
 
     /** The real Back, through the dispatcher the lesson's BackHandler listens to. */

@@ -125,9 +125,9 @@ class FirstLessonJourneyTest {
         // opened from the packaged course, and every question answered.
         createChild()
 
+        // One press, because that is what the dominant control does now: it opens the lesson the
+        // progression policy names rather than the page that lists them.
         tv.press(tv.string("home_start"))
-        tv.awaitText(FIRST_LESSON)
-        tv.press(FIRST_LESSON)
 
         // No recording exists for any prompt, so every question offers the unscored skip and that
         // is the fair way through. This is the "missing media, fair skip" journey.
@@ -188,9 +188,9 @@ class FirstLessonJourneyTest {
     }
 
     private fun walkTheFirstLesson() {
+        // One press, because that is what the dominant control does now: it opens the lesson the
+        // progression policy names rather than the page that lists them.
         tv.press(tv.string("home_start"))
-        tv.awaitText(FIRST_LESSON)
-        tv.press(FIRST_LESSON)
 
         repeat(ACTIVITIES) {
             tv.awaitText(tv.string("lesson_skip"))

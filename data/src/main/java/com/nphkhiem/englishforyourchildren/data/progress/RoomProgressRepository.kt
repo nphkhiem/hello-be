@@ -138,20 +138,13 @@ class RoomProgressRepository @Inject constructor(
             val session = dao.findSession(command.sessionId.value)
                 ?: return DomainResult.Failure(DomainError.PersistenceUnavailable)
 
-            dao.upsertSession(
-                session.copy(
-                    status = LessonStatus.COMPLETED.name,
-                    currentActivityInstanceId = null,
-                    completedAt = command.completedAt.value
-                )
-            )
-            dao.upsertLessonProgress(
-                LessonProgressEntity(
-                    profileId = session.profileId,
-                    lessonId = session.lessonId,
-                    completed = true,
-                    updatedAt = command.completedAt.value
-                )
+            // One transaction, and the checkpoint goes with it: a lesson that is finished has
+            // nowhere left to resume into. See `completeLesson`.
+            dao.completeLesson(
+                sessionId = command.sessionId.value,
+                lessonId = session.lessonId,
+                profileId = session.profileId,
+                completedAt = command.completedAt.value
             )
             DomainResult.Success(
                 LessonCompletion(

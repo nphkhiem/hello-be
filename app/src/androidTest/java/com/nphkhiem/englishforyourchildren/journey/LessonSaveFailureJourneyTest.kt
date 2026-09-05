@@ -137,9 +137,9 @@ class LessonSaveFailureJourneyTest {
         tv.press(AGE)
         tv.press(tv.string("create_submit"))
         tv.awaitText(tv.string("home_start"))
+        // One press, because that is what the dominant control does now: it opens the lesson the
+        // progression policy names rather than the page that lists them.
         tv.press(tv.string("home_start"))
-        tv.awaitText(FIRST_LESSON)
-        tv.press(FIRST_LESSON)
         tv.awaitText(FIRST_QUESTION)
     }
 

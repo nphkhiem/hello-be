@@ -1,6 +1,7 @@
 package com.nphkhiem.englishforyourchildren.feature.learning
 
 import androidx.compose.runtime.Immutable
+import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 
 /**
  * What the dominant slot on child home offers.
@@ -10,7 +11,14 @@ import androidx.compose.runtime.Immutable
  * context line, because only they have somewhere to point.
  */
 sealed interface HomePrimary {
-    /** A checkpoint exists and can be opened. */
+    /**
+     * There is a lesson to carry on with, and [context] names it.
+     *
+     * Not only a half-finished lesson. A child who finished one adventure and comes back tomorrow
+     * is continuing as much as one who stopped in the middle, and both want the same word on the
+     * same control. Where inside the lesson they land is the lesson's business, from its own
+     * checkpoint.
+     */
     data class Resume(val context: String) : HomePrimary
 
     /** A checkpoint exists and will not open. Said out loud rather than hidden. */
@@ -38,6 +46,15 @@ data class ChildHomeUiState(
     val greeting: String,
     val greetingHint: String,
     val primary: HomePrimary,
+    /**
+     * The lesson the dominant control opens, or null when it opens nothing.
+     *
+     * The brief asks for one Select press to the next useful activity, and a control that landed on
+     * the learning path would be two: the child would arrive somewhere they then have to read. Null
+     * for a finished course and for a checkpoint the course has lost, which are the two cases where
+     * there is nothing to open and the layout already says so.
+     */
+    val continueTarget: LessonId? = null,
     val pendingSave: Boolean
 )
 

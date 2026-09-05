@@ -144,6 +144,7 @@ internal fun LiveProfileCreate(onCreated: (ProfileId) -> Unit, modifier: Modifie
 @Composable
 internal fun LiveChildHome(
     profileId: ProfileId,
+    onContinue: (LessonId) -> Unit,
     onLearningPath: () -> Unit,
     onFreePlay: () -> Unit,
     onSwitchProfile: () -> Unit,
@@ -159,7 +160,12 @@ internal fun LiveChildHome(
         state = state,
         onAction = { action ->
             when (action) {
-                ChildHomeAction.ContinueRequested,
+                // One press to the next useful activity, which is what the brief asks of this
+                // control. Landing on the learning path instead was two, and the second was a
+                // page a child who cannot read has to recognise their way across.
+                ChildHomeAction.ContinueRequested ->
+                    state.continueTarget?.let(onContinue) ?: onLearningPath()
+
                 ChildHomeAction.LearningPathRequested -> onLearningPath()
 
                 ChildHomeAction.FreePlayRequested -> onFreePlay()

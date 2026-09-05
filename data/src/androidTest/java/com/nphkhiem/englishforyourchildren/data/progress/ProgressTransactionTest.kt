@@ -188,6 +188,57 @@ class ProgressTransactionTest {
         createdAt = NOW
     )
 
+    @Test
+    fun givenALessonIsFinished_whenItsCheckpointIsRead_thenThereIsNothingLeftToResume() {
+        // A checkpoint is where a child can be put back into a lesson. Once they have finished it
+        // there is nowhere to put them back into, and a row that outlives the lesson makes the
+        // whole profile look permanently half-saved: child home said "Not saved yet" and the
+        // caregiver overview said a session was still being written down, both for ever.
+        runBlocking {
+            dao.upsertSession(session())
+            dao.persistCheckpoint(attempt(), checkpoint(), lessonProgress())
+            dao.completeLesson(SESSION, LESSON, PROFILE, NOW)
+
+            assertThat(dao.checkpointsFor(PROFILE)).isEmpty()
+        }
+    }
+
+    @Test
+    fun givenAnotherLessonLeftHalfDone_whenOneIsFinished_thenTheOtherIsStillWaiting() {
+        // Finishing one lesson says nothing about a different one a child stopped in the middle of.
+        runBlocking {
+            dao.upsertSession(session())
+            dao.persistCheckpoint(attempt(), checkpoint(), lessonProgress())
+            dao.persistCheckpoint(
+                attempt(instance = SECOND_INSTANCE, activity = SECOND_ACTIVITY, ordinal = 1),
+                checkpoint(lessonId = OTHER_LESSON),
+                lessonProgress()
+            )
+
+            dao.completeLesson(SESSION, LESSON, PROFILE, NOW)
+
+            assertThat(dao.checkpointsFor(PROFILE).map { it.lessonId })
+                .containsExactly(OTHER_LESSON)
+        }
+    }
+
+    @Test
+    fun givenTwoLessonsLeftHalfDone_whenTheyAreRead_thenTheLatestComesFirst() {
+        // "The" open checkpoint is singular, so which row answers has to be decided rather than
+        // left to whatever the table returns. The most recent is where the child actually is.
+        runBlocking {
+            dao.persistCheckpoint(attempt(), checkpoint(), lessonProgress())
+            dao.persistCheckpoint(
+                attempt(instance = SECOND_INSTANCE, activity = SECOND_ACTIVITY, ordinal = 1),
+                checkpoint(lessonId = OTHER_LESSON).copy(updatedAt = NOW + 1),
+                lessonProgress()
+            )
+
+            assertThat(dao.observeCheckpoints(PROFILE).first().first().lessonId)
+                .isEqualTo(OTHER_LESSON)
+        }
+    }
+
     private fun session(current: String = FIRST_INSTANCE) = LessonSessionEntity(
         id = SESSION,
         profileId = PROFILE,
