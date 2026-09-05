@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nphkhiem.englishforyourchildren.domain.model.AgeBand
 import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
@@ -19,6 +20,11 @@ import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateScreen
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateUiState
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateViewModel
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverConfirmation
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverConfirmationAction
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverConfirmationKind
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverConfirmationState
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverConfirmationViewModel
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverLanguageViewModel
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverOverviewScreen
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverOverviewUiState
@@ -34,8 +40,13 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellState
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellViewModel
 import com.nphkhiem.englishforyourchildren.feature.caregiver.GateChallenge
 import com.nphkhiem.englishforyourchildren.feature.caregiver.LocalCaregiverLanguage
+import com.nphkhiem.englishforyourchildren.feature.caregiver.ManagedProfile
 import com.nphkhiem.englishforyourchildren.feature.caregiver.OverviewProgress
 import com.nphkhiem.englishforyourchildren.feature.caregiver.OverviewSummary
+import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementAction
+import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementScreen
+import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementUiState
+import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementViewModel
 import com.nphkhiem.englishforyourchildren.feature.caregiver.R as CaregiverR
 import com.nphkhiem.englishforyourchildren.feature.caregiver.SettingId
 import com.nphkhiem.englishforyourchildren.feature.caregiver.caregiverText
@@ -62,6 +73,7 @@ import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfilePickerScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileViewModel
+import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -482,6 +494,113 @@ internal fun LiveCaregiverOverview(profileId: ProfileId?, modifier: Modifier = M
             suggestion = null,
             pendingSave = state.pendingSave
         ),
+        modifier = modifier
+    )
+}
+
+/**
+ * The children on this television, live.
+ *
+ * The detail line carries the age and not the count of finished adventures the approved draft also
+ * puts there. That count needs each child's progress rather than this child's, and fetching one
+ * flow per profile to fill in a subtitle is a larger change than this screen is. It is recorded as
+ * owed rather than quietly dropped.
+ */
+@Composable
+internal fun LiveProfileManagement(
+    onAdd: () -> Unit,
+    onDelete: (ProfileId) -> Unit,
+    onReset: (ProfileId) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val model: ProfileManagementViewModel = hiltViewModel()
+    val state by model.state.collectAsStateWithLifecycle()
+
+    ProfileManagementScreen(
+        state = ProfileManagementUiState(
+            profiles = state.profiles.map { child ->
+                ManagedProfile(
+                    id = child.id.value,
+                    name = child.nickname,
+                    avatar = child.avatarId.value,
+                    detail = caregiverText(
+                        CaregiverR.string.profiles_detail_age,
+                        child.ageBand.years()
+                    )
+                )
+            },
+            selectedId = state.selectedId?.value,
+            persistenceFailed = state.persistenceFailed
+        ),
+        onAction = { action ->
+            when (action) {
+                is ProfileManagementAction.ProfileSelected -> model.onSelect(ProfileId(action.id))
+
+                ProfileManagementAction.AddProfileRequested -> onAdd()
+
+                is ProfileManagementAction.DeleteProfileRequested ->
+                    onDelete(ProfileId(action.id))
+
+                is ProfileManagementAction.ResetProgressRequested -> onReset(ProfileId(action.id))
+
+                // Editing a name and changing a picture have no destination yet. Reported rather
+                // than handled, so the gap is one place rather than a control that quietly does
+                // nothing.
+                is ProfileManagementAction.EditNameRequested -> Unit
+
+                is ProfileManagementAction.ChangeAvatarRequested -> Unit
+            }
+        },
+        modifier = modifier
+    )
+}
+
+/** How a child's age reads on a line, which is a number rather than a band. */
+private fun AgeBand.years(): Int = when (this) {
+    AgeBand.THREE -> 3
+    AgeBand.FOUR -> 4
+    AgeBand.FIVE -> 5
+}
+
+/**
+ * A thing that cannot be undone, live.
+ *
+ * The host leaves when it is done rather than the dialog drawing a finished state, which is why
+ * completion is a flag on the ViewModel and not a fourth phase.
+ */
+@Composable
+internal fun LiveCaregiverConfirmation(
+    kind: CaregiverConfirmationKind,
+    profileId: ProfileId,
+    onFinished: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val model: CaregiverConfirmationViewModel = hiltViewModel()
+    val state by model.state.collectAsStateWithLifecycle()
+    val profileModel: ProfileManagementViewModel = hiltViewModel()
+    val people by profileModel.state.collectAsStateWithLifecycle()
+
+    LaunchedEffect(kind, profileId) { model.start(kind, profileId) }
+    LaunchedEffect(state.done) { if (state.done) onFinished() }
+
+    val child = people.profiles.firstOrNull { it.id == profileId }
+    CaregiverConfirmation(
+        state = CaregiverConfirmationState(
+            kind = state.kind,
+            // Named on every one of them. A caregiver with four children must never be asked to
+            // delete "this profile".
+            profileName = child?.nickname.orEmpty(),
+            profileAvatar = child?.avatarId?.value.orEmpty(),
+            phase = state.phase
+        ),
+        focusRestorer = rememberHelloBeFocusRestorer(),
+        onAction = { action ->
+            when (action) {
+                CaregiverConfirmationAction.Dismissed -> onFinished()
+                CaregiverConfirmationAction.Confirmed -> model.onConfirm()
+                CaregiverConfirmationAction.RetryRequested -> model.onRetry()
+            }
+        },
         modifier = modifier
     )
 }

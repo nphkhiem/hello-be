@@ -114,6 +114,8 @@ class FakeProfileRepository : ProfileRepository {
 class FakeProgressRepository(
     private val timeProvider: TimeProvider = FakeTimeProvider(EpochMillis(DEFAULT_NOW))
 ) : ProgressRepository {
+    private val deletions = mutableListOf<ProfileId>()
+
     private val progress = MutableStateFlow<DomainResult<ProfileProgress>>(
         DomainResult.Success(DomainBuilders.profileProgress())
     )
@@ -206,8 +208,12 @@ class FakeProgressRepository(
         )
     }
 
+    /** Whose progress was removed, so a reset can be asserted rather than assumed. */
+    val deleted: List<ProfileId> get() = deletions.toList()
+
     override suspend fun deleteProfileProgress(profileId: ProfileId): DomainResult<Unit> {
         failure.take()?.let { return DomainResult.Failure(it) }
+        deletions += profileId
         return DomainResult.Success(Unit)
     }
 
