@@ -12,6 +12,7 @@ package com.nphkhiem.englishforyourchildren.feature.learning
 object SayWithPipFixtures {
 
     fun modelling(): LessonUiState = LessonUiState(
+        lessonId = "u03-my-home-l1",
         kind = LessonActivityKind.SAY_WITH_PIP,
         unitName = "My Home",
         activityTitle = "Say it with Pip",

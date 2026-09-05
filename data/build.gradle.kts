@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.PathSensitivity
+
 plugins {
     id("english.android.library")
     alias(libs.plugins.ksp)
@@ -12,6 +14,18 @@ android {
         // writes them to has to travel with it.
         getByName("androidTest").assets.srcDir("$projectDir/schemas")
     }
+}
+
+// `StarterContentTest` opens the packaged bundle off disk rather than through a fixture, which is
+// the point of it: it checks the same files the app will, in both source sets, down to which
+// recordings are actually present. Gradle cannot see that from this module's source tree, so
+// without this a content mistake ships green, the tests having been skipped as up to date because
+// no Kotlin changed. A wrong answer in the shipped bundle survived exactly that way.
+tasks.withType<Test>().configureEach {
+    inputs
+        .dir(layout.projectDirectory.dir("../content/starter/src"))
+        .withPropertyName("shippedContent")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
 ksp {

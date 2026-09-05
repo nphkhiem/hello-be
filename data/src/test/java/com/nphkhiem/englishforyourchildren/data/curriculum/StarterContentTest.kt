@@ -29,21 +29,29 @@ class StarterContentTest {
     }
 
     @Test
-    fun givenTheShippedUnit_whenItIsRead_thenItIsMyBodyWithItsFiveSessions() {
-        val unit = units.single()
+    fun givenTheShippedUnits_whenTheyAreRead_thenTheyAreTheApprovedThemesInOrder() {
+        assertThat(units.map { it.id }).containsExactly("u01-my-body", "u02-my-family").inOrder()
+        assertThat(units.map { it.theme }).containsExactly("My Body", "My Family").inOrder()
+    }
 
-        assertThat(unit.id).isEqualTo("u01-my-body")
-        assertThat(unit.theme).isEqualTo("My Body")
-        assertThat(unit.lessons).hasSize(5)
+    @Test
+    fun givenEveryShippedUnit_whenItIsRead_thenItHasItsFiveSessions() {
+        // Four that teach and a fifth that reviews, every unit, which is the shape the blueprint
+        // fixes for all twelve rather than for the one that happened to be written first.
+        units.forEach { unit ->
+            assertThat(unit.lessons).hasSize(5)
+            assertThat(unit.lessons.count { it.kind == "TEACHING" }).isEqualTo(4)
+            assertThat(unit.lessons.count { it.kind == "REVIEW" }).isEqualTo(1)
+        }
     }
 
     @Test
     fun givenEveryTeachingLesson_whenItsShapeIsRead_thenItIsTheApprovedSpine() {
         // Six activities in one order, every session. Predictability over novelty, and a mistake in
         // one lesson is visible against four identical siblings.
-        val teaching = units.single().lessons.filter { it.kind == "TEACHING" }
+        val teaching = units.flatMap { it.lessons }.filter { it.kind == "TEACHING" }
 
-        assertThat(teaching).hasSize(4)
+        assertThat(teaching).hasSize(4 * units.size)
         teaching.forEach { lesson ->
             assertThat(lesson.activities.map { it.family }).containsExactly(
                 "LISTEN_AND_CHOOSE",
@@ -57,21 +65,52 @@ class StarterContentTest {
     }
 
     @Test
-    fun givenTheUnit_whenItsWordsAreCounted_thenThereAreSixteenAndNoneIsTaughtTwice() {
+    fun givenEveryUnit_whenItsWordsAreCounted_thenThereAreSixteenAndNoneIsTaughtTwice() {
         // Four a session across four teaching sessions, which is the density the owner chose.
-        val taught = units.single().lessons.flatMap { it.teaches }
+        units.forEach { unit ->
+            val taught = unit.lessons.flatMap { it.teaches }
 
-        assertThat(taught).hasSize(16)
-        assertThat(taught.toSet()).hasSize(16)
+            assertThat(taught).hasSize(16)
+            assertThat(taught.toSet()).hasSize(16)
+        }
     }
 
     @Test
-    fun givenTheReviewLesson_whenItIsRead_thenItTeachesNothingNew() {
-        val review = units.single().lessons.single { it.kind == "REVIEW" }
+    fun givenTheWholeBundle_whenItsWordsAreCounted_thenNoUnitTeachesAnothersWord() {
+        // An id is permanent and names one thing, so a word taught in two units would be one skill
+        // a child is credited with twice and a picture two units disagree about.
+        val taught = units.flatMap { unit -> unit.lessons.flatMap { it.teaches } }
 
-        assertThat(review.teaches).isEmpty()
-        assertThat(review.letters).isEmpty()
-        assertThat(review.activities.map { it.family }.toSet()).containsExactly("REVIEW")
+        assertThat(taught.toSet()).hasSize(taught.size)
+    }
+
+    @Test
+    fun givenEveryReviewLesson_whenItIsRead_thenItTeachesNothingNew() {
+        units.forEach { unit ->
+            val review = unit.lessons.single { it.kind == "REVIEW" }
+
+            assertThat(review.teaches).isEmpty()
+            assertThat(review.letters).isEmpty()
+            assertThat(review.activities.map { it.family }.toSet()).containsExactly("REVIEW")
+        }
+    }
+
+    @Test
+    fun givenEveryReviewLesson_whenItIsRead_thenItOnlyAsksAboutWordsAlreadyTaught() {
+        // A review that asks about a word from a unit further on would be a question no child could
+        // have been taught the answer to, and the further on the unit the longer it would take to
+        // notice.
+        units.forEachIndexed { index, unit ->
+            val introduced = units.take(index + 1)
+                .flatMap { earlier -> earlier.lessons.flatMap { it.teaches } }
+                .toSet()
+            val asked = unit.lessons
+                .single { it.kind == "REVIEW" }
+                .activities
+                .flatMap { activity -> activity.choices.map { it.skillId } }
+
+            assertThat(introduced).containsAtLeastElementsIn(asked.toSet())
+        }
     }
 
     @Test
@@ -79,9 +118,9 @@ class StarterContentTest {
         // The information architecture puts one off-screen suggestion on the caregiver overview and
         // the brief offers one after every celebration. Both read the lesson, so a lesson without
         // one is a caregiver shown nothing.
-        val ideas = units.single().lessons.map { it.coPlay }
+        val ideas = units.flatMap { it.lessons }.map { it.coPlay }
 
-        assertThat(ideas).hasSize(5)
+        assertThat(ideas).hasSize(5 * units.size)
         assertThat(ideas.all { it != null }).isTrue()
     }
 
@@ -89,7 +128,7 @@ class StarterContentTest {
     fun givenEveryShippedIdea_whenACaregiverReadsIt_thenItIsThereInBothLanguages() {
         // The person being addressed is the caregiver, and the caregiver area speaks both. An idea
         // in English alone would be a card a Vietnamese-speaking parent cannot act on.
-        val ideas = units.single().lessons.mapNotNull { it.coPlay }
+        val ideas = units.flatMap { it.lessons }.mapNotNull { it.coPlay }
 
         ideas.forEach { idea ->
             assertThat(idea.titleVi).isNotEmpty()
@@ -131,7 +170,7 @@ class StarterContentTest {
         val course = parser.toDomain(course, units)
         val activities = course.units.flatMap { it.lessons }.flatMap { it.activities }
 
-        assertThat(activities).hasSize(30)
+        assertThat(activities).hasSize(30 * units.size)
         assertThat(activities.all { it.content != null }).isTrue()
     }
 
@@ -142,17 +181,17 @@ class StarterContentTest {
             .flatMap { it.activities }
             .filter { it.family == ActivityFamily.SAY_WITH_PIP }
 
-        assertThat(speaking).hasSize(4)
+        assertThat(speaking).hasSize(4 * units.size)
         assertThat(speaking.none { it.content is Answerable }).isTrue()
     }
 
     @Test
-    fun givenTheShippedUnit_whenItIsRead_thenItNamesTheWordACelebrationCanSay() {
+    fun givenEveryShippedUnit_whenItIsRead_thenItNamesTheWordACelebrationCanSay() {
         // "You found 4 body words!" needs a noun, and the theme is a title rather than one.
         // Deriving one by trimming "My Body" would be code inventing child-facing copy.
-        val unit = parser.toDomain(course, units).units.single()
+        val words = parser.toDomain(course, units).units.map { it.word }
 
-        assertThat(unit.word).isEqualTo("body")
+        assertThat(words).containsExactly("body", "family").inOrder()
     }
 
     @Test
@@ -162,9 +201,34 @@ class StarterContentTest {
             .flatMap { it.activities }
             .mapNotNull { it.content as? ActivityContent.LetterAndSound }
 
-        assertThat(letters).hasSize(4)
+        assertThat(letters).hasSize(4 * units.size)
         assertThat(letters.map { it.letter.value })
-            .containsExactly("letter-e", "letter-h", "letter-b", "letter-a")
+            .containsExactly(
+                "letter-e",
+                "letter-h",
+                "letter-b",
+                "letter-a",
+                "letter-s",
+                "letter-g",
+                "letter-u",
+                "letter-w"
+            )
+            .inOrder()
+    }
+
+    @Test
+    fun givenEveryTaughtLetter_whenItIsRead_thenItArrivesInsideAWordOfThatSession() {
+        // The blueprint's rule, and the reason it is a rule: a letter met on its own is a shape,
+        // and a letter met inside a word a child is learning that day is a sound they can use.
+        units.flatMap { it.lessons }
+            .filter { it.kind == "TEACHING" }
+            .forEach { lesson ->
+                val asked = lesson.activities.single { it.family == "LETTER_AND_SOUND" }
+                val initial = asked.letterSkillId?.removePrefix("letter-")
+
+                assertThat(lesson.letters).contains(asked.letterSkillId)
+                assertThat(asked.correctSkillId?.removePrefix("word-")).startsWith(initial)
+            }
     }
 
     @Test
@@ -231,7 +295,7 @@ class StarterContentTest {
     fun givenAnActivityNamingAnAnswerItDoesNotOffer_whenChecked_thenItIsReported() {
         // A question no child can get right. Proving the validator catches it matters more than
         // proving the current bundle is clean, because the bundle will change.
-        val broken = units.single().let { unit ->
+        val broken = units.first().let { unit ->
             unit.copy(
                 lessons = unit.lessons.take(1).map { lesson ->
                     lesson.copy(
@@ -252,7 +316,7 @@ class StarterContentTest {
 
     @Test
     fun givenActivitiesOutOfOrder_whenChecked_thenItIsReported() {
-        val unit = units.single()
+        val unit = units.first()
         val shuffled = unit.copy(
             lessons = unit.lessons.take(1).map { lesson ->
                 lesson.copy(activities = lesson.activities.reversed())
@@ -279,6 +343,6 @@ class StarterContentTest {
         val ASSETS = File("../content/starter/src/main/assets")
         val DEBUG_ASSETS = File("../content/starter/src/debug/assets")
         const val DEVELOPMENT_LEDGER = "attribution/attributions-development.json"
-        const val EXPECTED_ASSET_COUNT = 40
+        const val EXPECTED_ASSET_COUNT = 77
     }
 }

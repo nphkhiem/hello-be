@@ -194,8 +194,18 @@ internal fun LiveLearningPath(
         onAction = { action ->
             when (action) {
                 is LearningPathAction.LessonChosen -> onLessonChosen(LessonId(action.lessonId))
+
                 LearningPathAction.HomeRequested -> onHome()
+
                 LearningPathAction.SwitchProfileRequested -> onSwitchProfile()
+
+                // Paging is a change of view rather than a destination, so it stays here rather
+                // than going through the back stack: a child stepping between units is not
+                // somewhere Back should have to unwind.
+                LearningPathAction.PreviousUnitRequested -> model.showPreviousUnit()
+
+                LearningPathAction.NextUnitRequested -> model.showNextUnit()
+
                 else -> Unit
             }
         },
@@ -283,8 +293,12 @@ internal fun LiveLesson(
 
     // Finishing is the host's business, not the screen's: the lesson says it is over and the
     // celebration is a destination rather than a state of this one.
-    LaunchedEffect(state.phase) {
-        if (state.phase == LessonPhase.COMPLETED) onFinished()
+    //
+    // The lesson has to be the one that was asked for. This ViewModel outlives the screen, so
+    // opening a second lesson meets the first one's finished state before `start` has replaced it,
+    // and a child pressing Lesson 2 was sent to a celebration for a lesson they had not opened.
+    LaunchedEffect(state.phase, state.lessonId) {
+        if (state.phase == LessonPhase.COMPLETED && state.lessonId == lessonId.value) onFinished()
     }
 
     LessonActivity(

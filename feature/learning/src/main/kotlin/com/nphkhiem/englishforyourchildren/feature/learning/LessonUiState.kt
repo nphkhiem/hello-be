@@ -113,6 +113,15 @@ data class LearningObject(val id: String, val label: String, val image: String? 
  */
 @Immutable
 data class LessonUiState(
+    /**
+     * Which lesson this is about, or empty while nothing is open yet.
+     *
+     * Carried so that a host can tell a completion apart from a stale one. This ViewModel outlives
+     * the screen that asked for it, so a child opening their second lesson met the first lesson's
+     * finished state and was sent straight to a celebration they had not earned. State that does
+     * not say what it is about cannot be checked against what was asked for.
+     */
+    val lessonId: String,
     val unitName: String,
     val activityTitle: String,
     val prompt: String,
