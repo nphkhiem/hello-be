@@ -92,4 +92,9 @@
     <string name="settings_language_english">English</string>
     <string name="settings_language_vietnamese">Tiếng Việt</string>
     <string name="settings_language_both">English + Tiếng Việt</string>
+    <string name="overview_period">This week</string>
+    <string name="overview_adventures_label">Adventures finished</string>
+    <string name="overview_adventures_note">Sessions completed</string>
+    <string name="overview_words_label">Words encountered</string>
+    <string name="overview_words_note">Not a test score</string>
 </resources>

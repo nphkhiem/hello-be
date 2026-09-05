@@ -79,4 +79,9 @@
     <string name="settings_language_english">Tiếng Anh</string>
     <string name="settings_language_vietnamese">Tiếng Việt</string>
     <string name="settings_language_both">Tiếng Anh + Tiếng Việt</string>
+    <string name="overview_period">Tuần này</string>
+    <string name="overview_adventures_label">Số buổi đã học xong</string>
+    <string name="overview_adventures_note">Số buổi bé đã hoàn thành</string>
+    <string name="overview_words_label">Số từ bé đã gặp</string>
+    <string name="overview_words_note">Đây không phải điểm số</string>
 </resources>
