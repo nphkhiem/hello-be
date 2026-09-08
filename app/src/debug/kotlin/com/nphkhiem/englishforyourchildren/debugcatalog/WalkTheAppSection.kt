@@ -25,7 +25,6 @@ import com.nphkhiem.englishforyourchildren.navigation.ProfileSnapshot
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
-import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeSpacing
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 
@@ -86,14 +85,17 @@ internal fun WalkTheAppSection(profileCount: Int, onNextLaunch: () -> Unit, onOp
  * The app itself, walkable, filling the stage.
  *
  * Hosted at the catalog root and only while it is asked for, which is what makes Back work here.
- * Back is dispatched to the most recently registered handler, and this host used to be the first
- * section on the page: every lesson, free play and celebration specimen below it registered a
- * handler afterwards and took the press. Measured rather than assumed, the celebration specimen
- * answered the first Back and the host answered later ones, both off screen, so a reviewer pressing
- * Back saw nothing happen at all.
  *
- * Raised last, the host's handler is the newest one, so Back reaches the app being walked. At the
- * app's own root Back leaves, which closes the walk and returns to the catalog.
+ * Back goes to the most recently registered handler, and registration order is by the moment a
+ * handler mounts rather than by where it sits in the source. The walk used to be composed with the
+ * page, as its first section, so every lesson, free play and celebration specimen mounted after it
+ * and outranked it. Measured on a device rather than assumed: the celebration specimen answered the
+ * first Back and this host answered later ones, both off screen, so a reviewer pressing Back saw
+ * nothing happen while the adult gate in front of them said Back returns to the child screen.
+ *
+ * Mounting on request inverts that. Whatever the page registered during its first composition is
+ * older than this, so the walk always wins while it is open, and registers nothing while it is not.
+ * At the walked app's own root Back leaves, which closes the walk and returns to the catalog.
  */
 @Composable
 internal fun CatalogWalkTheApp(profileCount: Int, restarts: Int, onExit: () -> Unit) {
