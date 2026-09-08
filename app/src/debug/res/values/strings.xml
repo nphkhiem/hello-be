@@ -23,6 +23,7 @@
     <string name="theme_catalog_walk_heading">Walk the app</string>
     <string name="theme_catalog_walk_label">The real navigation, on fixture content. Every route from launch, with real Back.</string>
     <string name="theme_catalog_walk_reset">Start again</string>
+    <string name="theme_catalog_walk_open">Start the walk</string>
     <string name="theme_catalog_gate_heading">Screen: adult gate</string>
     <string name="theme_catalog_gate_label">Every gate state. Press Select without moving: it must never be the correct answer.</string>
     <string name="theme_catalog_overview_heading">Screen: caregiver overview</string>

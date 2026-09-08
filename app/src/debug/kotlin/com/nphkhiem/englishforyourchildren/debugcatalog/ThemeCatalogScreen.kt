@@ -14,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,6 +45,9 @@ private data class CatalogModeState(
 fun ThemeCatalogScreen() {
     var mode by remember { mutableStateOf(CatalogModeState()) }
     var dialogOpen by remember { mutableStateOf(false) }
+    var walkOpen by remember { mutableStateOf(false) }
+    var walkProfileCount by remember { mutableIntStateOf(1) }
+    var walkRestarts by remember { mutableIntStateOf(0) }
 
     HelloBeTheme(
         themeMode = mode.themeMode,
@@ -72,7 +76,14 @@ fun ThemeCatalogScreen() {
                 CatalogModeControls(mode = mode, onModeChange = { mode = it })
 
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_walk_heading))
-                WalkTheAppSection()
+                WalkTheAppSection(
+                    profileCount = walkProfileCount,
+                    onNextLaunch = {
+                        walkProfileCount = (walkProfileCount + 1) % (MAX_LAUNCH_PROFILES + 1)
+                        walkRestarts++
+                    },
+                    onOpen = { walkOpen = true }
+                )
 
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_gate_heading))
                 AdultGateCatalogSection()
@@ -170,6 +181,14 @@ fun ThemeCatalogScreen() {
 
             // Hosted at the root rather than inside the scrolling column, so the scrim covers the
             // whole screen exactly as it would on a real stage.
+            if (walkOpen) {
+                CatalogWalkTheApp(
+                    profileCount = walkProfileCount,
+                    restarts = walkRestarts,
+                    onExit = { walkOpen = false }
+                )
+            }
+
             if (dialogOpen) {
                 CatalogDialog(
                     focusRestorer = dialogRestorer,
@@ -292,3 +311,6 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
         Text(text = label, style = HelloBeTheme.typography.labelMedium)
     }
 }
+
+/** Launch counts the walk steps through, matching the entry-resolution table. */
+private const val MAX_LAUNCH_PROFILES = 4

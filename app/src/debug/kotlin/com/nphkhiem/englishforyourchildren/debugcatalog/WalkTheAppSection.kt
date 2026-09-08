@@ -4,8 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.R
@@ -45,10 +46,7 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
  * one opens that child's home, several open the picker.
  */
 @Composable
-internal fun WalkTheAppSection() {
-    var profileCount by remember { mutableIntStateOf(1) }
-    var restarts by remember { mutableIntStateOf(0) }
-
+internal fun WalkTheAppSection(profileCount: Int, onNextLaunch: () -> Unit, onOpen: () -> Unit) {
     Column(verticalArrangement = Arrangement.spacedBy(HelloBeSpacing.space4)) {
         Text(
             text = stringResource(R.string.theme_catalog_walk_label),
@@ -62,16 +60,13 @@ internal fun WalkTheAppSection() {
         ) {
             HelloBeAction(
                 label = stringResource(R.string.theme_catalog_lesson_next_state),
-                onClick = {
-                    profileCount = (profileCount + 1) % (MAX_LAUNCH_PROFILES + 1)
-                    restarts++
-                },
+                onClick = onNextLaunch,
                 tone = HelloBeActionTone.SECONDARY
             )
             HelloBeAction(
-                label = stringResource(R.string.theme_catalog_walk_reset),
-                onClick = { restarts++ },
-                tone = HelloBeActionTone.QUIET
+                label = stringResource(R.string.theme_catalog_walk_open),
+                onClick = onOpen,
+                tone = HelloBeActionTone.SECONDARY
             )
             Text(
                 text = stringResource(
@@ -84,30 +79,45 @@ internal fun WalkTheAppSection() {
                 color = HelloBeTheme.colors.textSecondary
             )
         }
+    }
+}
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(HelloBeLayout.referenceHeight)
-        ) {
-            // Keyed so Start again rebuilds the host from its entry destination, which is the only
-            // way back to launch once a walk has replaced the root.
-            key(profileCount, restarts) {
-                HelloBeNavHost(
-                    gateway = FixtureProfileGateway(
-                        ProfileSnapshot(
-                            storageReadable = true,
-                            validProfileIds = (1..profileCount).map { ProfileId("p$it") },
-                            rememberedProfileId = null
-                        )
-                    ),
-                    content = FixtureContent(),
-                    onExitApp = { restarts++ }
-                )
-            }
+/**
+ * The app itself, walkable, filling the stage.
+ *
+ * Hosted at the catalog root and only while it is asked for, which is what makes Back work here.
+ * Back is dispatched to the most recently registered handler, and this host used to be the first
+ * section on the page: every lesson, free play and celebration specimen below it registered a
+ * handler afterwards and took the press. Measured rather than assumed, the celebration specimen
+ * answered the first Back and the host answered later ones, both off screen, so a reviewer pressing
+ * Back saw nothing happen at all.
+ *
+ * Raised last, the host's handler is the newest one, so Back reaches the app being walked. At the
+ * app's own root Back leaves, which closes the walk and returns to the catalog.
+ */
+@Composable
+internal fun CatalogWalkTheApp(profileCount: Int, restarts: Int, onExit: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize().testTag(WALK_TAG)) {
+        // Keyed so a fresh launch count rebuilds the host from its entry destination, which is the
+        // only way back to launch once a walk has replaced the root.
+        key(profileCount, restarts) {
+            HelloBeNavHost(
+                gateway = FixtureProfileGateway(
+                    ProfileSnapshot(
+                        storageReadable = true,
+                        validProfileIds = (1..profileCount).map { ProfileId("p$it") },
+                        rememberedProfileId = null
+                    )
+                ),
+                content = FixtureContent(),
+                onExitApp = onExit
+            )
         }
     }
 }
+
+/** Identifies the raised walk, which is otherwise the same screens the gallery already shows. */
+internal const val WALK_TAG = "catalog-walk"
 
 private fun launchDescription(profileCount: Int): String = when (profileCount) {
     0 -> "no profiles, create is root"
