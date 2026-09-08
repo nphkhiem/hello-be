@@ -13,12 +13,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Border
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -26,6 +30,7 @@ import androidx.tv.material3.FilterChip
 import androidx.tv.material3.FilterChipDefaults
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.R
+import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverConfirmationAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeFocusFrame
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
 import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
@@ -48,6 +53,31 @@ fun ThemeCatalogScreen() {
     var walkOpen by remember { mutableStateOf(false) }
     var walkProfileCount by remember { mutableIntStateOf(1) }
     var walkRestarts by remember { mutableIntStateOf(0) }
+    var confirmationOpen by remember { mutableStateOf(false) }
+    var confirmationIndex by remember { mutableIntStateOf(0) }
+    var confirmationAction by remember { mutableStateOf<CaregiverConfirmationAction?>(null) }
+    var recoveryOpen by remember { mutableStateOf(false) }
+    var recoveryIndex by remember { mutableIntStateOf(0) }
+    var recoveryAction by remember { mutableStateOf<Any?>(null) }
+    val catalogEntryFocus = remember { FocusRequester() }
+
+    // The catalog asks for entry focus itself, one frame after composition.
+    //
+    // Every specimen below claims focus too, and each is right to: a screen owns its entry focus
+    // and a dialog focuses its safe action on appearing, which is what they must do where they
+    // really live. Composed together in a gallery they all claim at once.
+    //
+    // What this guarantees and what it does not, measured rather than assumed: asking a frame late
+    // beats every claim made during the first composition. It does not beat a screen specimen whose
+    // claim is gated on its own state settling, such as a learning path passing
+    // `entryFocusReady = !state.loading`, so the catalog can still open scrolled to one of those.
+    // That is untidy and a reviewer can simply press up out of it. What it must never do again is
+    // open inside a dialog, which contains focus and cannot be left at all; the two dialog families
+    // are gated behind openers for that reason, and tested.
+    LaunchedEffect(Unit) {
+        withFrameNanos { }
+        runCatching { catalogEntryFocus.requestFocus() }
+    }
 
     HelloBeTheme(
         themeMode = mode.themeMode,
@@ -56,6 +86,8 @@ fun ThemeCatalogScreen() {
     ) {
         val colors = HelloBeTheme.colors
         val dialogRestorer = rememberHelloBeFocusRestorer()
+        val confirmationRestorer = rememberHelloBeFocusRestorer()
+        val recoveryRestorer = rememberHelloBeFocusRestorer()
 
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -73,7 +105,11 @@ fun ThemeCatalogScreen() {
                     color = colors.textPrimary
                 )
 
-                CatalogModeControls(mode = mode, onModeChange = { mode = it })
+                CatalogModeControls(
+                    mode = mode,
+                    onModeChange = { mode = it },
+                    entryFocus = catalogEntryFocus
+                )
 
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_walk_heading))
                 WalkTheAppSection(
@@ -101,10 +137,24 @@ fun ThemeCatalogScreen() {
                 ProfileManagementCatalogSection()
 
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_confirm_heading))
-                CaregiverConfirmationCatalogSection()
+                CaregiverConfirmationCatalogSection(
+                    index = confirmationIndex,
+                    lastAction = confirmationAction,
+                    restorer = confirmationRestorer,
+                    onNextState = {
+                        confirmationIndex = (confirmationIndex + 1) % CONFIRMATION_STATE_COUNT
+                    },
+                    onOpen = { confirmationOpen = true }
+                )
 
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_recovery_heading))
-                RecoveryCatalogSection()
+                RecoveryCatalogSection(
+                    index = recoveryIndex,
+                    lastAction = recoveryAction,
+                    restorer = recoveryRestorer,
+                    onNextState = { recoveryIndex = (recoveryIndex + 1) % RECOVERY_STATE_COUNT },
+                    onOpen = { recoveryOpen = true }
+                )
 
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_stage_heading))
                 StageSection()
@@ -195,12 +245,42 @@ fun ThemeCatalogScreen() {
                     onClose = { dialogOpen = false }
                 )
             }
+
+            if (recoveryOpen) {
+                CatalogRecovery(
+                    index = recoveryIndex,
+                    restorer = recoveryRestorer,
+                    onAction = { action ->
+                        recoveryAction = action
+                        recoveryOpen = false
+                        recoveryRestorer.restore()
+                    }
+                )
+            }
+
+            if (confirmationOpen) {
+                CatalogCaregiverConfirmation(
+                    index = confirmationIndex,
+                    restorer = confirmationRestorer,
+                    onAction = { action ->
+                        confirmationAction = action
+                        if (action != CaregiverConfirmationAction.RetryRequested) {
+                            confirmationOpen = false
+                            confirmationRestorer.restore()
+                        }
+                    }
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun CatalogModeControls(mode: CatalogModeState, onModeChange: (CatalogModeState) -> Unit) {
+private fun CatalogModeControls(
+    mode: CatalogModeState,
+    onModeChange: (CatalogModeState) -> Unit,
+    entryFocus: FocusRequester
+) {
     val colors = HelloBeTheme.colors
 
     Row(
@@ -210,7 +290,8 @@ private fun CatalogModeControls(mode: CatalogModeState, onModeChange: (CatalogMo
         CatalogToggleChip(
             label = stringResource(R.string.theme_catalog_mode_day),
             selected = mode.themeMode == HelloBeThemeMode.DAY,
-            onClick = { onModeChange(mode.copy(themeMode = HelloBeThemeMode.DAY)) }
+            onClick = { onModeChange(mode.copy(themeMode = HelloBeThemeMode.DAY)) },
+            modifier = Modifier.focusRequester(entryFocus)
         )
         CatalogToggleChip(
             label = stringResource(R.string.theme_catalog_mode_night),
@@ -264,7 +345,12 @@ internal fun CatalogSectionHeading(title: String) {
  * only when the fill is unambiguous.
  */
 @Composable
-private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> Unit) {
+private fun CatalogToggleChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val colors = HelloBeTheme.colors
     val focus = HelloBeTheme.focus
     val interactionSource = remember { MutableInteractionSource() }
@@ -276,6 +362,7 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
     FilterChip(
         selected = selected,
         onClick = onClick,
+        modifier = modifier,
         interactionSource = interactionSource,
         shape = FilterChipDefaults.shape(shape = HelloBeShapes.large),
         colors =
@@ -314,3 +401,9 @@ private fun CatalogToggleChip(label: String, selected: Boolean, onClick: () -> U
 
 /** Launch counts the walk steps through, matching the entry-resolution table. */
 private const val MAX_LAUNCH_PROFILES = 4
+
+/** How many confirmation states the walker steps through. */
+private const val CONFIRMATION_STATE_COUNT = 2
+
+/** How many recovery states the walker steps through, including the caregiver one. */
+private const val RECOVERY_STATE_COUNT = 6

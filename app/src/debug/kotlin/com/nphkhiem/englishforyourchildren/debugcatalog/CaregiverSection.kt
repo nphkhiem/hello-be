@@ -32,6 +32,7 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementAc
 import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementScreen
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
+import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
 import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
@@ -369,13 +370,15 @@ internal fun ProfileManagementCatalogSection() {
  * child and restarts their learning, and no word may be shared between them.
  */
 @Composable
-internal fun CaregiverConfirmationCatalogSection() {
+internal fun CaregiverConfirmationCatalogSection(
+    index: Int,
+    lastAction: CaregiverConfirmationAction?,
+    restorer: HelloBeFocusRestorer,
+    onNextState: () -> Unit,
+    onOpen: () -> Unit
+) {
     val states = remember { CaregiverFixtures.confirmationStates() }
-    var index by remember { mutableIntStateOf(0) }
-    var lastAction by remember { mutableStateOf<CaregiverConfirmationAction?>(null) }
-    var dismissed by remember(index) { mutableStateOf(false) }
-    val (stateName, state) = states[index]
-    val restorer = rememberHelloBeFocusRestorer()
+    val (stateName, _) = states[index]
 
     Column(verticalArrangement = Arrangement.spacedBy(HelloBeSpacing.space4)) {
         Text(
@@ -390,7 +393,14 @@ internal fun CaregiverConfirmationCatalogSection() {
         ) {
             HelloBeAction(
                 label = stringResource(R.string.theme_catalog_lesson_next_state),
-                onClick = { index = (index + 1) % states.size },
+                onClick = onNextState,
+                tone = HelloBeActionTone.SECONDARY
+            )
+            // The opener carries the return target, because it is what focus comes back to when
+            // the confirmation closes.
+            HelloBeAction(
+                label = stringResource(R.string.theme_catalog_confirm_open),
+                onClick = onOpen,
                 tone = HelloBeActionTone.SECONDARY,
                 modifier = Modifier.focusRequester(restorer.returnTarget)
             )
@@ -415,26 +425,29 @@ internal fun CaregiverConfirmationCatalogSection() {
                 )
             }
         }
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(HelloBeLayout.referenceHeight)
-        ) {
-            // A dialog contains focus, which is correct on a television and would otherwise strand
-            // a reviewer on the state they stepped into, so its own choices close it here.
-            if (!dismissed) {
-                CaregiverConfirmation(
-                    state = state,
-                    focusRestorer = restorer,
-                    onAction = { action ->
-                        lastAction = action
-                        if (action != CaregiverConfirmationAction.RetryRequested) {
-                            dismissed = true
-                        }
-                    }
-                )
-            }
-        }
     }
+}
+
+/**
+ * The confirmation as a real screen raises it: above everything, scrimming the whole stage.
+ *
+ * Hosted at the catalog root rather than inside the scrolling column, for the reason
+ * [DialogSection] already gives about dialogs. Composing it unasked stranded the whole catalog, because a dialog
+ * contains focus and requests it on first composition; both are correct over a real stage and wrong
+ * for a specimen sitting seven sections down a page.
+ */
+@Composable
+internal fun CatalogCaregiverConfirmation(
+    index: Int,
+    restorer: HelloBeFocusRestorer,
+    onAction: (CaregiverConfirmationAction) -> Unit
+) {
+    val states = remember { CaregiverFixtures.confirmationStates() }
+    val (_, state) = states[index]
+
+    CaregiverConfirmation(
+        state = state,
+        focusRestorer = restorer,
+        onAction = onAction
+    )
 }
