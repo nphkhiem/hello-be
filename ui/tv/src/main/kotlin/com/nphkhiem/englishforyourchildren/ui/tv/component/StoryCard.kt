@@ -17,6 +17,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.tv.material3.Border
 import androidx.tv.material3.ExperimentalTvMaterial3Api
@@ -151,7 +152,14 @@ fun StoryCard(
             Text(
                 text = title,
                 style = HelloBeTheme.typography.titleMedium,
+                // Both floor and ceiling. A minimum alone was only half the contract this
+                // parameter documents, and the shortfall stayed invisible while the app rendered
+                // in the platform sans: Nunito Sans wraps a title one line further, and a row of
+                // cards immediately measured 1498px against 1442px. Ellipsis rather than the
+                // default clip, so a title that will not fit ends legibly.
                 minLines = titleMinLines,
+                maxLines = titleMinLines,
+                overflow = TextOverflow.Ellipsis,
                 textAlign = if (centerContent) TextAlign.Center else null,
                 modifier = Modifier.semantics { heading() }
             )
