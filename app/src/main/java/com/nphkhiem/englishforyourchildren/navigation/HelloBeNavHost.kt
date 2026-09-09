@@ -269,6 +269,16 @@ fun HelloBeNavHost(
                 onSwitchProfile = {
                     push(HelloBeKey.ProfilePicker(mode = ProfilePickerMode.Switch(key.profileId)))
                 },
+                onFreePlay = { push(HelloBeKey.FreePlay(profileId = key.profileId)) },
+                onCaregiverEntry = {
+                    caregiverOrigin = ChildReturnTarget.LEARNING_PATH
+                    push(
+                        HelloBeKey.CaregiverGate(
+                            profileId = key.profileId,
+                            returnTarget = ChildReturnTarget.LEARNING_PATH
+                        )
+                    )
+                },
                 onUnavailable = {
                     replaceAll(
                         listOf(HelloBeKey.Recovery(reason = RecoveryReason.APP_NEEDS_GROWN_UP))
@@ -296,7 +306,24 @@ fun HelloBeNavHost(
                             )
                         )
 
-                        else -> Unit
+                        LearningPathAction.FreePlayRequested ->
+                            push(HelloBeKey.FreePlay(profileId = key.profileId))
+
+                        LearningPathAction.CaregiverEntryRequested -> {
+                            caregiverOrigin = ChildReturnTarget.LEARNING_PATH
+                            push(
+                                HelloBeKey.CaregiverGate(
+                                    profileId = key.profileId,
+                                    returnTarget = ChildReturnTarget.LEARNING_PATH
+                                )
+                            )
+                        }
+
+                        // Unit paging is the screen's own state and never reaches the host. Named
+                        // rather than swallowed by an else: an else is what let two new actions
+                        // compile as dead controls here.
+                        LearningPathAction.PreviousUnitRequested,
+                        LearningPathAction.NextUnitRequested -> Unit
                     }
                 },
                 modifier = modifier

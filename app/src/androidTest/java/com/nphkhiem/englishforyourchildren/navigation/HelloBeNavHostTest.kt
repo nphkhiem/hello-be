@@ -199,6 +199,51 @@ class HelloBeNavHostTest {
         }
     }
 
+    @Test
+    fun givenTheLearningPath_whenGrownUpsIsPressed_thenTheAdultGateOpens() {
+        // The learning path is becoming the child's root, so this is the only door to the adult
+        // gate. The host swallowed unknown path actions in an `else`, which would have compiled a
+        // dead control and lost every caregiver surface behind it without failing anything.
+        setApp(profiles = listOf(ProfileId("minh")))
+        openTheLearningPath()
+
+        press(grownUpsLabel())
+
+        // Substring: caregiver surfaces render bilingually, so the gate's heading arrives as
+        // "Grown-ups only" followed by its Vietnamese half.
+        composeTestRule.onNodeWithText(gateTitle(), substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun givenTheLearningPath_whenFreePlayIsPressed_thenFreePlayOpens() {
+        setApp(profiles = listOf(ProfileId("minh")))
+        openTheLearningPath()
+
+        press(freePlayLabel())
+
+        composeTestRule.onNodeWithText(freePlayHeading()).assertIsDisplayed()
+    }
+
+    private fun openTheLearningPath() {
+        press(learningPathLabel())
+        composeTestRule.onNodeWithText(unitKicker()).assertIsDisplayed()
+    }
+
+    private fun press(label: String) {
+        composeTestRule.onNodeWithText(label).requestFocus()
+        composeTestRule.onNodeWithText(label).performKeyInput { pressKey(Key.DirectionCenter) }
+        composeTestRule.waitForIdle()
+    }
+
+    private fun grownUpsLabel() = string("home_grown_ups", learningPkg())
+
+    private fun freePlayLabel() = string("home_free_play", learningPkg())
+
+    private fun freePlayHeading() = string("free_play_title", learningPkg())
+
+    /** The gate's heading rather than its sum, which is generated fresh each time. */
+    private fun gateTitle() = string("gate_title", learningPkg())
+
     private fun setApp(profiles: List<ProfileId>, onExitApp: () -> Unit = {}) {
         composeTestRule.setContent {
             HelloBeRoot(

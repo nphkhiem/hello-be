@@ -445,6 +445,33 @@ class LearningPathTest {
         composeTestRule.onNodeWithText(pendingSave()).assertIsDisplayed()
     }
 
+    @Test
+    fun givenThePath_whenTheGrownUpsControlIsPressed_thenItAsksForTheCaregiverArea() {
+        // The path is becoming the child's root, so the only door to the adult gate has to be on
+        // it. Without this the gate is unreachable and with it every caregiver surface: settings,
+        // profiles, and the two destructive confirmations.
+        val actions = mutableListOf<LearningPathAction>()
+        setPath(LearningPathFixtures.midUnit(), onAction = { actions += it })
+
+        val grownUps = resources.getString(R.string.home_grown_ups)
+        composeTestRule.onNodeWithText(grownUps).requestFocus()
+        composeTestRule.onNodeWithText(grownUps).performKeyInput { pressKey(Key.DirectionCenter) }
+
+        assertThat(actions).containsExactly(LearningPathAction.CaregiverEntryRequested)
+    }
+
+    @Test
+    fun givenThePath_whenFreePlayIsPressed_thenItAsksForFreePlay() {
+        val actions = mutableListOf<LearningPathAction>()
+        setPath(LearningPathFixtures.midUnit(), onAction = { actions += it })
+
+        val freePlay = resources.getString(R.string.home_free_play)
+        composeTestRule.onNodeWithText(freePlay).requestFocus()
+        composeTestRule.onNodeWithText(freePlay).performKeyInput { pressKey(Key.DirectionCenter) }
+
+        assertThat(actions).containsExactly(LearningPathAction.FreePlayRequested)
+    }
+
     private fun setPath(state: LearningPathUiState, onAction: (LearningPathAction) -> Unit = {}) {
         composeTestRule.setContent {
             HelloBeTheme {

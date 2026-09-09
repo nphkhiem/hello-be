@@ -179,6 +179,8 @@ internal fun LiveLearningPath(
     onLessonChosen: (LessonId) -> Unit,
     onHome: () -> Unit,
     onSwitchProfile: () -> Unit,
+    onFreePlay: () -> Unit,
+    onCaregiverEntry: () -> Unit,
     onUnavailable: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -198,6 +200,10 @@ internal fun LiveLearningPath(
                 LearningPathAction.HomeRequested -> onHome()
 
                 LearningPathAction.SwitchProfileRequested -> onSwitchProfile()
+
+                LearningPathAction.FreePlayRequested -> onFreePlay()
+
+                LearningPathAction.CaregiverEntryRequested -> onCaregiverEntry()
 
                 // Paging is a change of view rather than a destination, so it stays here rather
                 // than going through the back stack: a child stepping between units is not
