@@ -12,8 +12,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverFixtures
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeFixtures
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathFixtures
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathScreen
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
@@ -41,9 +39,9 @@ class PaletteAndMotionAuditTest {
         get() = InstrumentationRegistry.getInstrumentation().targetContext.resources
 
     @Test
-    fun givenNightMode_whenChildHomeIsDrawn_thenItIsStillReadableAndFocused() {
+    fun givenNightMode_whenTheLearningPathIsDrawn_thenItIsStillReadableAndFocused() {
         setContent(mode = HelloBeThemeMode.NIGHT) {
-            ChildHomeScreen(state = ChildHomeFixtures.returning(), onAction = {})
+            LearningPathScreen(state = LearningPathFixtures.midUnit(), onAction = {})
         }
 
         composeTestRule.onNodeWithText(continueLabel()).assertIsDisplayed()
@@ -51,9 +49,9 @@ class PaletteAndMotionAuditTest {
     }
 
     @Test
-    fun givenHighContrast_whenChildHomeIsDrawn_thenNothingIsLost() {
+    fun givenHighContrast_whenTheLearningPathIsDrawn_thenNothingIsLost() {
         setContent(highContrast = true) {
-            ChildHomeScreen(state = ChildHomeFixtures.returning(), onAction = {})
+            LearningPathScreen(state = LearningPathFixtures.midUnit(), onAction = {})
         }
 
         composeTestRule.onNodeWithText(continueLabel()).assertIsDisplayed()

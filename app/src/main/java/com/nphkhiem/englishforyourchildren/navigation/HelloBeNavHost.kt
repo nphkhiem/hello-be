@@ -32,8 +32,6 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellActio
 import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementAction
 import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.CelebrationAction
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeAction
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildRecovery
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildRecoveryAction
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildRecoveryReason
@@ -95,7 +93,7 @@ fun HelloBeNavHost(
 
     // The invoking child surface, remembered so closing the session can put it back. It is not a
     // key on the stack: the caregiver area replaces the child surface rather than covering it.
-    var caregiverOrigin by remember { mutableStateOf(ChildReturnTarget.CHILD_HOME) }
+    var caregiverOrigin by remember { mutableStateOf(ChildReturnTarget.LEARNING_PATH) }
 
     fun push(key: HelloBeKey) {
         stack = resolved + key
@@ -167,11 +165,11 @@ fun HelloBeNavHost(
                 onChosen = { replaceAll(afterProfileChosen(it)) },
                 onAddProfile = { push(HelloBeKey.ProfileCreate) },
                 onCaregiverEntry = {
-                    caregiverOrigin = ChildReturnTarget.CHILD_HOME
+                    caregiverOrigin = ChildReturnTarget.LEARNING_PATH
                     push(
                         HelloBeKey.CaregiverGate(
                             profileId = null,
-                            returnTarget = ChildReturnTarget.CHILD_HOME
+                            returnTarget = ChildReturnTarget.LEARNING_PATH
                         )
                     )
                 },
@@ -193,63 +191,11 @@ fun HelloBeNavHost(
                         ProfileAction.AddProfileRequested -> push(HelloBeKey.ProfileCreate)
 
                         ProfileAction.CaregiverEntryRequested -> {
-                            caregiverOrigin = ChildReturnTarget.CHILD_HOME
+                            caregiverOrigin = ChildReturnTarget.LEARNING_PATH
                             push(
                                 HelloBeKey.CaregiverGate(
                                     profileId = null,
-                                    returnTarget = ChildReturnTarget.CHILD_HOME
-                                )
-                            )
-                        }
-                    }
-                },
-                modifier = modifier
-            )
-        }
-
-        is HelloBeKey.ChildHome -> if (content == null) {
-            LiveChildHome(
-                profileId = key.profileId,
-                onLearningPath = { push(HelloBeKey.LearningPath(profileId = key.profileId)) },
-                onFreePlay = { push(HelloBeKey.FreePlay(profileId = key.profileId)) },
-                onSwitchProfile = {
-                    push(HelloBeKey.ProfilePicker(mode = ProfilePickerMode.Switch(key.profileId)))
-                },
-                onCaregiverEntry = {
-                    caregiverOrigin = ChildReturnTarget.CHILD_HOME
-                    push(
-                        HelloBeKey.CaregiverGate(
-                            profileId = key.profileId,
-                            returnTarget = ChildReturnTarget.CHILD_HOME
-                        )
-                    )
-                },
-                modifier = modifier
-            )
-        } else {
-            ChildHomeScreen(
-                state = content.childHome(key.profileId),
-                onAction = { action ->
-                    when (action) {
-                        ChildHomeAction.ContinueRequested,
-                        ChildHomeAction.LearningPathRequested ->
-                            push(HelloBeKey.LearningPath(profileId = key.profileId))
-
-                        ChildHomeAction.FreePlayRequested ->
-                            push(HelloBeKey.FreePlay(profileId = key.profileId))
-
-                        ChildHomeAction.SwitchProfileRequested -> push(
-                            HelloBeKey.ProfilePicker(
-                                mode = ProfilePickerMode.Switch(key.profileId)
-                            )
-                        )
-
-                        ChildHomeAction.CaregiverEntryRequested -> {
-                            caregiverOrigin = ChildReturnTarget.CHILD_HOME
-                            push(
-                                HelloBeKey.CaregiverGate(
-                                    profileId = key.profileId,
-                                    returnTarget = ChildReturnTarget.CHILD_HOME
+                                    returnTarget = ChildReturnTarget.LEARNING_PATH
                                 )
                             )
                         }
@@ -339,8 +285,7 @@ fun HelloBeNavHost(
                     replaceAll(
                         resolved.dropLast(1) + HelloBeKey.LessonCelebration(
                             profileId = key.profileId,
-                            lessonId = key.lessonId,
-                            returnTarget = LessonReturnTarget.LEARNING_PATH
+                            lessonId = key.lessonId
                         )
                     )
                 },
@@ -375,8 +320,7 @@ fun HelloBeNavHost(
                         LessonAction.ContinueRequested -> replaceAll(
                             resolved.dropLast(1) + HelloBeKey.LessonCelebration(
                                 profileId = key.profileId,
-                                lessonId = key.lessonId,
-                                returnTarget = LessonReturnTarget.LEARNING_PATH
+                                lessonId = key.lessonId
                             )
                         )
 
@@ -392,7 +336,7 @@ fun HelloBeNavHost(
                 profileId = key.profileId,
                 lessonId = key.lessonId,
                 courseVersion = SHIPPED_COURSE_VERSION,
-                onDone = { replaceAll(afterCelebrationDone(key.profileId, key.returnTarget)) },
+                onDone = { replaceAll(afterCelebrationDone(key.profileId)) },
                 modifier = modifier
             )
         } else {
@@ -403,7 +347,7 @@ fun HelloBeNavHost(
                         CelebrationAction.DoneRequested,
                         CelebrationAction.MaybeLaterRequested,
                         CelebrationAction.PlayTogetherAccepted ->
-                            replaceAll(afterCelebrationDone(key.profileId, key.returnTarget))
+                            replaceAll(afterCelebrationDone(key.profileId))
                     }
                 },
                 modifier = modifier

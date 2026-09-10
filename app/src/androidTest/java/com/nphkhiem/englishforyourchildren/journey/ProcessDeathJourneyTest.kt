@@ -207,8 +207,7 @@ class ProcessDeathJourneyTest {
 
     /** With one child stored, the app opens on their home. See `resolveEntry`. */
     private fun openLessonOneFromHome() {
-        tv.awaitText(tv.string("home_start"))
-        tv.press(tv.string("home_start"))
+        tv.awaitText(tv.string("path_lesson_continue"))
         tv.awaitText(FIRST_LESSON)
         tv.press(FIRST_LESSON)
     }

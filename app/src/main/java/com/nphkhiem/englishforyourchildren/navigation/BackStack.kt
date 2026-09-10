@@ -30,13 +30,15 @@ internal fun backOutcome(stack: List<HelloBeKey>): BackOutcome =
 /**
  * The stack after choosing or creating a profile.
  *
- * Child home replaces everything rather than being pushed onto it. The information architecture is
- * explicit that child home becomes the root so Back always leaves the app, which would not be true
- * if the picker stayed underneath it: a child pressing Back would land on a screen asking them to
- * choose a profile they had already chosen.
+ * The learning path replaces everything rather than being pushed onto it. It is the child's root,
+ * so Back always leaves the app, which would not be true if the picker stayed underneath: a child
+ * pressing Back would land on a screen asking them to choose a profile they had already chosen.
+ *
+ * This was child home until the path absorbed it. The two answered the same question, and the path
+ * answered it better by putting the recommended lesson one press away instead of two.
  */
 internal fun afterProfileChosen(profileId: ProfileId): List<HelloBeKey> =
-    listOf(HelloBeKey.ChildHome(profileId = profileId))
+    listOf(HelloBeKey.LearningPath(profileId = profileId))
 
 /**
  * The stack after the caregiver session ends.
@@ -53,32 +55,20 @@ internal fun afterCaregiverSessionClosed(
     if (profileId == null) {
         return listOf(HelloBeKey.ProfilePicker(mode = ProfilePickerMode.Launch))
     }
-    val home = HelloBeKey.ChildHome(profileId = profileId)
+    val root = HelloBeKey.LearningPath(profileId = profileId)
     return when (returnTarget) {
-        ChildReturnTarget.CHILD_HOME -> listOf(home)
-
-        ChildReturnTarget.LEARNING_PATH ->
-            listOf(home, HelloBeKey.LearningPath(profileId = profileId))
-
-        ChildReturnTarget.FREE_PLAY -> listOf(home, HelloBeKey.FreePlay(profileId = profileId))
+        ChildReturnTarget.LEARNING_PATH -> listOf(root)
+        ChildReturnTarget.FREE_PLAY -> listOf(root, HelloBeKey.FreePlay(profileId = profileId))
     }
 }
 
 /**
  * The stack after a lesson finishes and its celebration is done with.
  *
- * The celebration carries where it came from, so completion returns to its origin without a route
- * string or a callback, which the acceptance checklist asks for by name.
+ * Every lesson is reached from the learning path, and the path is now the root, so completion lands
+ * on a single-entry stack rather than on a path stacked over a home. `LessonReturnTarget` went with
+ * child home: it named two origins that no longer differ, and only ever carried one of them in
+ * production.
  */
-internal fun afterCelebrationDone(
-    profileId: ProfileId,
-    returnTarget: LessonReturnTarget
-): List<HelloBeKey> {
-    val home = HelloBeKey.ChildHome(profileId = profileId)
-    return when (returnTarget) {
-        LessonReturnTarget.CHILD_HOME -> listOf(home)
-
-        LessonReturnTarget.LEARNING_PATH ->
-            listOf(home, HelloBeKey.LearningPath(profileId = profileId))
-    }
-}
+internal fun afterCelebrationDone(profileId: ProfileId): List<HelloBeKey> =
+    listOf(HelloBeKey.LearningPath(profileId = profileId))

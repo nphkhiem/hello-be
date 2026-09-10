@@ -50,8 +50,8 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
  * Pip sits in the recommended lesson's own column rather than pointing by colour or wording, so
  * the indication survives a child who cannot yet read and a television seen from across a room.
  *
- * Back is not handled. The information architecture has Back return to child home from here, and
- * that is host navigation, exactly as on [ChildHomeScreen].
+ * Back is not handled, and now means leaving. This screen is the child's root: there is nothing
+ * beneath it, so the host answers Back by exiting to the launcher rather than by popping.
  */
 @Composable
 fun LearningPathScreen(
