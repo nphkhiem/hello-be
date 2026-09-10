@@ -472,6 +472,29 @@ class LearningPathTest {
         assertThat(actions).containsExactly(LearningPathAction.FreePlayRequested)
     }
 
+    @Test
+    fun givenThePathAsRoot_whenSelectIsPressedOnArriving_thenLearningStartsInOnePress() {
+        // The information architecture's headline claim for making this screen the child's root:
+        // one press from arriving to learning. It is asserted as one chain rather than trusted to
+        // two separate tests, because what matters is that the thing holding entry focus is the
+        // thing that starts the lesson.
+        //
+        // No hero band sits above the row. The recommended card already is the hero: it carries
+        // the word Continue, holds entry focus, and has Pip standing over it, which is the
+        // indication a child who cannot read can follow. A second dominant control was built and
+        // reverted: it repeated the word, squeezed the row past its measured minimums, and broke
+        // the rule that the unit is meant to be seen at once.
+        val actions = mutableListOf<LearningPathAction>()
+        setPath(LearningPathFixtures.midUnit(), onAction = { actions += it })
+
+        composeTestRule.onNodeWithText(LearningPathFixtures.HANDS).assertIsFocused()
+        composeTestRule.onNodeWithText(LearningPathFixtures.HANDS)
+            .performKeyInput { pressKey(Key.DirectionCenter) }
+        composeTestRule.waitForIdle()
+
+        assertThat(actions).containsExactly(LearningPathAction.LessonChosen("hands-and-feet"))
+    }
+
     private fun setPath(state: LearningPathUiState, onAction: (LearningPathAction) -> Unit = {}) {
         composeTestRule.setContent {
             HelloBeTheme {
