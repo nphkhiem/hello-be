@@ -191,7 +191,6 @@ class ProfileViewModel @Inject constructor(
 
     private companion object {
         val AGES = listOf(3, 4, 5)
-        val AVATARS = listOf("rabbit", "bear", "cat", "duck")
 
         /**
          * Names a caregiver cycles through rather than types.
@@ -203,3 +202,12 @@ class ProfileViewModel @Inject constructor(
         val NAMES = listOf("Bé", "Minh", "Lan", "An", "Mai", "Nam")
     }
 }
+
+/**
+ * The pictures a caregiver can give a profile.
+ *
+ * Internal rather than private so the screen's tests can hold every shipped avatar to its layout. A
+ * copy of this list in a test would drift, and the create-profile fixture already has: it offers a
+ * tiger this app does not ship.
+ */
+internal val AVATARS = listOf("rabbit", "bear", "cat", "duck")
