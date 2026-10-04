@@ -123,12 +123,16 @@ class LessonScaffoldTest {
     private fun setScaffold(state: LessonUiState, onAction: (LessonAction) -> Unit = {}) {
         composeTestRule.setContent {
             HelloBeTheme {
-                LessonScaffold(state = state, onAction = onAction) { entryModifier ->
+                LessonScaffold(state = state, onAction = onAction) { choiceFocus ->
                     Box(Modifier.fillMaxSize().testTag(ACTIVITY)) {
                         HelloBeAction(
                             label = ACTIVITY_CONTROL,
                             onClick = {},
-                            modifier = entryModifier
+                            modifier = Modifier.lessonChoice(
+                                choiceFocus,
+                                ACTIVITY_CONTROL,
+                                entry = true
+                            )
                         )
                     }
                 }

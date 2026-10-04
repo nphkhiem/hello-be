@@ -56,7 +56,7 @@ fun ReviewActivity(
     modifier: Modifier = Modifier
 ) {
     // Where the answers begin, in root coordinates. The room's horizon is drawn from it rather
-    // than as a fraction of the stage: the answers sit in a centred column whose position moves
+    // than as a fraction of the stage: the answers sit below the prompt, and their position moves
     // with the prompt's length, the typeface and the font scale, and a fixed fraction drew the
     // horizon straight through the prompt as soon as any of those moved.
     var answersTop by remember { mutableStateOf<Float?>(null) }
@@ -66,13 +66,15 @@ fun ReviewActivity(
         onAction = onAction,
         modifier = modifier,
         scenery = { ReviewRoom(horizonInRoot = answersTop) }
-    ) { entryModifier ->
+    ) { choiceFocus ->
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(
                 space = HelloBeTheme.spacing.sectionGap,
-                alignment = Alignment.CenterVertically
+                // Top rather than centred, in all five families, so the prompt holds one place
+                // however tall the board beneath it is.
+                alignment = Alignment.Top
             )
         ) {
             Text(
@@ -85,7 +87,7 @@ fun ReviewActivity(
             RecallBoard(
                 state = state,
                 onAction = onAction,
-                entryModifier = entryModifier,
+                choiceFocus = choiceFocus,
                 modifier = Modifier.onGloballyPositioned { answersTop = it.positionInRoot().y }
             )
         }
@@ -142,12 +144,11 @@ private fun Room(height: Dp, modifier: Modifier) {
     )
 }
 
-@Suppress("ModifierParameter")
 @Composable
 private fun RecallBoard(
     state: LessonUiState,
     onAction: (LessonAction) -> Unit,
-    entryModifier: Modifier,
+    choiceFocus: LessonChoiceFocus,
     modifier: Modifier = Modifier
 ) {
     val boardHeight = HelloBeTheme.layout.childChoiceMinHeight + HelloBeTheme.focus.clearance * 2
@@ -171,17 +172,16 @@ private fun RecallBoard(
         }
 
         if (state.answers.isNotEmpty()) {
-            RecallRow(state = state, onAction = onAction, entryModifier = entryModifier)
+            RecallRow(state = state, onAction = onAction, choiceFocus = choiceFocus)
         }
     }
 }
 
-@Suppress("ModifierParameter")
 @Composable
 private fun RowScope.RecallRow(
     state: LessonUiState,
     onAction: (LessonAction) -> Unit,
-    entryModifier: Modifier
+    choiceFocus: LessonChoiceFocus
 ) {
     val availability = answerAvailability(state.phase)
 
@@ -202,7 +202,7 @@ private fun RowScope.RecallRow(
                 // reason picture matching does not fall back to the word either.
                 labelVisible = false,
                 illustration = picture?.let { { PackagedPicture(it) } },
-                modifier = (if (index == 0) entryModifier else Modifier)
+                modifier = Modifier.lessonChoice(choiceFocus, answer.id, entry = index == 0)
                     .weight(1f)
                     .fillMaxHeight()
             )

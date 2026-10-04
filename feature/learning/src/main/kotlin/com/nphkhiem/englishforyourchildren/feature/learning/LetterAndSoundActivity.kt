@@ -37,13 +37,15 @@ fun LetterAndSoundActivity(
     onAction: (LessonAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LessonScaffold(state = state, onAction = onAction, modifier = modifier) { entryModifier ->
+    LessonScaffold(state = state, onAction = onAction, modifier = modifier) { choiceFocus ->
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(
                 space = HelloBeTheme.spacing.sectionGap,
-                alignment = Alignment.CenterVertically
+                // Top rather than centred, in all five families, so the prompt holds one place
+                // however tall the board beneath it is.
+                alignment = Alignment.Top
             )
         ) {
             Text(
@@ -53,7 +55,7 @@ fun LetterAndSoundActivity(
                 textAlign = TextAlign.Center
             )
 
-            LetterBoard(state = state, onAction = onAction, entryModifier = entryModifier)
+            LetterBoard(state = state, onAction = onAction, choiceFocus = choiceFocus)
         }
     }
 }
@@ -67,15 +69,11 @@ fun LetterAndSoundActivity(
  * The letter card takes its height from the choice row rather than the draft's 265dp, which the
  * stage does not have room for once the prompt is drawn.
  */
-// The Modifier here is not this composable's own decoration but the scaffold's entry-focus
-// requester, routed to one specific child. Naming it `modifier` would claim it decorates this
-// composable's root, which is exactly what it must not do.
-@Suppress("ModifierParameter")
 @Composable
 private fun LetterBoard(
     state: LessonUiState,
     onAction: (LessonAction) -> Unit,
-    entryModifier: Modifier
+    choiceFocus: LessonChoiceFocus
 ) {
     val boardHeight = HelloBeTheme.layout.childChoiceMinHeight + HelloBeTheme.focus.clearance * 2
 
@@ -99,20 +97,16 @@ private fun LetterBoard(
         }
 
         if (state.answers.isNotEmpty()) {
-            ChoiceRow(state = state, onAction = onAction, entryModifier = entryModifier)
+            ChoiceRow(state = state, onAction = onAction, choiceFocus = choiceFocus)
         }
     }
 }
 
-// The Modifier here is not this composable's own decoration but the scaffold's entry-focus
-// requester, routed to one specific child. Naming it `modifier` would claim it decorates this
-// composable's root, which is exactly what it must not do.
-@Suppress("ModifierParameter")
 @Composable
 private fun RowScope.ChoiceRow(
     state: LessonUiState,
     onAction: (LessonAction) -> Unit,
-    entryModifier: Modifier
+    choiceFocus: LessonChoiceFocus
 ) {
     val availability = answerAvailability(state.phase)
 
@@ -133,7 +127,7 @@ private fun RowScope.ChoiceRow(
                 // packaged picture still takes its place, being the better thing to look at.
                 labelVisible = picture == null,
                 illustration = picture?.let { { PackagedPicture(it) } },
-                modifier = (if (index == 0) entryModifier else Modifier)
+                modifier = Modifier.lessonChoice(choiceFocus, answer.id, entry = index == 0)
                     .weight(1f)
                     .fillMaxHeight()
             )

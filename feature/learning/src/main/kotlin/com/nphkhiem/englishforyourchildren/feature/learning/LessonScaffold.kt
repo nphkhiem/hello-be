@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.CaptionPanel
@@ -40,9 +43,9 @@ import java.util.Locale
  * Renders and emits, nothing else. There is no timer here, no attempt counter and no audio handle:
  * the support ladder arrives already decided, per ADR 0003.
  *
- * [content] receives a modifier carrying entry focus whenever the child should be choosing, so
- * the activity attaches it to its first answer instead of the scaffold guessing where focus
- * belongs inside an activity it cannot see.
+ * [content] receives a [LessonChoiceFocus] to attach to every control a child can choose, so the
+ * activity names where entry focus lands instead of the scaffold guessing where focus belongs
+ * inside an activity it cannot see.
  */
 @Composable
 fun LessonScaffold(
@@ -55,7 +58,7 @@ fun LessonScaffold(
      * room a child chooses in front of is scenery, a room they choose out of is not.
      */
     scenery: (@Composable BoxScope.() -> Unit)? = null,
-    content: @Composable BoxScope.(Modifier) -> Unit
+    content: @Composable BoxScope.(LessonChoiceFocus) -> Unit
 ) {
     val replayFocus = remember { FocusRequester() }
     val firstAnswerFocus = remember { FocusRequester() }
@@ -63,6 +66,8 @@ fun LessonScaffold(
     val positionFormat = stringResource(R.string.lesson_position)
     val pipDescription = stringResource(pipDescriptionFor(state.phase, state.support))
     val stopForNowRestorer = rememberHelloBeFocusRestorer()
+    // The choice the child was last on, forgotten with the activity it belonged to.
+    val heldChoice = remember(state.activityNumber) { mutableStateOf<Any?>(null) }
 
     // Back never exits an active lesson directly. It asks instead, and while it is asking, Back
     // and the safe choice are the same press, so a second dialog cannot stack on the first.
@@ -142,18 +147,17 @@ fun LessonScaffold(
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                // The requester is pushed into the slot rather than left for the activity to
-                // arrange, so an activity cannot forget it and leave entry focus on the header
+                // The requesters are pushed into the slot rather than left for the activity to
+                // arrange, so an activity cannot forget them and leave entry focus on the header
                 // while a child is meant to be choosing.
-                // Wrapped in a focus group carrying the restorer's return target, so closing the
-                // dialog returns the child to the answer they were on rather than the first one.
-                // helloBeFocusGroup already applies focusRestorer, and the answer row inside carries
-                // its own, so the two chain: the outer restores the row, the row restores the card.
+                val choosing = focusTarget == LessonFocusTarget.CONTENT
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .then(
-                            if (focusTarget == LessonFocusTarget.CONTENT) {
+                            // Until a choice has held focus there is no control to hand focus back
+                            // to, so the stage itself holds the dialog's return target.
+                            if (choosing && heldChoice.value == null) {
                                 Modifier.focusRequester(stopForNowRestorer.returnTarget)
                             } else {
                                 Modifier
@@ -161,11 +165,11 @@ fun LessonScaffold(
                         ).helloBeFocusGroup()
                 ) {
                     content(
-                        if (focusTarget == LessonFocusTarget.CONTENT) {
-                            Modifier.focusRequester(firstAnswerFocus)
-                        } else {
-                            Modifier
-                        }
+                        LessonChoiceFocus(
+                            entry = firstAnswerFocus.takeIf { choosing },
+                            returnTarget = stopForNowRestorer.returnTarget.takeIf { choosing },
+                            held = heldChoice
+                        )
                     )
                 }
             }
@@ -179,6 +183,36 @@ fun LessonScaffold(
             )
         }
     }
+}
+
+/**
+ * Focus wiring for the controls an activity offers, attached to each through [lessonChoice].
+ *
+ * Carries entry focus, and the way back from Stop for now. The dialog takes focus
+ * programmatically, and no focus group behind it sees that as an exit, so no `focusRestorer`
+ * there remembers which control the child was on. The restore used to land on the top-left
+ * answer, or on the right one only when the dialog's button happened to sit nearer it. So the
+ * control remembers instead: whichever one the child was last on holds the dialog's return
+ * target, which is the contract `HelloBeFocusRestorer` asks for.
+ */
+class LessonChoiceFocus internal constructor(
+    internal val entry: FocusRequester?,
+    internal val returnTarget: FocusRequester?,
+    internal val held: MutableState<Any?>
+)
+
+/**
+ * Marks this as the control identified by [key], which must be unique among the controls on the
+ * stage. [entry] marks the one focus lands on first.
+ */
+fun Modifier.lessonChoice(focus: LessonChoiceFocus, key: Any, entry: Boolean = false): Modifier {
+    val entryFocus = focus.entry?.takeIf { entry }
+    val returnFocus = focus.returnTarget?.takeIf { focus.held.value == key }
+
+    return this
+        .then(entryFocus?.let { Modifier.focusRequester(it) } ?: Modifier)
+        .then(returnFocus?.let { Modifier.focusRequester(it) } ?: Modifier)
+        .onFocusChanged { if (it.isFocused) focus.held.value = key }
 }
 
 // The Modifier here is not this composable's own decoration but the scaffold's entry-focus
