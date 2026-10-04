@@ -163,6 +163,51 @@ class LearningPathViewModelTest {
             assertThat(model.state.value.unit?.unitId).isEqualTo(SECOND_UNIT)
         }
 
+    @Test
+    fun givenAChildWhoHasDoneNothing_whenThePathOpens_thenTheyHaveNotBegun() = runTest {
+        // The brief's rule for the root's primary action: Continue, or Start when no checkpoint
+        // exists. A child with no history has nothing to continue.
+        val model = started()
+
+        assertThat(model.state.value.begun).isFalse()
+    }
+
+    @Test
+    fun givenAChildWhoStoppedPartWayThroughTheirFirstLesson_whenThePathOpens_thenTheyHaveBegun() =
+        runTest {
+            // No lesson is finished, so the standings alone would call this child new. The open
+            // checkpoint is what says otherwise, and telling them to start again would be wrong.
+            progress.setProgress(
+                DomainBuilders.profileProgress(openCheckpoint = DomainBuilders.lessonCheckpoint())
+            )
+
+            val model = started()
+
+            assertThat(model.state.value.begun).isTrue()
+        }
+
+    @Test
+    fun givenAFinishedLesson_whenThePathOpens_thenTheyHaveBegun() = runTest {
+        progress.setProgress(
+            DomainBuilders.profileProgress(lessonsCompleted = setOf(LessonId("$LESSON-1")))
+        )
+
+        val model = started()
+
+        assertThat(model.state.value.begun).isTrue()
+    }
+
+    @Test
+    fun givenUnreadableHistory_whenThePathOpens_thenItDoesNotClaimTheyHaveBegun() = runTest {
+        // Continue promises something to continue. Unable to read the history, the path makes
+        // no such promise.
+        progress.setReadFailure(DomainError.PersistenceUnavailable)
+
+        val model = started()
+
+        assertThat(model.state.value.begun).isFalse()
+    }
+
     private fun twoUnits() = DomainBuilders.course(
         units = listOf(
             DomainBuilders.courseUnit(

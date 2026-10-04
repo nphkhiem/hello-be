@@ -152,6 +152,7 @@ private fun UnitPage(
         LessonRow(
             unit = unit,
             recommendedId = recommendedId,
+            begun = state.begun,
             onAction = onAction,
             recommendedFocus = recommendedFocus,
             onLessonFocused = { steppingUnits = false }
@@ -328,6 +329,7 @@ private fun PipPerch(present: Boolean) {
 private fun ColumnScope.LessonRow(
     unit: UnitPageState,
     recommendedId: String?,
+    begun: Boolean,
     onAction: (LearningPathAction) -> Unit,
     recommendedFocus: FocusRequester,
     onLessonFocused: () -> Unit
@@ -356,6 +358,7 @@ private fun ColumnScope.LessonRow(
                 LessonNode(
                     node = node,
                     recommended = node.id == recommendedId,
+                    begun = begun,
                     onAction = onAction,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -387,6 +390,7 @@ private fun ColumnScope.LessonRow(
 private fun LessonNode(
     node: LessonNodeState,
     recommended: Boolean,
+    begun: Boolean,
     onAction: (LearningPathAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -398,7 +402,7 @@ private fun LessonNode(
         modifier = modifier,
         selected = recommended,
         availability = availability,
-        supportingText = statusLabel(node, recommended),
+        supportingText = statusLabel(node, recommended, begun),
         stateDescription = if (availability == HelloBeAvailability.UNAVAILABLE) {
             stringResource(R.string.home_continue_unavailable)
         } else {
@@ -452,12 +456,18 @@ private fun lessonMark(node: LessonNodeState): (@Composable () -> Unit) {
 }
 
 @Composable
-private fun statusLabel(node: LessonNodeState, recommended: Boolean): String = when {
-    node.progress == LessonProgress.COMPLETED -> stringResource(R.string.path_lesson_finished)
-    node.progress == LessonProgress.FUTURE -> stringResource(R.string.path_lesson_later)
-    recommended -> stringResource(R.string.path_lesson_continue)
-    else -> stringResource(R.string.path_lesson_start)
-}
+private fun statusLabel(node: LessonNodeState, recommended: Boolean, begun: Boolean): String =
+    when {
+        node.progress == LessonProgress.COMPLETED -> stringResource(R.string.path_lesson_finished)
+
+        node.progress == LessonProgress.FUTURE -> stringResource(R.string.path_lesson_later)
+
+        // Continue only when there is something to continue. A child's very first lesson says
+        // Start, as the brief asks for when no checkpoint exists.
+        recommended && begun -> stringResource(R.string.path_lesson_continue)
+
+        else -> stringResource(R.string.path_lesson_start)
+    }
 
 /**
  * What a child sees when the unit will not load.

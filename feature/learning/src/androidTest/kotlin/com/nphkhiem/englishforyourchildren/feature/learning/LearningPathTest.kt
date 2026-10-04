@@ -495,6 +495,23 @@ class LearningPathTest {
         assertThat(actions).containsExactly(LearningPathAction.LessonChosen("hands-and-feet"))
     }
 
+    @Test
+    fun givenAChildWhoHasNotBegun_whenThePathOpens_thenTheLessonWaitingForThemSaysStart() {
+        // The brief: Continue, or Start when no checkpoint exists. Asserted on the focused card, so
+        // the word is proven to sit on the lesson one press away and not somewhere else.
+        setPath(LearningPathFixtures.firstVisit())
+
+        composeTestRule.onNodeWithText(startLabel()).assertIsFocused()
+        composeTestRule.onNodeWithText(continueLabel()).assertDoesNotExist()
+    }
+
+    @Test
+    fun givenAChildWhoHasBegun_whenThePathOpens_thenTheLessonWaitingForThemSaysContinue() {
+        setPath(LearningPathFixtures.midUnit())
+
+        composeTestRule.onNodeWithText(continueLabel()).assertIsFocused()
+    }
+
     private fun setPath(state: LearningPathUiState, onAction: (LearningPathAction) -> Unit = {}) {
         composeTestRule.setContent {
             HelloBeTheme {
@@ -502,6 +519,10 @@ class LearningPathTest {
             }
         }
     }
+
+    private fun startLabel() = resources.getString(R.string.path_lesson_start)
+
+    private fun continueLabel() = resources.getString(R.string.path_lesson_continue)
 
     private fun later() = resources.getString(R.string.path_lesson_later)
 

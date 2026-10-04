@@ -166,6 +166,7 @@ class LearningPathRulesTest {
             previousUnit = null,
             nextUnit = null,
             pendingSave = false,
+            begun = false,
             loading = loading
         )
 
