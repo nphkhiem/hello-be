@@ -139,7 +139,7 @@ class ReviewTest {
 
     @Test
     fun givenAPromptLongEnoughToWrap_whenDrawn_thenTheHorizonStillClearsIt() {
-        // The answers sit in a centred column, so a second line of prompt moves them. A horizon
+        // The answers sit below the prompt, so a second line of prompt moves them down. A horizon
         // fixed as a fraction of the stage stayed where it was and the gap moved out from under it.
         assertHorizonBetweenPromptAndAnswers(
             ReviewFixtures.answering().copy(prompt = LONG_PROMPT),

@@ -42,13 +42,15 @@ fun SayWithPipActivity(
     onAction: (LessonAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LessonScaffold(state = state, onAction = onAction, modifier = modifier) { entryModifier ->
+    LessonScaffold(state = state, onAction = onAction, modifier = modifier) { choiceFocus ->
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(
                 space = HelloBeTheme.spacing.cardGap,
-                alignment = Alignment.CenterVertically
+                // Top rather than centred, in all five families, so the prompt holds one place
+                // however tall the board beneath it is.
+                alignment = Alignment.Top
             )
         ) {
             // The phrase is the hero, as the draft shows. It varies per activity, so it is state.
@@ -66,17 +68,16 @@ fun SayWithPipActivity(
                 textAlign = TextAlign.Center
             )
 
-            SpeakBoard(state = state, onAction = onAction, entryModifier = entryModifier)
+            SpeakBoard(state = state, onAction = onAction, choiceFocus = choiceFocus)
         }
     }
 }
 
-@Suppress("ModifierParameter")
 @Composable
 private fun SpeakBoard(
     state: LessonUiState,
     onAction: (LessonAction) -> Unit,
-    entryModifier: Modifier
+    choiceFocus: LessonChoiceFocus
 ) {
     val boardHeight = HelloBeTheme.layout.childChoiceMinHeight + HelloBeTheme.focus.clearance * 2
 
@@ -109,7 +110,7 @@ private fun SpeakBoard(
                 PauseIndicator(progress = state.pauseProgress)
             }
 
-            SpeakActions(state = state, onAction = onAction, entryModifier = entryModifier)
+            SpeakActions(state = state, onAction = onAction, choiceFocus = choiceFocus)
         }
     }
 }
@@ -151,12 +152,11 @@ private fun PauseIndicator(progress: Float?) {
     }
 }
 
-@Suppress("ModifierParameter")
 @Composable
 private fun SpeakActions(
     state: LessonUiState,
     onAction: (LessonAction) -> Unit,
-    entryModifier: Modifier
+    choiceFocus: LessonChoiceFocus
 ) {
     // Out of the focus order while Pip is still modelling, so a child cannot act before they have
     // heard, per ADR 0004. They arrive once and focus does not move again when the pause ends.
@@ -171,7 +171,8 @@ private fun SpeakActions(
         HelloBeAction(
             label = stringResource(R.string.say_again),
             onClick = { onAction(LessonAction.ReplayRequested) },
-            tone = HelloBeActionTone.SECONDARY
+            tone = HelloBeActionTone.SECONDARY,
+            modifier = Modifier.lessonChoice(choiceFocus, R.string.say_again)
         )
         // Next holds entry focus, per the draft. A child may end their own turn early: the pause
         // is an invitation, and an invitation that cannot be declined is a demand.
@@ -179,7 +180,7 @@ private fun SpeakActions(
             label = stringResource(R.string.say_next),
             onClick = { onAction(LessonAction.ContinueRequested) },
             tone = HelloBeActionTone.PRIMARY,
-            modifier = entryModifier
+            modifier = Modifier.lessonChoice(choiceFocus, R.string.say_next, entry = true)
         )
     }
 }

@@ -30,13 +30,15 @@ fun ListenAndChooseActivity(
     onAction: (LessonAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LessonScaffold(state = state, onAction = onAction, modifier = modifier) { entryModifier ->
+    LessonScaffold(state = state, onAction = onAction, modifier = modifier) { choiceFocus ->
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(
                 space = HelloBeTheme.spacing.sectionGap,
-                alignment = Alignment.CenterVertically
+                // Top rather than centred, in all five families, so the prompt holds one place
+                // however tall the board beneath it is.
+                alignment = Alignment.Top
             )
         ) {
             Text(
@@ -49,21 +51,17 @@ fun ListenAndChooseActivity(
             // An activity that arrives with no answers shows the prompt alone. Drawing an empty
             // row would present a child with a question they have no way to answer.
             if (state.answers.isNotEmpty()) {
-                AnswerRow(state = state, onAction = onAction, entryModifier = entryModifier)
+                AnswerRow(state = state, onAction = onAction, choiceFocus = choiceFocus)
             }
         }
     }
 }
 
-// The Modifier here is not this composable's own decoration but the scaffold's entry-focus
-// requester, routed to one specific child. Naming it `modifier` would claim it decorates this
-// composable's root, which is exactly what it must not do.
-@Suppress("ModifierParameter")
 @Composable
 private fun AnswerRow(
     state: LessonUiState,
     onAction: (LessonAction) -> Unit,
-    entryModifier: Modifier
+    choiceFocus: LessonChoiceFocus
 ) {
     val availability = answerAvailability(state.phase)
 
@@ -85,11 +83,8 @@ private fun AnswerRow(
                 illustration = picture?.let { { PackagedPicture(it) } },
                 // Entry focus goes to the first answer by position. It is never routed by which
                 // answer is correct, because this screen is not told which one that is.
-                modifier = if (index == 0) {
-                    entryModifier.width(HelloBeLayout.cardThreeColumnSet)
-                } else {
-                    Modifier.width(HelloBeLayout.cardThreeColumnSet)
-                }
+                modifier = Modifier.lessonChoice(choiceFocus, answer.id, entry = index == 0)
+                    .width(HelloBeLayout.cardThreeColumnSet)
             )
         }
     }
