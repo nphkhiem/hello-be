@@ -54,9 +54,6 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.coPlaySuggestion
 import com.nphkhiem.englishforyourchildren.feature.caregiver.languageName
 import com.nphkhiem.englishforyourchildren.feature.caregiver.languageNamed
 import com.nphkhiem.englishforyourchildren.feature.caregiver.settingRows
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeAction
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeScreen
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeViewModel
 import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayAction
 import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayViewModel
@@ -142,43 +139,13 @@ internal fun LiveProfileCreate(onCreated: (ProfileId) -> Unit, modifier: Modifie
 }
 
 @Composable
-internal fun LiveChildHome(
-    profileId: ProfileId,
-    onLearningPath: () -> Unit,
-    onFreePlay: () -> Unit,
-    onSwitchProfile: () -> Unit,
-    onCaregiverEntry: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val model: ChildHomeViewModel = hiltViewModel()
-    val state by model.state.collectAsStateWithLifecycle()
-
-    LaunchedEffect(profileId) { model.start(profileId) }
-
-    ChildHomeScreen(
-        state = state,
-        onAction = { action ->
-            when (action) {
-                ChildHomeAction.ContinueRequested,
-                ChildHomeAction.LearningPathRequested -> onLearningPath()
-
-                ChildHomeAction.FreePlayRequested -> onFreePlay()
-
-                ChildHomeAction.SwitchProfileRequested -> onSwitchProfile()
-
-                ChildHomeAction.CaregiverEntryRequested -> onCaregiverEntry()
-            }
-        },
-        modifier = modifier
-    )
-}
-
-@Composable
 internal fun LiveLearningPath(
     profileId: ProfileId,
     onLessonChosen: (LessonId) -> Unit,
     onHome: () -> Unit,
     onSwitchProfile: () -> Unit,
+    onFreePlay: () -> Unit,
+    onCaregiverEntry: () -> Unit,
     onUnavailable: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -198,6 +165,10 @@ internal fun LiveLearningPath(
                 LearningPathAction.HomeRequested -> onHome()
 
                 LearningPathAction.SwitchProfileRequested -> onSwitchProfile()
+
+                LearningPathAction.FreePlayRequested -> onFreePlay()
+
+                LearningPathAction.CaregiverEntryRequested -> onCaregiverEntry()
 
                 // Paging is a change of view rather than a destination, so it stays here rather
                 // than going through the back stack: a child stepping between units is not

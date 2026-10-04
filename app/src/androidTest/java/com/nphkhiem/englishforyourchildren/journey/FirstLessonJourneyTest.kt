@@ -124,8 +124,6 @@ class FirstLessonJourneyTest {
         // The whole of M1 press by press: a television with nothing on it, a child made, a lesson
         // opened from the packaged course, and every question answered.
         createChild()
-
-        tv.press(tv.string("home_start"))
         tv.awaitText(FIRST_LESSON)
         tv.press(FIRST_LESSON)
 
@@ -184,11 +182,10 @@ class FirstLessonJourneyTest {
 
         tv.press(tv.string("free_play_empty_action"))
 
-        tv.awaitText(tv.string("home_start"))
+        tv.awaitText(tv.string("path_lesson_continue"))
     }
 
     private fun walkTheFirstLesson() {
-        tv.press(tv.string("home_start"))
         tv.awaitText(FIRST_LESSON)
         tv.press(FIRST_LESSON)
 
@@ -202,7 +199,7 @@ class FirstLessonJourneyTest {
     private fun createChild() {
         tv.press(AGE)
         tv.press(tv.string("create_submit"))
-        tv.awaitText(tv.string("home_start"))
+        tv.awaitText(tv.string("path_lesson_continue"))
     }
 
     private fun completedLessons(): Set<LessonId> = runBlocking {

@@ -42,7 +42,7 @@ class HelloBeNavHostTest {
     }
 
     @Test
-    fun givenOneProfile_whenAppStarts_thenChildHomeIsRoot() {
+    fun givenOneProfile_whenAppStarts_thenTheLearningPathIsRoot() {
         setApp(profiles = listOf(ProfileId("minh")))
 
         composeTestRule.onNodeWithText(continueLabel()).assertIsDisplayed()
@@ -70,8 +70,8 @@ class HelloBeNavHostTest {
     }
 
     @Test
-    fun givenChildHomeIsRoot_whenBackIsPressed_thenTheAppExitsToTheLauncher() {
-        // Child home is root after a profile resolves, so Back leaves Hello Bé rather than
+    fun givenTheLearningPathIsRoot_whenBackIsPressed_thenTheAppExitsToTheLauncher() {
+        // The path is root after a profile resolves, so Back leaves Hello Bé rather than
         // returning to a picker the child has already answered.
         var exited = false
         setApp(profiles = listOf(ProfileId("minh")), onExitApp = { exited = true })
@@ -104,20 +104,13 @@ class HelloBeNavHostTest {
     }
 
     @Test
-    fun givenChildHome_whenTheLearningPathIsOpened_thenBackReturnsToHomeWithoutLeaving() {
-        var exited = false
-        setApp(profiles = listOf(ProfileId("minh")), onExitApp = { exited = true })
-
-        composeTestRule.onNodeWithText(learningPathLabel()).requestFocus()
-        composeTestRule.onNodeWithText(learningPathLabel())
-            .performKeyInput { pressKey(Key.DirectionCenter) }
-        composeTestRule.waitForIdle()
+    fun givenTheLearningPathIsRoot_whenItIsDrawn_thenTheUnitIsAlreadyOnScreen() {
+        // Child home used to sit in front of this, and reaching the unit cost a press. The two
+        // screens answered the same question, so the path absorbed the other and the unit is
+        // simply what a child arrives at.
+        setApp(profiles = listOf(ProfileId("minh")))
 
         composeTestRule.onNodeWithText(unitKicker()).assertIsDisplayed()
-        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(KeyEvent.KEYCODE_BACK)
-        composeTestRule.waitForIdle()
-
-        assertThat(exited).isFalse()
         composeTestRule.onNodeWithText(continueLabel()).assertIsDisplayed()
     }
 
@@ -128,10 +121,6 @@ class HelloBeNavHostTest {
         var exited = false
         setApp(profiles = listOf(ProfileId("minh")), onExitApp = { exited = true })
 
-        composeTestRule.onNodeWithText(learningPathLabel()).requestFocus()
-        composeTestRule.onNodeWithText(learningPathLabel())
-            .performKeyInput { pressKey(Key.DirectionCenter) }
-        composeTestRule.waitForIdle()
         composeTestRule.onNodeWithText(RECOMMENDED_LESSON)
             .performKeyInput { pressKey(Key.DirectionCenter) }
         composeTestRule.waitForIdle()
@@ -198,6 +187,44 @@ class HelloBeNavHostTest {
             registry.currentState = Lifecycle.State.CREATED
         }
     }
+
+    @Test
+    fun givenTheLearningPath_whenGrownUpsIsPressed_thenTheAdultGateOpens() {
+        // The learning path is becoming the child's root, so this is the only door to the adult
+        // gate. The host swallowed unknown path actions in an `else`, which would have compiled a
+        // dead control and lost every caregiver surface behind it without failing anything.
+        setApp(profiles = listOf(ProfileId("minh")))
+
+        press(grownUpsLabel())
+
+        // Substring: caregiver surfaces render bilingually, so the gate's heading arrives as
+        // "Grown-ups only" followed by its Vietnamese half.
+        composeTestRule.onNodeWithText(gateTitle(), substring = true).assertIsDisplayed()
+    }
+
+    @Test
+    fun givenTheLearningPath_whenFreePlayIsPressed_thenFreePlayOpens() {
+        setApp(profiles = listOf(ProfileId("minh")))
+
+        press(freePlayLabel())
+
+        composeTestRule.onNodeWithText(freePlayHeading()).assertIsDisplayed()
+    }
+
+    private fun press(label: String) {
+        composeTestRule.onNodeWithText(label).requestFocus()
+        composeTestRule.onNodeWithText(label).performKeyInput { pressKey(Key.DirectionCenter) }
+        composeTestRule.waitForIdle()
+    }
+
+    private fun grownUpsLabel() = string("home_grown_ups", learningPkg())
+
+    private fun freePlayLabel() = string("home_free_play", learningPkg())
+
+    private fun freePlayHeading() = string("free_play_title", learningPkg())
+
+    /** The gate's heading rather than its sum, which is generated fresh each time. */
+    private fun gateTitle() = string("gate_title", learningPkg())
 
     private fun setApp(profiles: List<ProfileId>, onExitApp: () -> Unit = {}) {
         composeTestRule.setContent {

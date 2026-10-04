@@ -50,8 +50,8 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
  * Pip sits in the recommended lesson's own column rather than pointing by colour or wording, so
  * the indication survives a child who cannot yet read and a television seen from across a room.
  *
- * Back is not handled. The information architecture has Back return to child home from here, and
- * that is host navigation, exactly as on [ChildHomeScreen].
+ * Back is not handled, and now means leaving. This screen is the child's root: there is nothing
+ * beneath it, so the host answers Back by exiting to the launcher rather than by popping.
  */
 @Composable
 fun LearningPathScreen(
@@ -79,12 +79,25 @@ fun LearningPathScreen(
                 modifier = Modifier.fillMaxWidth(),
                 title = stringResource(R.string.picker_brand_home),
                 action = {
-                    HelloBeAction(
-                        label = state.profileName,
-                        onClick = { onAction(LearningPathAction.SwitchProfileRequested) },
-                        tone = HelloBeActionTone.QUIET,
-                        supportingText = state.profileAvatar
-                    )
+                    // Grouped exactly as on child home, because this screen is taking over as the
+                    // child's root and the utilities a root must carry come with the job.
+                    Row(
+                        modifier = Modifier.helloBeFocusGroup(),
+                        horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space3),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        HelloBeAction(
+                            label = stringResource(R.string.home_grown_ups),
+                            onClick = { onAction(LearningPathAction.CaregiverEntryRequested) },
+                            tone = HelloBeActionTone.QUIET
+                        )
+                        HelloBeAction(
+                            label = state.profileName,
+                            onClick = { onAction(LearningPathAction.SwitchProfileRequested) },
+                            tone = HelloBeActionTone.QUIET,
+                            supportingText = state.profileAvatar
+                        )
+                    }
                 }
             )
         }
@@ -191,6 +204,17 @@ private fun UnitCopy(
                     color = HelloBeTheme.colors.warningContent
                 )
             }
+        }
+
+        // Its own focus group: the stepper's group reports unit-stepping when anything inside it
+        // takes focus, and free play is a destination rather than a way through the course.
+        Row(modifier = Modifier.helloBeFocusGroup()) {
+            HelloBeAction(
+                label = stringResource(R.string.home_free_play),
+                onClick = { onAction(LearningPathAction.FreePlayRequested) },
+                tone = HelloBeActionTone.QUIET,
+                supportingText = stringResource(R.string.home_free_play_hint)
+            )
         }
 
         UnitStepper(

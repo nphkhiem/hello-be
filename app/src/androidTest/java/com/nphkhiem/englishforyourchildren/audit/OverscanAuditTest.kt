@@ -9,10 +9,10 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeFixtures
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayFixtures
 import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayScreen
+import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathFixtures
+import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathScreen
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import org.junit.Rule
@@ -34,10 +34,11 @@ class OverscanAuditTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun givenChildHome_whenItIsDrawn_thenItsHeadingClearsTheOverscanMargin() {
-        setContent { ChildHomeScreen(state = ChildHomeFixtures.returning(), onAction = {}) }
+    fun givenTheLearningPath_whenItIsDrawn_thenItsHeadingClearsTheOverscanMargin() {
+        // The path is the child's root now, so it is the surface an overscan audit must clear.
+        setContent { LearningPathScreen(state = LearningPathFixtures.midUnit(), onAction = {}) }
 
-        assertClearsOverscan(ChildHomeFixtures.WAITING_HINT)
+        assertClearsOverscan(LearningPathFixtures.THEME)
     }
 
     @Test

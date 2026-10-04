@@ -136,8 +136,7 @@ class LessonSaveFailureJourneyTest {
     private fun openFirstLesson() {
         tv.press(AGE)
         tv.press(tv.string("create_submit"))
-        tv.awaitText(tv.string("home_start"))
-        tv.press(tv.string("home_start"))
+        tv.awaitText(tv.string("path_lesson_continue"))
         tv.awaitText(FIRST_LESSON)
         tv.press(FIRST_LESSON)
         tv.awaitText(FIRST_QUESTION)

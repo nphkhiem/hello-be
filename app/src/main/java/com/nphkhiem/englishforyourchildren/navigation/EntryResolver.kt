@@ -35,7 +35,7 @@ fun resolveEntry(snapshot: ProfileSnapshot): HelloBeKey {
     val profiles = snapshot.validProfileIds
     return when (profiles.size) {
         0 -> HelloBeKey.ProfileCreate
-        1 -> HelloBeKey.ChildHome(profileId = profiles.single())
+        1 -> HelloBeKey.LearningPath(profileId = profiles.single())
         else -> HelloBeKey.ProfilePicker(mode = ProfilePickerMode.Launch)
     }
 }

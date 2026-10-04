@@ -95,4 +95,20 @@ sealed interface LearningPathAction {
     data object HomeRequested : LearningPathAction
 
     data object SwitchProfileRequested : LearningPathAction
+
+    /**
+     * Practise what has already been learned.
+     *
+     * A peer destination rather than a utility, which is why it sits with the unit context rather
+     * than in the header beside the profile chip.
+     */
+    data object FreePlayRequested : LearningPathAction
+
+    /**
+     * The way to the adult gate, and through it every caregiver surface.
+     *
+     * The path is the child's root, so this is the only door to settings, profile management and
+     * the destructive confirmations. Losing it would strand a caregiver entirely.
+     */
+    data object CaregiverEntryRequested : LearningPathAction
 }

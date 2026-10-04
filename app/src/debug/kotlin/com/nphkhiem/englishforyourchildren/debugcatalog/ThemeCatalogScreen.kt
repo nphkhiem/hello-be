@@ -172,7 +172,6 @@ fun ThemeCatalogScreen() {
                 ProfilePickerSection()
 
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_home_heading))
-                ChildHomeSection()
 
                 CatalogSectionHeading(stringResource(R.string.theme_catalog_create_heading))
                 CreateProfileSection()
