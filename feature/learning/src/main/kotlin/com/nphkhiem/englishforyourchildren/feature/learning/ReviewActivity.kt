@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -13,9 +14,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.ChoiceCard
 import com.nphkhiem.englishforyourchildren.ui.tv.component.LearningObjectCard
@@ -45,11 +55,17 @@ fun ReviewActivity(
     onAction: (LessonAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Where the answers begin, in root coordinates. The room's horizon is drawn from it rather
+    // than as a fraction of the stage: the answers sit in a centred column whose position moves
+    // with the prompt's length, the typeface and the font scale, and a fixed fraction drew the
+    // horizon straight through the prompt as soon as any of those moved.
+    var answersTop by remember { mutableStateOf<Float?>(null) }
+
     LessonScaffold(
         state = state,
         onAction = onAction,
         modifier = modifier,
-        scenery = { ReviewRoom() }
+        scenery = { ReviewRoom(horizonInRoot = answersTop) }
     ) { entryModifier ->
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -66,7 +82,12 @@ fun ReviewActivity(
                 textAlign = TextAlign.Center
             )
 
-            RecallBoard(state = state, onAction = onAction, entryModifier = entryModifier)
+            RecallBoard(
+                state = state,
+                onAction = onAction,
+                entryModifier = entryModifier,
+                modifier = Modifier.onGloballyPositioned { answersTop = it.positionInRoot().y }
+            )
         }
     }
 }
@@ -82,12 +103,33 @@ fun ReviewActivity(
  * the stage so the horizon sits behind the answers rather than through them.
  */
 @Composable
-internal fun BoxScope.ReviewRoom(modifier: Modifier = Modifier) {
+internal fun BoxScope.ReviewRoom(horizonInRoot: Float?, modifier: Modifier = Modifier) {
+    var stageTopInRoot by remember { mutableStateOf<Float?>(null) }
+
+    BoxWithConstraints(
+        modifier = Modifier
+            .matchParentSize()
+            .onGloballyPositioned { stageTopInRoot = it.positionInRoot().y }
+    ) {
+        val stageTop = stageTopInRoot
+        // Nothing is drawn until both are known. A frame without decoration is invisible; a frame
+        // with the horizon in the wrong place is a jump.
+        if (horizonInRoot == null || stageTop == null) return@BoxWithConstraints
+        val horizon = with(LocalDensity.current) { (horizonInRoot - stageTop).toDp() }
+
+        Room(
+            height = (maxHeight - horizon).coerceAtLeast(0.dp),
+            modifier = modifier.align(Alignment.BottomCenter)
+        )
+    }
+}
+
+@Composable
+private fun Room(height: Dp, modifier: Modifier) {
     Box(
         modifier = modifier
-            .align(Alignment.BottomCenter)
             .fillMaxWidth(ROOM_WIDTH_FRACTION)
-            .fillMaxHeight(ROOM_HEIGHT_FRACTION)
+            .height(height)
             // storyPage is already the draft's room outline: rounded at the top, squarer where it
             // meets the floor. Using it keeps the room on the token set rather than inventing a
             // one-off radius for a placeholder.
@@ -105,12 +147,13 @@ internal fun BoxScope.ReviewRoom(modifier: Modifier = Modifier) {
 private fun RecallBoard(
     state: LessonUiState,
     onAction: (LessonAction) -> Unit,
-    entryModifier: Modifier
+    entryModifier: Modifier,
+    modifier: Modifier = Modifier
 ) {
     val boardHeight = HelloBeTheme.layout.childChoiceMinHeight + HelloBeTheme.focus.clearance * 2
 
     Row(
-        modifier = Modifier.fillMaxWidth().height(boardHeight),
+        modifier = modifier.fillMaxWidth().height(boardHeight),
         horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -173,7 +216,6 @@ private fun RowScope.RecallRow(
  * cutting across the cards reads as a mistake rather than as a room.
  */
 private const val ROOM_WIDTH_FRACTION = 0.86f
-private const val ROOM_HEIGHT_FRACTION = 0.66f
 
 /** A recall item with an object beside it splits the board; without one the answers take it all. */
 private const val OBJECT_WEIGHT = 30f
