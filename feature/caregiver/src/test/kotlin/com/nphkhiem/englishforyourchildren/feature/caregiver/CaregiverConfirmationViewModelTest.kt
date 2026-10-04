@@ -113,6 +113,23 @@ class CaregiverConfirmationViewModelTest {
             assertThat(model.state.value.done).isTrue()
         }
 
+    @Test
+    fun givenAFinishedReset_whenItsEndIsHandled_thenTheSameModelCanAskAgain() =
+        confirming(CaregiverConfirmationKind.RESET_PROGRESS) { model ->
+            // One model serves every confirmation in a caregiver session, because nothing scopes it
+            // to a single dialog. Left marked done, the next dialog read the old completion and
+            // closed as it opened, and a confirm pressed in time was refused as already done.
+            model.onConfirm()
+            assertThat(model.state.value.done).isTrue()
+
+            model.onFinishHandled()
+
+            assertThat(model.state.value.done).isFalse()
+            model.start(CaregiverConfirmationKind.RESET_PROGRESS, ProfileId(CHILD))
+            model.onConfirm()
+            assertThat(model.state.value.done).isTrue()
+        }
+
     private fun stored(): AppSettings =
         (settings.current as DomainResult.Success<AppSettings>).value
 

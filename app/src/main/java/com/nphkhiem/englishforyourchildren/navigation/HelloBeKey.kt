@@ -61,10 +61,6 @@ sealed interface HelloBeKey {
 
     data class ProfileManagement(val selectedProfileId: ProfileId?) : HelloBeKey
 
-    data class DeleteProfileConfirmation(val profileId: ProfileId) : HelloBeKey
-
-    data class ResetProgressConfirmation(val profileId: ProfileId) : HelloBeKey
-
     data class Recovery(
         val reason: RecoveryReason,
         val safeReturnTarget: ChildReturnTarget? = null
@@ -75,9 +71,7 @@ sealed interface HelloBeKey {
 internal fun HelloBeKey.isCaregiver(): Boolean = when (this) {
     is HelloBeKey.CaregiverDashboard,
     is HelloBeKey.CaregiverSettings,
-    is HelloBeKey.ProfileManagement,
-    is HelloBeKey.DeleteProfileConfirmation,
-    is HelloBeKey.ResetProgressConfirmation -> true
+    is HelloBeKey.ProfileManagement -> true
 
     else -> false
 }
