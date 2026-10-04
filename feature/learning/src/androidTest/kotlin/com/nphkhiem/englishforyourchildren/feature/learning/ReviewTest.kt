@@ -25,6 +25,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performKeyInput
 import androidx.compose.ui.test.pressKey
 import androidx.compose.ui.test.requestFocus
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
@@ -109,7 +110,9 @@ class ReviewTest {
         // the activity: production code should not know it is being looked at.
         composeTestRule.setContent {
             HelloBeTheme {
-                Box(modifier = Modifier.fillMaxSize().testTag(STAGE)) { ReviewRoom() }
+                Box(modifier = Modifier.fillMaxSize().testTag(STAGE)) {
+                    ReviewRoom(horizonInRoot = 0f)
+                }
             }
         }
 
@@ -127,22 +130,50 @@ class ReviewTest {
     }
 
     @Test
-    fun givenTheRoom_whenTheAnswersAreDrawn_thenTheHorizonDoesNotCutAcrossThem() {
-        // Scenery sits behind the answers, so its top edge has to clear them. A horizon crossing
-        // the middle of the cards reads as a rendering fault rather than as a room.
+    fun givenTheRoom_whenTheAnswersAreDrawn_thenTheHorizonRunsBetweenPromptAndAnswers() {
+        // Scenery sits behind the answers, so its top edge has to clear them, and it sits below
+        // the prompt, so it must not cut through the words either. This used to check only the
+        // first half, and the horizon was drawing straight through the prompt.
+        assertHorizonBetweenPromptAndAnswers(ReviewFixtures.answering())
+    }
+
+    @Test
+    fun givenAPromptLongEnoughToWrap_whenDrawn_thenTheHorizonStillClearsIt() {
+        // The answers sit in a centred column, so a second line of prompt moves them. A horizon
+        // fixed as a fraction of the stage stayed where it was and the gap moved out from under it.
+        assertHorizonBetweenPromptAndAnswers(
+            ReviewFixtures.answering().copy(prompt = LONG_PROMPT),
+            minimumPromptLines = 2
+        )
+    }
+
+    private fun assertHorizonBetweenPromptAndAnswers(
+        state: LessonUiState,
+        minimumPromptLines: Int = 1
+    ) {
         composeTestRule.setContent {
             HelloBeTheme {
                 Box(modifier = Modifier.fillMaxSize().testTag(STAGE)) {
-                    ReviewActivity(state = ReviewFixtures.answering(), onAction = {})
+                    ReviewActivity(state = state, onAction = {})
                 }
             }
         }
+        composeTestRule.waitForIdle()
 
+        val prompt = composeTestRule.onNodeWithText(state.prompt)
+        // Guards against a long prompt that quietly fits on one line and proves nothing.
+        val layouts = mutableListOf<TextLayoutResult>()
+        prompt.fetchSemanticsNode().config[SemanticsActions.GetTextLayoutResult].action
+            ?.invoke(layouts)
+        assertThat(layouts.single().lineCount).isAtLeast(minimumPromptLines)
+
+        val promptBottom = prompt.getUnclippedBoundsInRoot().bottom.value
         val room = composeTestRule.onNodeWithTag(STAGE).onChildren().onFirst()
             .getUnclippedBoundsInRoot()
         val answer = composeTestRule.onNodeWithContentDescription(CHAIR)
             .getUnclippedBoundsInRoot()
 
+        assertThat(room.top.value).isAtLeast(promptBottom)
         assertThat(room.top.value).isLessThan(answer.top.value)
         assertThat(room.bottom.value).isAtLeast(answer.bottom.value)
     }
@@ -181,6 +212,8 @@ class ReviewTest {
     }
 
     private companion object {
+        const val LONG_PROMPT =
+            "Find something soft that you can sit on after a long and happy day of play"
         const val CHAIR = ReviewFixtures.CHAIR
         const val SOFA = ReviewFixtures.SOFA
         const val LAMP = ReviewFixtures.LAMP
