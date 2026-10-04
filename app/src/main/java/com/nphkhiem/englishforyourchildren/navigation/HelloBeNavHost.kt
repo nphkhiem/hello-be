@@ -1,6 +1,8 @@
 package com.nphkhiem.englishforyourchildren.navigation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,6 +48,7 @@ import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfilePickerScreen
+import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StoryLoading
 import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 
@@ -489,107 +492,117 @@ fun HelloBeNavHost(
             }
         }
 
-        is HelloBeKey.ProfileManagement -> if (content == null) {
-            CaregiverLanguageScope {
-                LiveCaregiverShell(
-                    profileId = key.selectedProfileId,
-                    section = CaregiverSection.PROFILES,
-                    onSection = { section ->
-                        replaceCaregiver(::replaceAll, resolved, section, key.selectedProfileId)
-                    },
-                    onReturn = {
-                        replaceAll(
-                            afterCaregiverSessionClosed(key.selectedProfileId, caregiverOrigin)
-                        )
-                    },
-                    modifier = modifier
-                ) {
-                    LiveProfileManagement(
-                        onAdd = { push(HelloBeKey.ProfileCreate) },
-                        onDelete = { push(HelloBeKey.DeleteProfileConfirmation(it)) },
-                        onReset = { push(HelloBeKey.ResetProgressConfirmation(it)) }
-                    )
-                }
-            }
-        } else {
-            content.let {
-                CaregiverShell(
-                    content = it,
-                    profileId = key.selectedProfileId,
-                    section = CaregiverSection.PROFILES,
-                    onSection = { section ->
-                        replaceCaregiver(
-                            ::replaceAll,
-                            resolved,
-                            section,
-                            key.selectedProfileId
-                        )
-                    },
-                    onReturn = {
-                        replaceAll(
-                            afterCaregiverSessionClosed(key.selectedProfileId, caregiverOrigin)
-                        )
-                    },
-                    modifier = modifier
-                ) {
-                    ProfileManagementScreen(
-                        state = it.profileManagement(key.selectedProfileId),
-                        onAction = { action ->
-                            when (action) {
-                                is ProfileManagementAction.DeleteProfileRequested -> push(
-                                    HelloBeKey.DeleteProfileConfirmation(ProfileId(action.id))
-                                )
+        is HelloBeKey.ProfileManagement -> {
+            // The two destructive confirmations are raised over this screen rather than replacing
+            // it, and each hands focus back to the control that raised it. As destinations they
+            // replaced the screen, and their restorer was never attached to anything, so a
+            // caregiver who backed out of a deletion was left at the top of the pane.
+            var confirming by remember(key) { mutableStateOf<PendingConfirmation?>(null) }
+            val deleteReturn = rememberHelloBeFocusRestorer()
+            val resetReturn = rememberHelloBeFocusRestorer()
+            fun returnFor(kind: CaregiverConfirmationKind) =
+                if (kind == DELETE) deleteReturn else resetReturn
 
-                                is ProfileManagementAction.ResetProgressRequested -> push(
-                                    HelloBeKey.ResetProgressConfirmation(ProfileId(action.id))
+            if (content == null) {
+                CaregiverLanguageScope {
+                    Box(modifier = modifier) {
+                        LiveCaregiverShell(
+                            profileId = key.selectedProfileId,
+                            section = CaregiverSection.PROFILES,
+                            onSection = { section ->
+                                replaceCaregiver(
+                                    ::replaceAll,
+                                    resolved,
+                                    section,
+                                    key.selectedProfileId
                                 )
-
-                                else -> Unit
-                            }
+                            },
+                            onReturn = {
+                                replaceAll(
+                                    afterCaregiverSessionClosed(
+                                        key.selectedProfileId,
+                                        caregiverOrigin
+                                    )
+                                )
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            LiveProfileManagement(
+                                onAdd = { push(HelloBeKey.ProfileCreate) },
+                                onDelete = { confirming = PendingConfirmation(DELETE, it) },
+                                onReset = { confirming = PendingConfirmation(RESET, it) },
+                                deleteFocus = deleteReturn.returnTarget,
+                                resetFocus = resetReturn.returnTarget
+                            )
                         }
-                    )
+                        confirming?.let { pending ->
+                            LiveCaregiverConfirmation(
+                                kind = pending.kind,
+                                profileId = pending.profileId,
+                                focusRestorer = returnFor(pending.kind),
+                                onFinished = { confirming = null }
+                            )
+                        }
+                    }
                 }
-            } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
-        }
+            } else {
+                content.let {
+                    Box(modifier = modifier) {
+                        CaregiverShell(
+                            content = it,
+                            profileId = key.selectedProfileId,
+                            section = CaregiverSection.PROFILES,
+                            onSection = { section ->
+                                replaceCaregiver(
+                                    ::replaceAll,
+                                    resolved,
+                                    section,
+                                    key.selectedProfileId
+                                )
+                            },
+                            onReturn = {
+                                replaceAll(
+                                    afterCaregiverSessionClosed(
+                                        key.selectedProfileId,
+                                        caregiverOrigin
+                                    )
+                                )
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            ProfileManagementScreen(
+                                state = it.profileManagement(key.selectedProfileId),
+                                onAction = { action ->
+                                    when (action) {
+                                        is ProfileManagementAction.DeleteProfileRequested ->
+                                            confirming = PendingConfirmation(
+                                                DELETE,
+                                                ProfileId(action.id)
+                                            )
 
-        is HelloBeKey.DeleteProfileConfirmation -> if (content == null) {
-            CaregiverLanguageScope {
-                LiveCaregiverConfirmation(
-                    kind = CaregiverConfirmationKind.DELETE_PROFILE,
-                    profileId = key.profileId,
-                    onFinished = { pop() },
-                    modifier = modifier
-                )
-            }
-        } else {
-            Confirmation(
-                state = content.confirmation(
-                    CaregiverConfirmationKind.DELETE_PROFILE,
-                    key.profileId
-                ),
-                onFinished = { pop() },
-                modifier = modifier
-            )
-        }
+                                        is ProfileManagementAction.ResetProgressRequested ->
+                                            confirming = PendingConfirmation(
+                                                RESET,
+                                                ProfileId(action.id)
+                                            )
 
-        is HelloBeKey.ResetProgressConfirmation -> if (content == null) {
-            CaregiverLanguageScope {
-                LiveCaregiverConfirmation(
-                    kind = CaregiverConfirmationKind.RESET_PROGRESS,
-                    profileId = key.profileId,
-                    onFinished = { pop() },
-                    modifier = modifier
-                )
+                                        else -> Unit
+                                    }
+                                },
+                                deleteFocus = deleteReturn.returnTarget,
+                                resetFocus = resetReturn.returnTarget
+                            )
+                        }
+                        confirming?.let { pending ->
+                            Confirmation(
+                                state = it.confirmation(pending.kind, pending.profileId),
+                                focusRestorer = returnFor(pending.kind),
+                                onFinished = { confirming = null }
+                            )
+                        }
+                    }
+                }
             }
-        } else {
-            Confirmation(
-                state = content.confirmation(
-                    CaregiverConfirmationKind.RESET_PROGRESS,
-                    key.profileId
-                ),
-                onFinished = { pop() },
-                modifier = modifier
-            )
         }
 
         is HelloBeKey.Recovery -> Recovery(
@@ -639,20 +652,19 @@ private fun Recovery(
 @Composable
 private fun Confirmation(
     state: com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverConfirmationState,
-    onFinished: () -> Unit,
-    modifier: Modifier
+    focusRestorer: HelloBeFocusRestorer,
+    onFinished: () -> Unit
 ) {
     CaregiverConfirmation(
         state = state,
-        focusRestorer = rememberHelloBeFocusRestorer(),
+        focusRestorer = focusRestorer,
         onAction = { action ->
             when (action) {
                 CaregiverConfirmationAction.Dismissed -> onFinished()
                 CaregiverConfirmationAction.Confirmed -> onFinished()
                 CaregiverConfirmationAction.RetryRequested -> Unit
             }
-        },
-        modifier = modifier
+        }
     )
 }
 
@@ -700,8 +712,6 @@ private fun profileIdOf(key: HelloBeKey): ProfileId? = when (key) {
     is HelloBeKey.CaregiverDashboard -> key.profileId
     is HelloBeKey.CaregiverSettings -> key.profileId
     is HelloBeKey.ProfileManagement -> key.selectedProfileId
-    is HelloBeKey.DeleteProfileConfirmation -> key.profileId
-    is HelloBeKey.ResetProgressConfirmation -> key.profileId
     else -> null
 }
 
@@ -766,3 +776,12 @@ private const val DATABASE_CODE = "DB-OPEN-01"
  */
 private const val UNBUILT_SCREEN_CODE = "SCREEN-MISSING-01"
 private const val CREATED_PROFILE = "created"
+
+/** A destructive question raised over profile management: which one, and about whom. */
+private data class PendingConfirmation(
+    val kind: CaregiverConfirmationKind,
+    val profileId: ProfileId
+)
+
+private val DELETE = CaregiverConfirmationKind.DELETE_PROFILE
+private val RESET = CaregiverConfirmationKind.RESET_PROGRESS

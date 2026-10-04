@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nphkhiem.englishforyourchildren.domain.model.AgeBand
@@ -71,6 +72,7 @@ import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfilePickerScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileViewModel
+import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import kotlinx.coroutines.delay
@@ -176,8 +178,6 @@ internal fun LiveLearningPath(
                 LearningPathAction.PreviousUnitRequested -> model.showPreviousUnit()
 
                 LearningPathAction.NextUnitRequested -> model.showNextUnit()
-
-                else -> Unit
             }
         },
         modifier = modifier
@@ -510,6 +510,8 @@ internal fun LiveProfileManagement(
     onAdd: () -> Unit,
     onDelete: (ProfileId) -> Unit,
     onReset: (ProfileId) -> Unit,
+    deleteFocus: FocusRequester,
+    resetFocus: FocusRequester,
     modifier: Modifier = Modifier
 ) {
     val model: ProfileManagementViewModel = hiltViewModel()
@@ -559,7 +561,9 @@ internal fun LiveProfileManagement(
                 is ProfileManagementAction.ChangeAvatarRequested -> Unit
             }
         },
-        modifier = modifier
+        modifier = modifier,
+        deleteFocus = deleteFocus,
+        resetFocus = resetFocus
     )
 }
 
@@ -580,6 +584,7 @@ private fun AgeBand.years(): Int = when (this) {
 internal fun LiveCaregiverConfirmation(
     kind: CaregiverConfirmationKind,
     profileId: ProfileId,
+    focusRestorer: HelloBeFocusRestorer,
     onFinished: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -589,7 +594,12 @@ internal fun LiveCaregiverConfirmation(
     val people by profileModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(kind, profileId) { model.start(kind, profileId) }
-    LaunchedEffect(state.done) { if (state.done) onFinished() }
+    LaunchedEffect(state.done) {
+        if (state.done) {
+            model.onFinishHandled()
+            onFinished()
+        }
+    }
 
     val child = people.profiles.firstOrNull { it.id == profileId }
     CaregiverConfirmation(
@@ -601,7 +611,9 @@ internal fun LiveCaregiverConfirmation(
             profileAvatar = child?.avatarId?.value.orEmpty(),
             phase = state.phase
         ),
-        focusRestorer = rememberHelloBeFocusRestorer(),
+        // The caller's restorer, attached to the screen this is raised over. A fresh one here had
+        // nothing attached, so closing the dialog handed focus back to nowhere.
+        focusRestorer = focusRestorer,
         onAction = { action ->
             when (action) {
                 CaregiverConfirmationAction.Dismissed -> onFinished()

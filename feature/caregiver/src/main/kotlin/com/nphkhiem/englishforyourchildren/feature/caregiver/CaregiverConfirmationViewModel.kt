@@ -72,6 +72,18 @@ class CaregiverConfirmationViewModel @Inject constructor(
         run()
     }
 
+    /**
+     * The host has acted on [ConfirmationState.done], so it is spent.
+     *
+     * Done is an event rather than a lasting state. This model outlives each dialog, because the
+     * host scopes nothing to a single one, so a completion left standing was read by the next
+     * dialog as its own: it closed the moment it opened, and a confirm pressed in time was refused
+     * as already done.
+     */
+    fun onFinishHandled() {
+        _state.value = _state.value.copy(done = false)
+    }
+
     /** After a refusal, the same act again. Nothing was changed by the attempt that failed. */
     fun onRetry() {
         if (_state.value.phase == CaregiverConfirmationPhase.WORKING) return

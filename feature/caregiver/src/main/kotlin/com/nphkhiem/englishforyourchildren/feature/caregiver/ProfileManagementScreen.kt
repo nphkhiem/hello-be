@@ -14,6 +14,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
@@ -40,7 +42,9 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 fun ProfileManagementScreen(
     state: ProfileManagementUiState,
     onAction: (ProfileManagementAction) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    deleteFocus: FocusRequester? = null,
+    resetFocus: FocusRequester? = null
 ) {
     val selected = selectedProfile(state)
 
@@ -66,6 +70,8 @@ fun ProfileManagementScreen(
                 ProfileDetail(
                     profile = selected,
                     onAction = onAction,
+                    deleteFocus = deleteFocus,
+                    resetFocus = resetFocus,
                     modifier = Modifier.weight(1f).fillMaxHeight()
                 )
             }
@@ -177,6 +183,8 @@ private fun ProfileList(
 private fun ProfileDetail(
     profile: ManagedProfile,
     onAction: (ProfileManagementAction) -> Unit,
+    deleteFocus: FocusRequester?,
+    resetFocus: FocusRequester?,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -212,7 +220,13 @@ private fun ProfileDetail(
                 onClick = { onAction(action) },
                 tone = HelloBeActionTone.QUIET,
                 minHeight = HelloBeLayout.caregiverControlMinHeight,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().then(
+                    if (action is ProfileManagementAction.ResetProgressRequested) {
+                        resetFocus.attached()
+                    } else {
+                        Modifier
+                    }
+                )
             )
         }
 
@@ -227,7 +241,7 @@ private fun ProfileDetail(
             onClick = { onAction(ProfileManagementAction.DeleteProfileRequested(profile.id)) },
             tone = HelloBeActionTone.DESTRUCTIVE,
             minHeight = HelloBeLayout.caregiverControlMinHeight,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth().then(deleteFocus.attached())
         )
     }
 }
@@ -255,3 +269,13 @@ private fun EmptyLibrary() {
         )
     }
 }
+
+/**
+ * Where focus goes back to when a confirmation this control raised is closed.
+ *
+ * Attached to the control itself, as the focus restorer's contract asks. The confirmation takes
+ * focus programmatically, which a focus group's own restorer never sees leave, so a group-level
+ * target would hand focus back to the top of the pane rather than to what the caregiver pressed.
+ */
+private fun FocusRequester?.attached(): Modifier =
+    this?.let { Modifier.focusRequester(it) } ?: Modifier

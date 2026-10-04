@@ -68,9 +68,9 @@ class BackStackTest {
         listOf(
             HelloBeKey.CaregiverDashboard(minh),
             HelloBeKey.CaregiverSettings(minh),
-            HelloBeKey.ProfileManagement(minh),
-            HelloBeKey.DeleteProfileConfirmation(minh),
-            HelloBeKey.ResetProgressConfirmation(minh)
+            // The delete and reset confirmations are overlays on profile management now rather
+            // than destinations, so they ride inside it behind the gate.
+            HelloBeKey.ProfileManagement(minh)
         ).forEach { assertThat(it.isCaregiver()).isTrue() }
     }
 
