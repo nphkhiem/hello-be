@@ -133,7 +133,7 @@ class RepeatedInputJourneyTest {
         tv.awaitText(AGE)
         tv.press(AGE)
         tv.press(tv.string("create_submit"))
-        tv.awaitText(tv.string("path_lesson_continue"))
+        tv.awaitText(tv.string("path_lesson_start"))
         tv.awaitText(FIRST_LESSON)
         tv.press(FIRST_LESSON)
         tv.awaitText(FIRST_ANSWER)

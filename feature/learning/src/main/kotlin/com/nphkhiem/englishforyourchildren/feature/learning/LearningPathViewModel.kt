@@ -9,6 +9,7 @@ import com.nphkhiem.englishforyourchildren.domain.model.CourseUnit
 import com.nphkhiem.englishforyourchildren.domain.model.Lesson
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
+import com.nphkhiem.englishforyourchildren.domain.model.ProfileProgress
 import com.nphkhiem.englishforyourchildren.domain.model.UnitId
 import com.nphkhiem.englishforyourchildren.domain.progression.LearningPath
 import com.nphkhiem.englishforyourchildren.domain.progression.LessonStanding
@@ -63,10 +64,11 @@ class LearningPathViewModel @Inject constructor(
                 curriculum.observeCourse(),
                 learningPath(profileId),
                 profiles.observeProfiles(),
+                progress.observeProfileProgress(profileId),
                 chosenUnit
-            ) { course, path, people, chosen ->
-                Reading(course, path, people, chosen)
-            }.collect { (course, path, people, chosen) ->
+            ) { course, path, people, history, chosen ->
+                Reading(course, path, people, history, chosen)
+            }.collect { (course, path, people, history, chosen) ->
                 if (course !is DomainResult.Success) {
                     _unavailable.value = true
                     return@collect
@@ -78,6 +80,7 @@ class LearningPathViewModel @Inject constructor(
                     course = course.value,
                     path = (path as? DomainResult.Success)?.value,
                     child = child,
+                    begun = (history as? DomainResult.Success)?.value?.hasBegun() ?: false,
                     chosen = chosen
                 )
             }
@@ -97,6 +100,7 @@ class LearningPathViewModel @Inject constructor(
         course: Course,
         path: LearningPath?,
         child: ChildProfile?,
+        begun: Boolean,
         chosen: UnitId?
     ): LearningPathUiState {
         val index = course.units.indexOfShown(chosen, path)
@@ -107,7 +111,8 @@ class LearningPathViewModel @Inject constructor(
             unit = unit.toPage(course.units.size, path),
             previousUnit = course.units.getOrNull(index - 1)?.toSummary(),
             nextUnit = course.units.getOrNull(index + 1)?.toSummary(),
-            pendingSave = false
+            pendingSave = false,
+            begun = begun
         )
     }
 
@@ -139,8 +144,18 @@ class LearningPathViewModel @Inject constructor(
         val course: DomainResult<Course>,
         val path: DomainResult<LearningPath>,
         val people: DomainResult<List<ChildProfile>>,
+        val history: DomainResult<ProfileProgress>,
         val chosen: UnitId?
     )
+
+    /**
+     * A finished lesson or an open checkpoint, either of which is something to continue.
+     *
+     * Unreadable history is not counted as begun, and that is deliberate: Continue promises there is
+     * something to continue, and a screen that cannot see the history has no business promising it.
+     */
+    private fun ProfileProgress.hasBegun(): Boolean =
+        lessonsCompleted.isNotEmpty() || openCheckpoint != null
 
     private fun CourseUnit.toPage(unitCount: Int, path: LearningPath?) = UnitPageState(
         unitId = id.value,
@@ -190,6 +205,7 @@ class LearningPathViewModel @Inject constructor(
             previousUnit = null,
             nextUnit = null,
             pendingSave = false,
+            begun = false,
             loading = true
         )
     }

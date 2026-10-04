@@ -177,7 +177,7 @@ class AdultGateJourneyTest {
     private fun createChild() {
         tv.press(AGE)
         tv.press(tv.string("create_submit"))
-        tv.awaitText(tv.string("path_lesson_continue"))
+        tv.awaitText(tv.string("path_lesson_start"))
     }
 
     private companion object {

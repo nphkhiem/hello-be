@@ -182,7 +182,7 @@ class FirstLessonJourneyTest {
 
         tv.press(tv.string("free_play_empty_action"))
 
-        tv.awaitText(tv.string("path_lesson_continue"))
+        tv.awaitText(tv.string("path_lesson_start"))
     }
 
     private fun walkTheFirstLesson() {
@@ -199,7 +199,7 @@ class FirstLessonJourneyTest {
     private fun createChild() {
         tv.press(AGE)
         tv.press(tv.string("create_submit"))
-        tv.awaitText(tv.string("path_lesson_continue"))
+        tv.awaitText(tv.string("path_lesson_start"))
     }
 
     private fun completedLessons(): Set<LessonId> = runBlocking {
