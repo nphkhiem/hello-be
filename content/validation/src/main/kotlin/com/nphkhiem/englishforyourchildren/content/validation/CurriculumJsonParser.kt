@@ -39,6 +39,8 @@ class CurriculumJsonParser {
 
     fun parseAttributions(source: String): AttributionsDto = json.decodeFromString(source)
 
+    fun parseManifest(source: String): ManifestDto = json.decodeFromString(source)
+
     /**
      * The domain course, content and all.
      *
