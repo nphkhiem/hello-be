@@ -1,4 +1,4 @@
-package com.nphkhiem.englishforyourchildren.data.curriculum
+package com.nphkhiem.englishforyourchildren.content.validation
 
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityId
 import com.nphkhiem.englishforyourchildren.domain.model.AssetId
@@ -9,7 +9,6 @@ import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.SkillId
 import com.nphkhiem.englishforyourchildren.domain.model.UnitId
 import com.nphkhiem.englishforyourchildren.domain.model.readIdentifier
-import javax.inject.Inject
 
 /**
  * What is wrong with a bundle, in words a person can act on.
@@ -48,7 +47,7 @@ data class ContentProblem(val where: String, val what: String, val kind: Kind = 
  * of the mapping, and the whole bundle came back as invalid content with nothing a content author
  * could act on.
  */
-class CurriculumValidator @Inject constructor() {
+class CurriculumValidator {
 
     fun validate(
         course: CourseDto,

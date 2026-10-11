@@ -1,4 +1,4 @@
-package com.nphkhiem.englishforyourchildren.data.curriculum
+package com.nphkhiem.englishforyourchildren.content.validation
 
 /**
  * That every asset reaching a child's television is one this project may ship.

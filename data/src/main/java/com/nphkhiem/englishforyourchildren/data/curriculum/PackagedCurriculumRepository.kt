@@ -1,6 +1,9 @@
 package com.nphkhiem.englishforyourchildren.data.curriculum
 
 import android.content.res.AssetManager
+import com.nphkhiem.englishforyourchildren.content.validation.ContentProblem
+import com.nphkhiem.englishforyourchildren.content.validation.CurriculumJsonParser
+import com.nphkhiem.englishforyourchildren.content.validation.CurriculumValidator
 import com.nphkhiem.englishforyourchildren.domain.model.AssetId
 import com.nphkhiem.englishforyourchildren.domain.model.Attribution
 import com.nphkhiem.englishforyourchildren.domain.model.Course

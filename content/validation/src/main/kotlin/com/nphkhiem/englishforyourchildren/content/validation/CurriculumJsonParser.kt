@@ -1,4 +1,4 @@
-package com.nphkhiem.englishforyourchildren.data.curriculum
+package com.nphkhiem.englishforyourchildren.content.validation
 
 import com.nphkhiem.englishforyourchildren.domain.model.Activity
 import com.nphkhiem.englishforyourchildren.domain.model.ActivityContent
@@ -15,7 +15,6 @@ import com.nphkhiem.englishforyourchildren.domain.model.Lesson
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.SkillId
 import com.nphkhiem.englishforyourchildren.domain.model.UnitId
-import javax.inject.Inject
 import kotlinx.serialization.json.Json
 
 /**
@@ -24,7 +23,7 @@ import kotlinx.serialization.json.Json
  * Nothing here decides whether the content is sensible; that is [CurriculumValidator]'s job, and it
  * runs first.
  */
-class CurriculumJsonParser @Inject constructor() {
+class CurriculumJsonParser {
     /**
      * Lenient about fields it does not know, so content written for a later app does not crash an
      * older one, and strict about everything it does read.
