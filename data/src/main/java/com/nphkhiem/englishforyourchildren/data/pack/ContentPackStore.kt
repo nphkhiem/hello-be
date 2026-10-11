@@ -50,17 +50,65 @@ class ContentPackStore(private val root: File, private val preferences: DataStor
     }
 
     /**
+     * A fresh, empty workspace for assembling [version], away from anything the app reads.
+     *
+     * Anything a previous attempt left behind is cleared first, so an assembly killed halfway by a
+     * power cut cannot leak into the next one.
+     */
+    fun stage(version: CourseVersion): Staging {
+        val workspace = File(root, "$STAGING/${pathSegment(version)}")
+        workspace.deleteRecursively()
+        return Staging(File(workspace, "bundle"), File(workspace, "archives")).also {
+            if (!it.bundle.mkdirs() || !it.archives.mkdirs()) {
+                throw IOException("Could not prepare a workspace for ${version.value}")
+            }
+        }
+    }
+
+    /**
+     * Moves an assembled bundle into place in a single rename, so a pack directory is only ever
+     * complete: the reader never sees one half unpacked. The workspace goes with it.
+     */
+    fun commit(staging: Staging, version: CourseVersion) {
+        val target = File(root, pathSegment(version))
+        if (target.exists() || !staging.bundle.renameTo(target)) {
+            throw IOException("Could not move ${version.value} into place")
+        }
+        File(root, STAGING).deleteRecursively()
+    }
+
+    /** Clears an abandoned workspace. The live pack is never in one. */
+    fun discard(staging: Staging) {
+        staging.bundle.parentFile?.deleteRecursively()
+    }
+
+    /**
+     * Deletes every pack but [keep]. Only after [keep] is live: until then the old pack is what a
+     * child is reading, and the seed in the APK stays underneath all of them regardless.
+     */
+    fun evictAllBut(keep: CourseVersion) {
+        root.listFiles()?.filter {
+            it.name != pathSegment(keep)
+        }?.forEach { it.deleteRecursively() }
+    }
+
+    /** Where one version is assembled: [bundle] becomes the pack, [archives] holds the downloads. */
+    class Staging(val bundle: File, val archives: File)
+
+    /**
      * The version as one directory name. It arrives in a signed manifest, but a value that could
      * step out of [root] is refused anyway: it costs one check, and the alternative is trusting that
-     * nothing else ever writes this key.
+     * nothing else ever writes this key. Hidden names are refused too, which keeps every version
+     * clear of the staging workspace.
      */
     private fun pathSegment(version: CourseVersion): String = version.value.also {
-        require(it != "." && it != ".." && '/' !in it && '\\' !in it) {
-            "A course version must be a single directory name"
+        require(!it.startsWith('.') && '/' !in it && '\\' !in it) {
+            "A course version must be a single, visible directory name"
         }
     }
 
     private companion object {
         val ACTIVE = stringPreferencesKey("active_course_version")
+        const val STAGING = ".staging"
     }
 }

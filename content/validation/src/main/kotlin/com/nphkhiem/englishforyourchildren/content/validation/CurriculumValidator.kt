@@ -63,10 +63,10 @@ class CurriculumValidator {
             problems += named(where, "declared unit id", ref.id) { UnitId(it) }
         }
 
-        if (course.schemaVersion != SUPPORTED_SCHEMA) {
+        if (course.schemaVersion != SUPPORTED_SCHEMA_VERSION) {
             problems += ContentProblem(
                 where,
-                "schema version ${course.schemaVersion} is not the $SUPPORTED_SCHEMA this app reads"
+                "schema version ${course.schemaVersion} is not the $SUPPORTED_SCHEMA_VERSION this app reads"
             )
         }
         if (course.supportedLocales.isEmpty()) {
@@ -225,7 +225,6 @@ class CurriculumValidator {
         .map { ContentProblem(it.key, "the same $kind id appears ${it.value} times") }
 
     private companion object {
-        const val SUPPORTED_SCHEMA = 2
         const val LETTER_AND_SOUND = "LETTER_AND_SOUND"
         val FAMILIES = setOf(
             "LISTEN_AND_CHOOSE",
@@ -239,3 +238,11 @@ class CurriculumValidator {
         val FAMILIES_WITHOUT_AN_ANSWER = setOf("SAY_WITH_PIP")
     }
 }
+
+/**
+ * The content schema this app reads.
+ *
+ * Public because it is also the gate on a download: a manifest asking for a newer schema is
+ * refused whole, before a byte of its packs is fetched, rather than half parsed.
+ */
+const val SUPPORTED_SCHEMA_VERSION = 2

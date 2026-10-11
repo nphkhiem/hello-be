@@ -5,19 +5,14 @@ import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.content.validation.CurriculumJsonParser
 import com.nphkhiem.englishforyourchildren.content.validation.CurriculumValidator
 import com.nphkhiem.englishforyourchildren.data.curriculum.CurriculumLoader
-import com.nphkhiem.englishforyourchildren.data.curriculum.lesson
 import com.nphkhiem.englishforyourchildren.domain.model.Attribution
-import com.nphkhiem.englishforyourchildren.domain.model.Course
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.Lesson
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
-import com.nphkhiem.englishforyourchildren.domain.repository.CurriculumRepository
 import com.nphkhiem.englishforyourchildren.domain.result.DomainError
 import com.nphkhiem.englishforyourchildren.domain.result.DomainResult
 import java.io.File
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -173,27 +168,7 @@ class LayeredCurriculumRepositoryTest {
     private fun firstPrompt(lesson: DomainResult<Lesson>): String? =
         (lesson as? DomainResult.Success)?.value?.activities?.first()?.content?.prompt
 
-    /** The shipped seed, read off disk as the app reads it from the APK. */
-    private class SeedFromDisk(private val loader: CurriculumLoader) : CurriculumRepository {
-        private val course = loader.course({ File(SEED, it).readText() }, emptySet())
-
-        override fun observeCourse(): Flow<DomainResult<Course>> = flowOf(course)
-
-        override suspend fun getLesson(id: LessonId, version: CourseVersion): DomainResult<Lesson> {
-            val loaded = course as? DomainResult.Success ?: return course as DomainResult.Failure
-            if (loaded.value.version != version) {
-                return DomainResult.Failure(DomainError.LessonNotFound)
-            }
-            return loaded.value.lesson(id)
-        }
-
-        override suspend fun getAttributions(): DomainResult<List<Attribution>> =
-            loader.attributions { File(SEED, it).readText() }
-    }
-
     private companion object {
-        val SEED = File("../content/starter/src/main/assets")
-        val SEED_VERSION = CourseVersion("2026.09")
         val PACK_VERSION = CourseVersion("2026.10")
         val FIRST_LESSON = LessonId("u01-my-body-l1")
         const val SEED_PROMPT = "Where are the eyes?"
