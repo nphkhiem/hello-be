@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 /**
- * The six settings as they stand, and whether the last change held.
+ * The six settings as they stand, whether the last change held, and where new lessons stand.
  *
  * The settings themselves rather than finished rows, for the reason [AdultGateState] holds a sum
  * rather than a question: every title, every child-facing consequence and every option name is a
@@ -29,7 +29,9 @@ data class CaregiverSettingsState(
     val settings: AppSettings,
     val saveStatus: SettingsSaveStatus,
     val canRestoreDefaults: Boolean,
-    val unreadable: Boolean
+    val unreadable: Boolean,
+    /** Where getting new lessons stands, or null when this build offers no way to get them. */
+    val lessons: TaskState?
 )
 
 /**
@@ -40,14 +42,17 @@ data class CaregiverSettingsState(
  * able to trust it: a caregiver who turned captions on for a child who cannot follow without them.
  */
 @HiltViewModel
-class CaregiverSettingsViewModel @Inject constructor(private val settings: SettingsRepository) :
-    ViewModel() {
+class CaregiverSettingsViewModel @Inject constructor(
+    private val settings: SettingsRepository,
+    private val lessonUpdates: LessonUpdates
+) : ViewModel() {
     private val _state = MutableStateFlow(
         CaregiverSettingsState(
             settings = AppSettings.DEFAULT,
             saveStatus = SettingsSaveStatus.Idle,
             canRestoreDefaults = false,
-            unreadable = false
+            unreadable = false,
+            lessons = null
         )
     )
 
@@ -69,6 +74,33 @@ class CaregiverSettingsViewModel @Inject constructor(private val settings: Setti
                 }
             }
         }
+
+        if (lessonUpdates.offered) {
+            viewModelScope.launch {
+                lessonUpdates.state.collect { _state.value = _state.value.copy(lessons = it) }
+            }
+            // Opening Settings is a caregiver asking, behind the adult gate, which is the one place
+            // a fetch is allowed to happen in the foreground. The row then says something true on
+            // arrival rather than a state nobody has looked at.
+            viewModelScope.launch { lessonUpdates.check() }
+        }
+    }
+
+    /**
+     * The task row was pressed: fetch what is waiting, or look again.
+     *
+     * Nothing while working. The row is unavailable then, and a press that slipped through must
+     * not start a second check underneath a download.
+     */
+    fun onTaskRequested() {
+        val lessons = _state.value.lessons ?: return
+        viewModelScope.launch {
+            when (lessons) {
+                TaskState.Available -> lessonUpdates.download()
+                TaskState.UpToDate, is TaskState.Failed -> lessonUpdates.check()
+                is TaskState.Working -> Unit
+            }
+        }
     }
 
     /**
@@ -76,7 +108,8 @@ class CaregiverSettingsViewModel @Inject constructor(private val settings: Setti
      *
      * The caregiver language is not a switch and says so by doing nothing here. Three modes cannot
      * be turned on and off, and picking one on the caregiver's behalf because a press arrived would
-     * change the language they read by accident.
+     * change the language they read by accident. Getting new lessons is not a switch either; it
+     * arrives through [onTaskRequested].
      */
     fun onToggle(id: SettingId) {
         val now = _state.value.settings
@@ -94,7 +127,7 @@ class CaregiverSettingsViewModel @Inject constructor(private val settings: Setti
             SettingId.BACKGROUND_MUSIC ->
                 write { it.updateBackgroundMusic(!now.backgroundMusicEnabled) }
 
-            SettingId.CAREGIVER_LANGUAGE -> Unit
+            SettingId.CAREGIVER_LANGUAGE, SettingId.CHECK_FOR_LESSONS -> Unit
         }
     }
 

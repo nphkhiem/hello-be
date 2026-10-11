@@ -192,13 +192,27 @@ object CaregiverFixtures {
         canRestoreDefaults = true
     )
 
+    /** A build that can get new lessons, with the task where [state] says it is. */
+    fun settingsWithLessons(state: TaskState): CaregiverSettingsUiState = settings().copy(
+        rows = settings().rows + SettingRow(
+            id = SettingId.CHECK_FOR_LESSONS,
+            group = SettingGroup.LESSONS,
+            title = NEW_LESSONS,
+            consequence = "Arrive between lessons, never during one",
+            value = SettingValue.Task(state)
+        )
+    )
+
     fun settingsStates(): List<Pair<String, CaregiverSettingsUiState>> = listOf(
         "default" to settings(),
         "changed" to settingsChanged(),
         "language options open" to settingsLanguageOpen(),
         "saving" to settingsSaving(),
         "save failed" to settingsSaveFailed(),
-        "accessibility on" to settingsAccessible()
+        "accessibility on" to settingsAccessible(),
+        "new lessons available" to settingsWithLessons(TaskState.Available),
+        "new lessons downloading" to settingsWithLessons(TaskState.Working(done = 2, total = 5)),
+        "new lessons failed" to settingsWithLessons(TaskState.Failed(TaskFailure.COULD_NOT_FINISH))
     )
 
     /** The draft's own two children. */
@@ -298,6 +312,7 @@ object CaregiverFixtures {
     const val MINH_DETAIL = "Age 3 · 6 adventures finished"
     const val LAN_DETAIL = "Age 5 · 2 adventures finished"
     const val VIETNAMESE_HELP = "Vietnamese help"
+    const val NEW_LESSONS = "New lessons"
     const val CAREGIVER_LANGUAGE = "Caregiver language"
     const val CAPTIONS = "Captions"
     const val REDUCED_MOTION = "Reduced motion"

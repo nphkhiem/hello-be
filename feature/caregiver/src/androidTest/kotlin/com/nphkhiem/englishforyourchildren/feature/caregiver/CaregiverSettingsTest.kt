@@ -1,8 +1,12 @@
 package com.nphkhiem.englishforyourchildren.feature.caregiver
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
+import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.hasStateDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -195,6 +199,104 @@ class CaregiverSettingsTest {
                 .also { assertThat(it).isEmpty() }
         }
     }
+
+    @Test
+    fun givenLessonsCanBeFetched_whenTheListIsRead_thenTheyComeLast() {
+        // The rarest thing a caregiver does here, so it must not push the common ones down.
+        setSettings(CaregiverFixtures.settingsWithLessons(TaskState.UpToDate))
+
+        val music = composeTestRule.onNodeWithText(CaregiverFixtures.BACKGROUND_MUSIC)
+            .getUnclippedBoundsInRoot()
+        val lessons = composeTestRule.onNodeWithText(CaregiverFixtures.NEW_LESSONS)
+            .getUnclippedBoundsInRoot()
+
+        assertThat(lessons.top).isGreaterThan(music.top)
+    }
+
+    @Test
+    fun givenNewLessonsWaiting_whenTheRowIsPressed_thenItAsksForTheTask() {
+        val actions = mutableListOf<CaregiverSettingsAction>()
+        setSettings(CaregiverFixtures.settingsWithLessons(TaskState.Available), { actions += it })
+
+        pressRow(CaregiverFixtures.NEW_LESSONS)
+
+        assertThat(actions)
+            .containsExactly(CaregiverSettingsAction.TaskRequested(SettingId.CHECK_FOR_LESSONS))
+    }
+
+    @Test
+    fun givenADownloadUnderway_whenTheRowIsPressed_thenItCanBeReachedButNothingHappens() {
+        val actions = mutableListOf<CaregiverSettingsAction>()
+        setSettings(
+            CaregiverFixtures.settingsWithLessons(TaskState.Working(done = 2, total = 5)),
+            { actions += it }
+        )
+
+        pressRow(CaregiverFixtures.NEW_LESSONS)
+
+        composeTestRule.onNodeWithText(CaregiverFixtures.NEW_LESSONS).assertIsFocused()
+        assertThat(actions).isEmpty()
+    }
+
+    @Test
+    fun givenEachStateOfTheTask_whenTheRowIsRead_thenItSaysWhereThingsStandInWords() {
+        val cases = listOf(
+            TaskState.UpToDate to text(R.string.settings_lessons_up_to_date),
+            TaskState.Available to text(R.string.settings_lessons_available),
+            TaskState.Working(done = 0, total = 0) to text(R.string.settings_lessons_checking),
+            TaskState.Working(done = 2, total = 5) to
+                text(R.string.settings_lessons_downloading, 2, 5),
+            TaskState.Failed(TaskFailure.APP_UPDATE_NEEDED) to
+                text(R.string.settings_lessons_needs_update)
+        )
+        var state by mutableStateOf(cases.first().first)
+        composeTestRule.setContent {
+            HelloBeTheme {
+                CaregiverSettingsScreen(
+                    state = CaregiverFixtures.settingsWithLessons(state),
+                    onAction = {}
+                )
+            }
+        }
+
+        cases.forEach { (task, words) ->
+            state = task
+            composeTestRule.waitForIdle()
+            // Exists rather than displayed: the row is last in a scrolling list, and the claim is
+            // that its state is in words, not that it is on screen at this size.
+            composeTestRule.onNode(hasStateDescription(words)).assertExists()
+        }
+    }
+
+    @Test
+    fun givenTheRowHeldFocus_whenTheDownloadStartsAndMovesOn_thenFocusStaysOnIt() {
+        // Unavailable rather than disabled, so the caregiver's place does not move as it works.
+        var state by mutableStateOf<TaskState>(TaskState.Available)
+        composeTestRule.setContent {
+            HelloBeTheme {
+                CaregiverSettingsScreen(
+                    state = CaregiverFixtures.settingsWithLessons(state),
+                    onAction = {}
+                )
+            }
+        }
+        composeTestRule.onNodeWithText(CaregiverFixtures.NEW_LESSONS).requestFocus()
+
+        listOf(TaskState.Working(0, 0), TaskState.Working(1, 2), TaskState.UpToDate).forEach {
+            state = it
+            composeTestRule.waitForIdle()
+            composeTestRule.onNodeWithText(CaregiverFixtures.NEW_LESSONS).assertIsFocused()
+        }
+    }
+
+    private fun pressRow(title: String) {
+        composeTestRule.onNodeWithText(title).requestFocus()
+        composeTestRule.onNodeWithText(title).performKeyInput { pressKey(Key.DirectionCenter) }
+        composeTestRule.waitForIdle()
+    }
+
+    private fun text(id: Int, vararg args: Any) =
+        context.caregiverText(CaregiverLanguage.BOTH, id, *args)
 
     private fun setSettings(
         state: CaregiverSettingsUiState,
