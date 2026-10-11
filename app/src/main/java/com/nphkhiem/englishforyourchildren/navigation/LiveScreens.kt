@@ -15,7 +15,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nphkhiem.englishforyourchildren.domain.model.AgeBand
 import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
-import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateScreen
@@ -152,10 +151,14 @@ internal fun LiveLearningPath(
     modifier: Modifier = Modifier
 ) {
     val model: LearningPathViewModel = hiltViewModel()
+    val course: CourseViewModel = hiltViewModel()
     val state by model.state.collectAsStateWithLifecycle()
     val unavailable by model.unavailable.collectAsStateWithLifecycle()
 
     LaunchedEffect(profileId) { model.start(profileId) }
+    // The path is where a child is when no lesson is open, which is the only moment a newer course
+    // may take over. The path is drawn from the live course, so it simply redraws.
+    LaunchedEffect(profileId) { course.switchToNewestCourse() }
     LaunchedEffect(unavailable) { if (unavailable) onUnavailable() }
 
     LearningPathScreen(
@@ -217,14 +220,19 @@ internal fun LiveFreePlay(
 internal fun LiveLessonCelebration(
     profileId: ProfileId,
     lessonId: LessonId,
-    courseVersion: CourseVersion,
     onDone: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val model: LessonCelebrationViewModel = hiltViewModel()
+    val course: CourseViewModel = hiltViewModel()
     val state by model.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(lessonId) { model.start(profileId, lessonId, courseVersion) }
+    // The live course. Nothing goes live between a lesson ending and this, and a lesson resumed
+    // under an older version is the same lesson in the live one, because published lessons are
+    // never withdrawn.
+    LaunchedEffect(lessonId) {
+        course.liveVersion()?.let { model.start(profileId, lessonId, it) }
+    }
 
     // The reveal is a clock, and ADR 0003 keeps clocks out of the screen. It lives here with the
     // motion token that names the budget, the way the stop-for-now dialog's visibility does.
@@ -248,18 +256,23 @@ internal fun LiveLessonCelebration(
 internal fun LiveLesson(
     profileId: ProfileId,
     lessonId: LessonId,
-    courseVersion: CourseVersion,
     onFinished: () -> Unit,
     onStopConfirmed: () -> Unit,
     onUnavailable: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val model: LessonViewModel = hiltViewModel()
+    val course: CourseViewModel = hiltViewModel()
     val state by model.state.collectAsStateWithLifecycle()
     val unavailable by model.unavailable.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(lessonId) { model.start(profileId, lessonId, courseVersion) }
+    LaunchedEffect(lessonId) {
+        val version = course.lessonVersion(profileId, lessonId)
+        if (version == null) onUnavailable() else model.start(profileId, lessonId, version)
+        // While the child is busy with this one, newer lessons can arrive. Silent either way.
+        course.prefetch()
+    }
     LaunchedEffect(unavailable) { if (unavailable) onUnavailable() }
 
     // Finishing is the host's business, not the screen's: the lesson says it is over and the

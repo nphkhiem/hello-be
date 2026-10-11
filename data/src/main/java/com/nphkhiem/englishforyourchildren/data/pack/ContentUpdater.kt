@@ -25,8 +25,12 @@ import kotlinx.coroutines.withContext
  *
  * ```text
  * Idle -> Checking -> UpToDate
- *                  -> Available -> Downloading -> Verifying -> Staged -> Active
+ *                  -> Available -> Downloading -> Verifying -> Staged
  * ```
+ *
+ * Going live is not a state here. It is [PackActivation]'s, because it depends on the children
+ * using the television rather than on the download, and it has to work after a restart, when this
+ * object remembers nothing.
  *
  * [Refused] is the only failure with a state of its own, because it is the only kind a caregiver can
  * act on or must be told about. Everything else, an unreachable server, a dropped connection, a
@@ -49,8 +53,6 @@ sealed interface ContentUpdate {
     /** On disk and complete, waiting for a moment no child is in a lesson. */
     data class Staged(val version: CourseVersion) : ContentUpdate
 
-    data class Active(val version: CourseVersion) : ContentUpdate
-
     data class Refused(val reason: Refusal) : ContentUpdate
 }
 
@@ -69,7 +71,7 @@ enum class Refusal {
  * Fetches, checks and stages new lessons, without ever touching the ones a child is using.
  *
  * Downloads land in a workspace, are checked there, and move into place in one rename; going live
- * is one pointer write. So whichever step a power cut or a dropped connection interrupts, the live
+ * is one pointer write, made later by [PackActivation]. So whichever step a power cut or a dropped connection interrupts, the live
  * pack is exactly as it was and the application still works.
  *
  * Only a version newer than the live one is offered. The signature proves the owner published a
@@ -128,18 +130,12 @@ class ContentUpdater(
     }
 
     /**
-     * Makes the [ContentUpdate.Staged] version live and deletes the packs it supersedes.
-     *
-     * Only when no child is in a lesson, per spec section 8: a session pins its course version, and
-     * two versions must never mix within one. Deciding when that is belongs to the caller.
+     * Looks, and fetches anything newer, without anyone asking: the prefetch that runs while a child
+     * is in a lesson. Every failure is as silent as the steps it is made of.
      */
-    suspend fun activate() = oneAtATime.withLock {
-        withContext(Dispatchers.IO) {
-            val staged = current.value as? ContentUpdate.Staged ?: return@withContext
-            packs.activate(staged.version)
-            packs.evictAllBut(staged.version)
-            current.value = ContentUpdate.Active(staged.version)
-        }
+    suspend fun refresh() {
+        check()
+        download()
     }
 
     private fun fetchManifest(): ContentUpdate {

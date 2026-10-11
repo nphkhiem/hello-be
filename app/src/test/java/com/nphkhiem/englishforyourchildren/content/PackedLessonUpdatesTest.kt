@@ -16,8 +16,6 @@ class PackedLessonUpdatesTest {
         // Going live waits for a moment no child is in a lesson. That is not the adult's to manage.
         assertThat(taskState(ContentUpdate.Staged(NEXT), lastDownloadFailed = false))
             .isEqualTo(TaskState.UpToDate)
-        assertThat(taskState(ContentUpdate.Active(NEXT), lastDownloadFailed = false))
-            .isEqualTo(TaskState.UpToDate)
     }
 
     @Test

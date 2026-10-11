@@ -33,6 +33,12 @@ class ContentPackStore(private val root: File, private val preferences: DataStor
         .map { stored -> stored[ACTIVE]?.let(::CourseVersion)?.takeIf { directory(it) != null } }
         .catch { cause -> if (cause is IOException) emit(null) else throw cause }
 
+    /** Every complete pack on disk, whether live or waiting. Half-assembled work is not one. */
+    fun versionsOnDisk(): List<CourseVersion> = root.listFiles()
+        .orEmpty()
+        .filter { it.isDirectory && !it.name.startsWith('.') }
+        .map { CourseVersion(it.name) }
+
     /** The pack for [version], or null when there is none on disk. */
     fun directory(version: CourseVersion): File? =
         File(root, pathSegment(version)).takeIf { it.isDirectory }

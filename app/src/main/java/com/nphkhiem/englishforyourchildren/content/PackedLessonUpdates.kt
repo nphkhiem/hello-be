@@ -59,8 +59,7 @@ internal fun taskState(update: ContentUpdate, lastDownloadFailed: Boolean): Task
     when (update) {
         ContentUpdate.Idle,
         ContentUpdate.UpToDate,
-        is ContentUpdate.Staged,
-        is ContentUpdate.Active -> TaskState.UpToDate
+        is ContentUpdate.Staged -> TaskState.UpToDate
 
         is ContentUpdate.Available -> if (lastDownloadFailed) {
             TaskState.Failed(TaskFailure.COULD_NOT_FINISH)
