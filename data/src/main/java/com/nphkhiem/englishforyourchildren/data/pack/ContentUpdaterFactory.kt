@@ -23,8 +23,12 @@ class ContentUpdaterFactory @Inject constructor(
     private val curriculum: CurriculumRepository
 ) {
     /** [publicKeyBase64] is the raw 32-byte Ed25519 key, Base64 encoded. */
-    fun create(baseUrl: String, publicKeyBase64: String): ContentUpdater = ContentUpdater(
-        fetcher = HttpContentFetcher(URI(baseUrl)),
+    fun create(baseUrl: String, publicKeyBase64: String): ContentUpdater =
+        create(HttpContentFetcher(URI(baseUrl)), publicKeyBase64)
+
+    /** The same, fetching through [fetcher]: how a journey stands in a server that never answers. */
+    fun create(fetcher: ContentFetcher, publicKeyBase64: String): ContentUpdater = ContentUpdater(
+        fetcher = fetcher,
         verifier = PackVerifier(Base64.getDecoder().decode(publicKeyBase64)),
         parser = parser,
         loader = loader,

@@ -99,15 +99,23 @@ class ContentUpdater(
     /** The verified manifest behind the current [ContentUpdate.Available], held for [download]. */
     private var offered: ManifestDto? = null
 
-    /** Asks the server what is published. A signed, newer version becomes [ContentUpdate.Available]. */
-    suspend fun check() = oneAtATime.withLock {
+    /**
+     * Asks the server what is published. A signed, newer version becomes [ContentUpdate.Available].
+     *
+     * Returns whether the server answered at all. The state cannot say: an unreachable server
+     * leaves it where it was, which for a television that has never checked is [ContentUpdate.Idle],
+     * and a caregiver who just asked deserves to know the question went nowhere.
+     */
+    suspend fun check(): Boolean = oneAtATime.withLock {
         withContext(Dispatchers.IO) {
             val before = current.value
             current.value = ContentUpdate.Checking
-            current.value = try {
-                decide(fetchManifest())
+            try {
+                current.value = decide(fetchManifest())
+                true
             } catch (_: IOException) {
-                before
+                current.value = before
+                false
             }
         }
     }

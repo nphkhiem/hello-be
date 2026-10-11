@@ -15,27 +15,28 @@ import kotlinx.coroutines.flow.flowOf
  * The caregiver's view of the content updater.
  *
  * The one translation the two sides need. The updater keeps transient failures silent, because in
- * the background a dropped download is simply tried again; a caregiver who pressed the row and saw
- * it quietly return to "Download new lessons" would not know it had failed, so here a download that
- * ends where it started says so, with a retry.
+ * the background a dropped download is simply tried again. A caregiver who asked is owed the truth
+ * instead: a download that ends where it started, or a check that never reached the server, says
+ * so with a retry, rather than leaving "Download new lessons" or "Up to date" on a television that
+ * could not find out.
  */
 class PackedLessonUpdates(private val updater: ContentUpdater) : LessonUpdates {
-    private val lastDownloadFailed = MutableStateFlow(false)
+    private val lastAttemptFailed = MutableStateFlow(false)
 
     override val offered = true
 
     override val state: Flow<TaskState> =
-        combine(updater.state, lastDownloadFailed) { update, failed -> taskState(update, failed) }
+        combine(updater.state, lastAttemptFailed) { update, failed -> taskState(update, failed) }
 
     override suspend fun check() {
-        lastDownloadFailed.value = false
-        updater.check()
+        lastAttemptFailed.value = false
+        lastAttemptFailed.value = !updater.check()
     }
 
     override suspend fun download() {
-        lastDownloadFailed.value = false
+        lastAttemptFailed.value = false
         updater.download()
-        lastDownloadFailed.value = updater.state.value is ContentUpdate.Available
+        lastAttemptFailed.value = updater.state.value is ContentUpdate.Available
     }
 }
 
@@ -54,17 +55,18 @@ object UnofferedLessonUpdates : LessonUpdates {
  *
  * Staged reads as up to date: from where the caregiver sits the lessons are here, and the moment
  * they go live is a rule about children's sessions rather than something to ask an adult to manage.
+ * Any resting state reads as a failure with a retry when the caregiver's last attempt went nowhere,
+ * because the state itself only says what was true before they asked.
  */
-internal fun taskState(update: ContentUpdate, lastDownloadFailed: Boolean): TaskState =
+internal fun taskState(update: ContentUpdate, lastAttemptFailed: Boolean): TaskState =
     when (update) {
         ContentUpdate.Idle,
         ContentUpdate.UpToDate,
-        is ContentUpdate.Staged -> TaskState.UpToDate
-
-        is ContentUpdate.Available -> if (lastDownloadFailed) {
-            TaskState.Failed(TaskFailure.COULD_NOT_FINISH)
-        } else {
-            TaskState.Available
+        is ContentUpdate.Staged,
+        is ContentUpdate.Available -> when {
+            lastAttemptFailed -> TaskState.Failed(TaskFailure.COULD_NOT_FINISH)
+            update is ContentUpdate.Available -> TaskState.Available
+            else -> TaskState.UpToDate
         }
 
         ContentUpdate.Checking, is ContentUpdate.Verifying -> TaskState.Working(done = 0, total = 0)
