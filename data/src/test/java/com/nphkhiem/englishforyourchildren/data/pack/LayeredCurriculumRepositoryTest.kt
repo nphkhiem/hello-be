@@ -140,6 +140,27 @@ class LayeredCurriculumRepositoryTest {
     }
 
     @Test
+    fun givenAPackGoesLive_whenMediaIsLookedUpWithoutWaiting_thenItsFolderIsAlreadyKnown() {
+        // Lookups for pictures and recordings cannot suspend, so the store has to know already.
+        writePack()
+
+        activate(PACK_VERSION)
+
+        assertThat(store.liveDirectory()).isEqualTo(File(packsRoot, PACK_VERSION.value))
+    }
+
+    @Test
+    fun givenTheLivePackHasGone_whenTheCourseIsReadAgain_thenMediaComesFromTheApkAgain() {
+        writePack()
+        activate(PACK_VERSION)
+        File(packsRoot, PACK_VERSION.value).deleteRecursively()
+
+        observedVersion()
+
+        assertThat(store.liveDirectory()).isNull()
+    }
+
+    @Test
     fun givenAVersionThatWouldLeaveThePacksDirectory_whenUsed_thenItIsRefused() {
         assertThrows<IllegalArgumentException> { store.directory(CourseVersion("..")) }
         assertThrows<IllegalArgumentException> { store.directory(CourseVersion("a/b")) }

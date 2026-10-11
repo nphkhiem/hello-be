@@ -5,6 +5,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.playback.PackagedAssetLocator
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -19,8 +20,32 @@ import org.junit.runner.RunWith
 class PackagedPictureSourceTest {
     private val context = InstrumentationRegistry.getInstrumentation().context
 
-    private val pictures =
-        PackagedPictureSource(context, PackagedAssetLocator.forImages(context))
+    private val pack = InstrumentationRegistry.getInstrumentation().targetContext.cacheDir
+        .resolve("picture-test-pack")
+    private val pictures = PackagedPictureSource(
+        context,
+        PackagedAssetLocator.forImages(context) { pack.takeIf { it.isDirectory } }
+    )
+
+    @After
+    fun forgetThePack() {
+        pack.deleteRecursively()
+    }
+
+    @Test
+    fun givenAPictureADownloadedPackBrought_whenItIsAskedFor_thenItIsDecodedFromStorage() =
+        runTest {
+            // An id the APK has never drawn, so only the file on the television's storage can answer.
+            pack.resolve("media/image").mkdirs()
+            context.assets.open("media/image/img-test-shape.webp").use { input ->
+                pack.resolve("media/image/img-eyes.webp").outputStream().use { input.copyTo(it) }
+            }
+
+            val picture = pictures.load("img-eyes")
+
+            assertThat(picture).isNotNull()
+            assertThat(picture?.width).isEqualTo(1)
+        }
 
     @Test
     fun givenAPackagedPicture_whenItIsAskedFor_thenItIsDecoded() = runTest {

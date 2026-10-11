@@ -10,6 +10,7 @@ import java.io.IOException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 
 /**
  * Where downloaded lesson packs live, and which one the app reads.
@@ -23,6 +24,12 @@ import kotlinx.coroutines.flow.map
  */
 class ContentPackStore(private val root: File, private val preferences: DataStore<Preferences>) {
 
+    // The live pack's folder, remembered from the last time anyone read the pointer or moved it.
+    // Media lookups are synchronous and cannot wait on DataStore; by the time a lesson asks for a
+    // recording, the course it is teaching has been read, and this with it.
+    @Volatile
+    private var live: File? = null
+
     /**
      * The live pack's version, or null when the seed is what a child should get.
      *
@@ -32,6 +39,13 @@ class ContentPackStore(private val root: File, private val preferences: DataStor
     fun observeActiveVersion(): Flow<CourseVersion?> = preferences.data
         .map { stored -> stored[ACTIVE]?.let(::CourseVersion)?.takeIf { directory(it) != null } }
         .catch { cause -> if (cause is IOException) emit(null) else throw cause }
+        .onEach { active -> live = active?.let(::directory) }
+
+    /**
+     * The live pack's folder as last seen, or null for the seed. For lookups that cannot suspend;
+     * anything that can should use [observeActiveVersion].
+     */
+    fun liveDirectory(): File? = live
 
     /** Every complete pack on disk, whether live or waiting. Half-assembled work is not one. */
     fun versionsOnDisk(): List<CourseVersion> = root.listFiles()
@@ -53,6 +67,7 @@ class ContentPackStore(private val root: File, private val preferences: DataStor
     suspend fun activate(version: CourseVersion) {
         requireNotNull(directory(version)) { "No pack on disk for ${version.value}" }
         preferences.edit { it[ACTIVE] = version.value }
+        live = directory(version)
     }
 
     /**
