@@ -125,6 +125,16 @@ class ContentUpdaterTest {
     }
 
     @Test
+    fun givenACheck_whenItReachesTheServerOrNot_thenItSaysWhich() {
+        // The state alone cannot tell an offline television from one that is up to date.
+        assertThat(runBlocking { updater.check() }).isFalse()
+
+        publish(SEED_VERSION)
+        assertThat(runBlocking { updater.check() }).isTrue()
+        assertThat(updater.state.value).isEqualTo(ContentUpdate.UpToDate)
+    }
+
+    @Test
     fun givenAnAvailableVersion_whenDownloaded_thenItIsStagedButNotYetTaught() {
         publish(NEXT)
         check()
