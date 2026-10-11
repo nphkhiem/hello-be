@@ -163,7 +163,8 @@ private fun SettingRowCard(
                 HelloBeAvailability.UNAVAILABLE
             } else {
                 HelloBeAvailability.ENABLED
-            }
+            },
+            announcesChanges = row.value is SettingValue.Task
         )
 
         if (expanded && row.value is SettingValue.Choice) {
