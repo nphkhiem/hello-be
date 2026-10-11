@@ -19,6 +19,7 @@ import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Surface
 import androidx.tv.material3.Text
+import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAvailability
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeFocusFrame
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusClearance
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
@@ -46,15 +47,22 @@ internal fun SettingRowControl(
     consequence: String,
     value: String,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    /**
+     * [HelloBeAvailability.UNAVAILABLE] keeps the row in the focus order, readable and announced,
+     * and stops it being pressed. A row that dropped out of focus while it worked would move the
+     * caregiver's place under them.
+     */
+    availability: HelloBeAvailability = HelloBeAvailability.ENABLED
 ) {
+    val unavailable = availability == HelloBeAvailability.UNAVAILABLE
     val colors = HelloBeTheme.colors
     val focus = HelloBeTheme.focus
     val shape = HelloBeShapes.large
     val interactionSource = remember { MutableInteractionSource() }
 
     Surface(
-        onClick = onClick,
+        onClick = { if (!unavailable) onClick() },
         modifier = modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = HelloBeLayout.caregiverControlMinHeight)
@@ -63,8 +71,8 @@ internal fun SettingRowControl(
         interactionSource = interactionSource,
         shape = ClickableSurfaceDefaults.shape(shape = shape),
         colors = ClickableSurfaceDefaults.colors(
-            containerColor = colors.surfacePrimary,
-            contentColor = colors.textPrimary,
+            containerColor = if (unavailable) colors.surfaceMuted else colors.surfacePrimary,
+            contentColor = if (unavailable) colors.textSecondary else colors.textPrimary,
             focusedContainerColor = colors.focusFill,
             focusedContentColor = colors.onFocusFill,
             pressedContainerColor = colors.actionPrimaryPressed,
@@ -72,7 +80,11 @@ internal fun SettingRowControl(
         ),
         scale = ClickableSurfaceDefaults.scale(focusedScale = focus.scaleButton),
         border = ClickableSurfaceDefaults.border(
-            border = HelloBeFocusFrame.resting(shape),
+            border = if (unavailable) {
+                HelloBeFocusFrame.unavailable(shape)
+            } else {
+                HelloBeFocusFrame.resting(shape)
+            },
             focusedBorder = HelloBeFocusFrame.ring(shape),
             pressedBorder = HelloBeFocusFrame.ring(shape)
         )

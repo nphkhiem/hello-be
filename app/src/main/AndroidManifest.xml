@@ -8,6 +8,12 @@
         android:name="android.hardware.touchscreen"
         android:required="false" />
 
+    <!--
+        For new lessons only: HTTPS GET requests for static, signed files. Nothing is uploaded, and
+        a television that never connects still has the complete course that ships inside the app.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".HelloBeApplication"
         android:allowBackup="true"

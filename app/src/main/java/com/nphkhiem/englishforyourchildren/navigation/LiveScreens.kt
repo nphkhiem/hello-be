@@ -376,7 +376,7 @@ internal fun LiveCaregiverSettings(onBack: () -> Unit, modifier: Modifier = Modi
 
     CaregiverSettingsScreen(
         state = CaregiverSettingsUiState(
-            rows = settingRows(state.settings),
+            rows = settingRows(state.settings, state.lessons),
             expandedRow = expanded,
             saveStatus = state.saveStatus,
             canRestoreDefaults = state.canRestoreDefaults
@@ -396,6 +396,8 @@ internal fun LiveCaregiverSettings(onBack: () -> Unit, modifier: Modifier = Modi
                 }
 
                 CaregiverSettingsAction.RestoreDefaultsRequested -> model.onRestoreDefaults()
+
+                is CaregiverSettingsAction.TaskRequested -> model.onTaskRequested()
             }
         },
         modifier = modifier

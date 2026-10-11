@@ -5,20 +5,21 @@ import com.nphkhiem.englishforyourchildren.domain.model.AppSettings
 import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
 
 /**
- * The six settings, written out.
+ * The six settings, and the Lessons task when this build can get lessons, written out.
  *
  * Here rather than in a ViewModel because every word of it is a string resource read in whichever
  * language the caregiver is using, and a ViewModel that reached for a `Context` to get one would
  * be a ViewModel that could not be tested without a device.
  *
  * The order and grouping are the approved screen's, not a preference: the information architecture
- * allows exactly three groups and this is what goes in them.
+ * fixes the groups and what goes in them. [lessons] is null when there is nowhere to get lessons
+ * from, and then the group is not drawn at all rather than shown empty.
  *
  * Public because the host assembles the screen's state, the same way it composes the gate's
  * question. This is the module's mapping surface rather than an accident of visibility.
  */
 @Composable
-fun settingRows(settings: AppSettings): List<SettingRow> = listOf(
+fun settingRows(settings: AppSettings, lessons: TaskState?): List<SettingRow> = listOfNotNull(
     SettingRow(
         id = SettingId.VIETNAMESE_HELP,
         group = SettingGroup.LANGUAGE,
@@ -63,7 +64,16 @@ fun settingRows(settings: AppSettings): List<SettingRow> = listOf(
         title = caregiverText(R.string.settings_background_music_title),
         consequence = caregiverText(R.string.settings_background_music_consequence),
         value = SettingValue.Toggle(on = settings.backgroundMusicEnabled)
-    )
+    ),
+    lessons?.let {
+        SettingRow(
+            id = SettingId.CHECK_FOR_LESSONS,
+            group = SettingGroup.LESSONS,
+            title = caregiverText(R.string.settings_lessons_title),
+            consequence = caregiverText(R.string.settings_lessons_consequence),
+            value = SettingValue.Task(it)
+        )
+    }
 )
 
 /**

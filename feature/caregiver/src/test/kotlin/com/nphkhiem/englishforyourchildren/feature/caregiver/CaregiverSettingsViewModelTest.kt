@@ -12,6 +12,7 @@ import com.nphkhiem.englishforyourchildren.domain.result.DomainError
 import com.nphkhiem.englishforyourchildren.domain.result.DomainResult
 import com.nphkhiem.englishforyourchildren.testsupport.FakeSettingsRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -28,6 +29,7 @@ import org.junit.jupiter.api.Test
  */
 class CaregiverSettingsViewModelTest {
     private lateinit var repository: FakeSettingsRepository
+    private lateinit var lessons: FakeLessonUpdates
 
     @AfterEach
     fun releaseMain() {
@@ -114,20 +116,68 @@ class CaregiverSettingsViewModelTest {
             assertThat(stored().selectedProfileId).isEqualTo(ProfileId(CHILD))
         }
 
+    @Test
+    fun givenABuildWithNowhereToGetLessons_whenSettingsOpen_thenThereIsNoLessonsRowAndNoCheck() =
+        settings { model ->
+            assertThat(model.state.value.lessons).isNull()
+            assertThat(lessons.calls).isEmpty()
+        }
+
+    @Test
+    fun givenLessonsCanBeFetched_whenSettingsOpen_thenItLooksOnceAndShowsWhatItFound() =
+        settings(lessonsOffered = true) { model ->
+            lessons.state.value = TaskState.Available
+
+            assertThat(lessons.calls).containsExactly(CHECK)
+            assertThat(model.state.value.lessons).isEqualTo(TaskState.Available)
+        }
+
+    @Test
+    fun givenNewLessonsWaiting_whenTheRowIsPressed_thenTheyAreDownloaded() =
+        settings(lessonsOffered = true) { model ->
+            lessons.state.value = TaskState.Available
+
+            model.onTaskRequested()
+
+            assertThat(lessons.calls).containsExactly(CHECK, DOWNLOAD).inOrder()
+        }
+
+    @Test
+    fun givenUpToDateOrFailed_whenTheRowIsPressed_thenItLooksAgain() =
+        settings(lessonsOffered = true) { model ->
+            model.onTaskRequested()
+            lessons.state.value = TaskState.Failed(TaskFailure.COULD_NOT_FINISH)
+            model.onTaskRequested()
+
+            assertThat(lessons.calls).containsExactly(CHECK, CHECK, CHECK).inOrder()
+        }
+
+    @Test
+    fun givenADownloadUnderway_whenTheRowIsPressed_thenNothingElseStarts() =
+        settings(lessonsOffered = true) { model ->
+            lessons.state.value = TaskState.Working(done = 1, total = 3)
+
+            model.onTaskRequested()
+
+            assertThat(lessons.calls).containsExactly(CHECK)
+        }
+
     private fun stored(): AppSettings =
         (repository.current as DomainResult.Success<AppSettings>).value
 
     /** A settings screen on a controlled clock, cleared however the body ends. */
     private fun settings(
         initial: AppSettings = AppSettings.DEFAULT,
+        lessonsOffered: Boolean = false,
         body: suspend TestScope.(CaregiverSettingsViewModel) -> Unit
     ) = runTest {
         Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
         repository = FakeSettingsRepository(initial)
+        lessons = FakeLessonUpdates(lessonsOffered)
         val store = ViewModelStore()
         val model = ViewModelProvider(
             store,
-            viewModelFactory { initializer { CaregiverSettingsViewModel(repository) } }
+            viewModelFactory { initializer { CaregiverSettingsViewModel(repository, lessons) } }
         )[CaregiverSettingsViewModel::class.java]
 
         try {
@@ -137,7 +187,23 @@ class CaregiverSettingsViewModelTest {
         }
     }
 
+    /** Records what the screen asked for, and reports whatever state a test sets. */
+    private class FakeLessonUpdates(override val offered: Boolean) : LessonUpdates {
+        override val state = MutableStateFlow<TaskState>(TaskState.UpToDate)
+        val calls = mutableListOf<String>()
+
+        override suspend fun check() {
+            calls += CHECK
+        }
+
+        override suspend fun download() {
+            calls += DOWNLOAD
+        }
+    }
+
     private companion object {
         const val CHILD = "p1"
+        const val CHECK = "check"
+        const val DOWNLOAD = "download"
     }
 }
