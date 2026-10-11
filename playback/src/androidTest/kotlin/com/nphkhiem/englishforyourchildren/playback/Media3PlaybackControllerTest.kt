@@ -22,11 +22,16 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class Media3PlaybackControllerTest {
     private val context = InstrumentationRegistry.getInstrumentation().context
-    private val controller =
-        Media3PlaybackController(context, PackagedAssetLocator.forAudio(context))
+    private val pack = InstrumentationRegistry.getInstrumentation().targetContext.cacheDir
+        .resolve("playback-test-pack")
+    private val controller = Media3PlaybackController(
+        context,
+        PackagedAssetLocator.forAudio(context) { pack.takeIf { it.isDirectory } }
+    )
 
     @After
     fun releasePlayer() {
+        pack.deleteRecursively()
         controller.stop()
     }
 
@@ -42,6 +47,23 @@ class Media3PlaybackControllerTest {
         val event = awaitEvent { controller.play(listOf(TONE)) }
 
         assertThat(event).isEqualTo(PlaybackEvent.Completed(TONE))
+    }
+
+    @Test
+    fun givenADownloadedRecording_whenItIsPlayed_thenItReachesItsEnd() {
+        // A recording a downloaded pack brought, played off the television's own storage rather
+        // than out of the APK. The id is one the APK does not have, so only the pack can answer.
+        val downloaded = AssetId("aud-test-downloaded")
+        pack.resolve("media/audio").mkdirs()
+        context.assets.open("media/audio/aud-test-tone.m4a").use { input ->
+            pack.resolve("media/audio/${downloaded.value}.m4a").outputStream().use {
+                input.copyTo(it)
+            }
+        }
+
+        val event = awaitEvent { controller.play(listOf(downloaded)) }
+
+        assertThat(event).isEqualTo(PlaybackEvent.Completed(downloaded))
     }
 
     @Test

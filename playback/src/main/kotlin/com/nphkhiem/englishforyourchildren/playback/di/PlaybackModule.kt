@@ -1,6 +1,7 @@
 package com.nphkhiem.englishforyourchildren.playback.di
 
 import android.content.Context
+import com.nphkhiem.englishforyourchildren.playback.DownloadedMedia
 import com.nphkhiem.englishforyourchildren.playback.ImageAssetLocator
 import com.nphkhiem.englishforyourchildren.playback.Media3PlaybackController
 import com.nphkhiem.englishforyourchildren.playback.MediaAssetLocator
@@ -35,12 +36,16 @@ abstract class PlaybackModule {
         // instance is comes from the factory that made it, never from the id it is handed.
         @Provides
         @Singleton
-        fun provideMediaAssetLocator(@ApplicationContext context: Context): MediaAssetLocator =
-            PackagedAssetLocator.forAudio(context)
+        fun provideMediaAssetLocator(
+            @ApplicationContext context: Context,
+            downloaded: DownloadedMedia
+        ): MediaAssetLocator = PackagedAssetLocator.forAudio(context, downloaded)
 
         @Provides
         @Singleton
-        fun provideImageAssetLocator(@ApplicationContext context: Context): ImageAssetLocator =
-            PackagedAssetLocator.forImages(context)
+        fun provideImageAssetLocator(
+            @ApplicationContext context: Context,
+            downloaded: DownloadedMedia
+        ): ImageAssetLocator = PackagedAssetLocator.forImages(context, downloaded)
     }
 }
