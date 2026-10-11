@@ -3,7 +3,7 @@ package com.nphkhiem.englishforyourchildren.data.di
 import com.nphkhiem.englishforyourchildren.data.SystemTimeProvider
 import com.nphkhiem.englishforyourchildren.data.UuidProfileIdProvider
 import com.nphkhiem.englishforyourchildren.data.UuidSessionIdProvider
-import com.nphkhiem.englishforyourchildren.data.curriculum.PackagedCurriculumRepository
+import com.nphkhiem.englishforyourchildren.data.pack.LayeredCurriculumRepository
 import com.nphkhiem.englishforyourchildren.data.profile.RoomProfileRepository
 import com.nphkhiem.englishforyourchildren.data.progress.RoomProgressRepository
 import com.nphkhiem.englishforyourchildren.data.settings.DataStoreSettingsRepository
@@ -38,7 +38,7 @@ abstract class DataBindingsModule {
     @Binds
     @Singleton
     abstract fun bindCurriculumRepository(
-        implementation: PackagedCurriculumRepository
+        implementation: LayeredCurriculumRepository
     ): CurriculumRepository
 
     @Binds
