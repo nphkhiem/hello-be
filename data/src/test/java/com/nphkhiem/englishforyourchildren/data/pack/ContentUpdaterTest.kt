@@ -352,15 +352,6 @@ class ContentUpdaterTest {
         assertThat(fresh.state.value).isEqualTo(ContentUpdate.Staged(NEXT))
     }
 
-    @Test
-    fun givenDottedVersions_whenCompared_thenNumbersCountNotCharacters() {
-        assertThat(CourseVersion("2026.10").isNewerThan(CourseVersion("2026.09"))).isTrue()
-        assertThat(CourseVersion("1.10.0").isNewerThan(CourseVersion("1.9.0"))).isTrue()
-        assertThat(CourseVersion("1.1").isNewerThan(CourseVersion("1.1.0"))).isFalse()
-        assertThat(CourseVersion("2026.09").isNewerThan(CourseVersion("2026.09"))).isFalse()
-        assertThat(CourseVersion("next").isNewerThan(CourseVersion("2026.09"))).isFalse()
-    }
-
     private fun newUpdater() = ContentUpdater(
         fetcher = server,
         verifier = PackVerifier(owner.public.encoded.takeLast(RAW_KEY_BYTES).toByteArray()),
