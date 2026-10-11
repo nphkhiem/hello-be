@@ -141,10 +141,69 @@ class ContentUpdaterTest {
         check()
         download()
 
-        activate()
+        val activated = activate()
 
-        assertThat(updater.state.value).isEqualTo(ContentUpdate.Active(NEXT))
+        assertThat(activated).isEqualTo(NEXT)
         assertThat(liveVersion()).isEqualTo(NEXT)
+    }
+
+    @Test
+    fun givenAPackStagedBeforeTheTelevisionWasSwitchedOff_whenActivated_thenItGoesLive() {
+        // Nothing in memory remembers the download; only the disk does.
+        publish(NEXT)
+        check()
+        download()
+
+        val afterRestart = PackActivation(store, repository)
+
+        assertThat(runBlocking { afterRestart.activateNewest() }).isEqualTo(NEXT)
+        assertThat(liveVersion()).isEqualTo(NEXT)
+    }
+
+    @Test
+    fun givenNothingNewerOnDisk_whenActivated_thenTheLiveCourseStays() {
+        install(NEXT)
+
+        assertThat(activate()).isNull()
+        assertThat(liveVersion()).isEqualTo(NEXT)
+    }
+
+    @Test
+    fun givenTwoVersionsWaiting_whenActivated_thenTheNewerOneGoesLive() {
+        publish(AFTER_NEXT)
+        check()
+        download()
+        publish(NEXT)
+        newUpdater().also {
+            runBlocking {
+                it.check()
+                it.download()
+            }
+        }
+
+        assertThat(activate()).isEqualTo(AFTER_NEXT)
+        assertThat(store.directory(NEXT)).isNull()
+    }
+
+    @Test
+    fun givenANewerVersionPublished_whenRefreshedDuringALesson_thenItIsStagedButNotLive() {
+        publish(NEXT)
+
+        runBlocking { updater.refresh() }
+
+        assertThat(updater.state.value).isEqualTo(ContentUpdate.Staged(NEXT))
+        assertThat(liveVersion()).isEqualTo(SEED_VERSION)
+    }
+
+    @Test
+    fun givenTheConnectionDropsDuringARefresh_whenItFails_thenNothingIsSaidOrStaged() {
+        publish(NEXT)
+        server.dropAt(UNITS_PACK, HALF)
+
+        runBlocking { updater.refresh() }
+
+        assertThat(updater.state.value).isInstanceOf(ContentUpdate.Available::class.java)
+        assertThat(store.directory(NEXT)).isNull()
     }
 
     @Test
@@ -315,7 +374,8 @@ class ContentUpdaterTest {
 
     private fun download() = runBlocking { updater.download() }
 
-    private fun activate() = runBlocking { updater.activate() }
+    private fun activate(): CourseVersion? =
+        runBlocking { PackActivation(store, repository).activateNewest() }
 
     private fun liveVersion(): CourseVersion? = (
         runBlocking {
@@ -330,8 +390,8 @@ class ContentUpdaterTest {
         runBlocking {
             installer.check()
             installer.download()
-            installer.activate()
         }
+        activate()
         check(liveVersion() == version) { "the pack under test should be live" }
     }
 

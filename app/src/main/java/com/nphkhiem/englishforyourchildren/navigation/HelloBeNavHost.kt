@@ -15,7 +15,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.nphkhiem.englishforyourchildren.R
-import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateAction
@@ -283,7 +282,6 @@ fun HelloBeNavHost(
             LiveLesson(
                 profileId = key.profileId,
                 lessonId = key.lessonId,
-                courseVersion = SHIPPED_COURSE_VERSION,
                 onFinished = {
                     replaceAll(
                         resolved.dropLast(1) + HelloBeKey.LessonCelebration(
@@ -338,7 +336,6 @@ fun HelloBeNavHost(
             LiveLessonCelebration(
                 profileId = key.profileId,
                 lessonId = key.lessonId,
-                courseVersion = SHIPPED_COURSE_VERSION,
                 onDone = { replaceAll(afterCelebrationDone(key.profileId)) },
                 modifier = modifier
             )
@@ -756,15 +753,6 @@ private fun MissingContent(key: HelloBeKey, onSafeReturn: () -> Unit, modifier: 
         )
     }
 }
-
-/**
- * The content version an installed build carries.
- *
- * One published version ships inside the app, so the lesson a child opens is always this one. When
- * a second version exists, which one a child is working through becomes a stored fact rather than a
- * constant, and it moves to their progress.
- */
-private val SHIPPED_COURSE_VERSION = CourseVersion("2026.09")
 
 private const val DATABASE_CODE = "DB-OPEN-01"
 
