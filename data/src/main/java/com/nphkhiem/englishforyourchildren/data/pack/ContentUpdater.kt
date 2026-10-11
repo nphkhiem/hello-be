@@ -3,6 +3,7 @@ package com.nphkhiem.englishforyourchildren.data.pack
 import com.nphkhiem.englishforyourchildren.content.validation.CurriculumJsonParser
 import com.nphkhiem.englishforyourchildren.content.validation.ManifestDto
 import com.nphkhiem.englishforyourchildren.content.validation.SUPPORTED_SCHEMA_VERSION
+import com.nphkhiem.englishforyourchildren.content.validation.isNewerThan
 import com.nphkhiem.englishforyourchildren.data.curriculum.CurriculumLoader
 import com.nphkhiem.englishforyourchildren.data.curriculum.CurriculumLoader.Companion.MEDIA
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
@@ -264,21 +265,6 @@ class ContentUpdater(
         const val MAX_UNPACKED_BYTES = 1L shl 30
         const val BUFFER_BYTES = 1 shl 16
     }
-}
-
-/**
- * Whether this version comes after [other], comparing dot-separated numbers: `2026.10` after
- * `2026.09`, `1.10.0` after `1.9.0`. A missing part counts as zero. A version that is not numbers
- * is never newer, so it can never replace one that is.
- */
-internal fun CourseVersion.isNewerThan(other: CourseVersion): Boolean {
-    val mine = value.split('.').map { it.toIntOrNull() ?: return false }
-    val theirs = other.value.split('.').map { it.toIntOrNull() ?: return true }
-    for (index in 0 until maxOf(mine.size, theirs.size)) {
-        val difference = mine.getOrElse(index) { 0 } - theirs.getOrElse(index) { 0 }
-        if (difference != 0) return difference > 0
-    }
-    return false
 }
 
 private fun InputStream.readCapped(limit: Long): ByteArray =

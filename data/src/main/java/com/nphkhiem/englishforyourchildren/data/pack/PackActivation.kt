@@ -1,5 +1,6 @@
 package com.nphkhiem.englishforyourchildren.data.pack
 
+import com.nphkhiem.englishforyourchildren.content.validation.isNewerThan
 import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.repository.CurriculumRepository
 import com.nphkhiem.englishforyourchildren.domain.result.DomainResult
