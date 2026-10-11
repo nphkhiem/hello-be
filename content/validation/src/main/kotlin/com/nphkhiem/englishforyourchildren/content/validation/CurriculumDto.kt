@@ -1,4 +1,4 @@
-package com.nphkhiem.englishforyourchildren.data.curriculum
+package com.nphkhiem.englishforyourchildren.content.validation
 
 import kotlinx.serialization.Serializable
 
