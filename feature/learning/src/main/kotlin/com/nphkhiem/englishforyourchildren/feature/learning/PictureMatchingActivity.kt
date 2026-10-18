@@ -39,13 +39,15 @@ fun PictureMatchingActivity(
     onAction: (LessonAction) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LessonScaffold(state = state, onAction = onAction, modifier = modifier) { entryModifier ->
+    LessonScaffold(state = state, onAction = onAction, modifier = modifier) { choiceFocus ->
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(
                 space = HelloBeTheme.spacing.sectionGap,
-                alignment = Alignment.CenterVertically
+                // Top rather than centred, in all five families, so the prompt holds one place
+                // however tall the board beneath it is.
+                alignment = Alignment.Top
             )
         ) {
             Text(
@@ -55,7 +57,7 @@ fun PictureMatchingActivity(
                 textAlign = TextAlign.Center
             )
 
-            MatchBoard(state = state, onAction = onAction, entryModifier = entryModifier)
+            MatchBoard(state = state, onAction = onAction, choiceFocus = choiceFocus)
         }
     }
 }
@@ -74,15 +76,11 @@ fun PictureMatchingActivity(
  * board may. At four destinations this is the widest the source can be and still leave each card
  * a `cardFiveColumnSet` slot.
  */
-// The Modifier here is not this composable's own decoration but the scaffold's entry-focus
-// requester, routed to one specific child. Naming it `modifier` would claim it decorates this
-// composable's root, which is exactly what it must not do.
-@Suppress("ModifierParameter")
 @Composable
 private fun MatchBoard(
     state: LessonUiState,
     onAction: (LessonAction) -> Unit,
-    entryModifier: Modifier
+    choiceFocus: LessonChoiceFocus
 ) {
     // Derived from the tokens rather than measured intrinsically, so the cards cannot be squeezed
     // below the minimum by whatever height the stage happens to have left.
@@ -117,20 +115,16 @@ private fun MatchBoard(
         }
 
         if (state.answers.isNotEmpty()) {
-            DestinationRow(state = state, onAction = onAction, entryModifier = entryModifier)
+            DestinationRow(state = state, onAction = onAction, choiceFocus = choiceFocus)
         }
     }
 }
 
-// The Modifier here is not this composable's own decoration but the scaffold's entry-focus
-// requester, routed to one specific child. Naming it `modifier` would claim it decorates this
-// composable's root, which is exactly what it must not do.
-@Suppress("ModifierParameter")
 @Composable
 private fun RowScope.DestinationRow(
     state: LessonUiState,
     onAction: (LessonAction) -> Unit,
-    entryModifier: Modifier
+    choiceFocus: LessonChoiceFocus
 ) {
     val availability = answerAvailability(state.phase)
 
@@ -157,7 +151,7 @@ private fun RowScope.DestinationRow(
                 illustration = picture?.let { { PackagedPicture(it) } },
                 // Entry focus goes to the first destination by position, never by which one is
                 // correct, because this screen is not told which one that is.
-                modifier = (if (index == 0) entryModifier else Modifier)
+                modifier = Modifier.lessonChoice(choiceFocus, answer.id, entry = index == 0)
                     .weight(1f)
                     .fillMaxHeight()
             )

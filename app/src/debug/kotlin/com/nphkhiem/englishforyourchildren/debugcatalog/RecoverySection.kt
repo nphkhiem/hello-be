@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.stringResource
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.R
@@ -22,6 +23,7 @@ import com.nphkhiem.englishforyourchildren.feature.learning.ChildRecovery
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildRecoveryReason
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
+import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
 import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
@@ -39,11 +41,14 @@ import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
  * that lives behind the adult gate.
  */
 @Composable
-internal fun RecoveryCatalogSection() {
+internal fun RecoveryCatalogSection(
+    index: Int,
+    lastAction: Any?,
+    restorer: HelloBeFocusRestorer,
+    onNextState: () -> Unit,
+    onOpen: () -> Unit
+) {
     val reasons = remember { ChildRecoveryReason.entries.toList() }
-    var index by remember { mutableIntStateOf(0) }
-    var lastAction by remember { mutableStateOf<Any?>(null) }
-    val restorer = rememberHelloBeFocusRestorer()
     val caregiverIndex = reasons.size
     val showing = if (index == caregiverIndex) "caregiver database" else reasons[index].name
 
@@ -60,8 +65,14 @@ internal fun RecoveryCatalogSection() {
         ) {
             HelloBeAction(
                 label = stringResource(R.string.theme_catalog_lesson_next_state),
-                onClick = { index = (index + 1) % (reasons.size + 1) },
+                onClick = onNextState,
                 tone = HelloBeActionTone.SECONDARY
+            )
+            HelloBeAction(
+                label = stringResource(R.string.theme_catalog_recovery_open),
+                onClick = onOpen,
+                tone = HelloBeActionTone.SECONDARY,
+                modifier = Modifier.focusRequester(restorer.returnTarget)
             )
             Text(
                 text = stringResource(
@@ -84,24 +95,23 @@ internal fun RecoveryCatalogSection() {
                 )
             }
         }
+    }
+}
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(HelloBeLayout.referenceHeight)
-        ) {
-            if (index == caregiverIndex) {
-                CaregiverRecovery(
-                    state = CaregiverFixtures.databaseRecovery(),
-                    onAction = { lastAction = it }
-                )
-            } else {
-                ChildRecovery(
-                    reason = reasons[index],
-                    focusRestorer = restorer,
-                    onAction = { lastAction = it }
-                )
-            }
-        }
+/**
+ * The recovery as a real screen shows it: filling the stage, owning focus.
+ *
+ * Hoisted out of the scrolling column for the reason [DialogSection] gives about dialogs. A
+ * recovery panel requests focus for its safe action on first composition, which is right when a
+ * child meets one and wrong for a specimen nobody asked to see.
+ */
+@Composable
+internal fun CatalogRecovery(index: Int, restorer: HelloBeFocusRestorer, onAction: (Any) -> Unit) {
+    val reasons = remember { ChildRecoveryReason.entries.toList() }
+
+    if (index == reasons.size) {
+        CaregiverRecovery(state = CaregiverFixtures.databaseRecovery(), onAction = onAction)
+    } else {
+        ChildRecovery(reason = reasons[index], focusRestorer = restorer, onAction = onAction)
     }
 }

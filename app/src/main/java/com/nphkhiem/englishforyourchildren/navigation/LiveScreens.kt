@@ -10,11 +10,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nphkhiem.englishforyourchildren.domain.model.AgeBand
 import com.nphkhiem.englishforyourchildren.domain.model.CaregiverLanguage
-import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateScreen
@@ -54,9 +54,6 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.coPlaySuggestion
 import com.nphkhiem.englishforyourchildren.feature.caregiver.languageName
 import com.nphkhiem.englishforyourchildren.feature.caregiver.languageNamed
 import com.nphkhiem.englishforyourchildren.feature.caregiver.settingRows
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeAction
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeScreen
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeViewModel
 import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayAction
 import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayViewModel
@@ -74,6 +71,7 @@ import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfilePickerScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileViewModel
+import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
 import kotlinx.coroutines.delay
@@ -142,51 +140,25 @@ internal fun LiveProfileCreate(onCreated: (ProfileId) -> Unit, modifier: Modifie
 }
 
 @Composable
-internal fun LiveChildHome(
-    profileId: ProfileId,
-    onLearningPath: () -> Unit,
-    onFreePlay: () -> Unit,
-    onSwitchProfile: () -> Unit,
-    onCaregiverEntry: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val model: ChildHomeViewModel = hiltViewModel()
-    val state by model.state.collectAsStateWithLifecycle()
-
-    LaunchedEffect(profileId) { model.start(profileId) }
-
-    ChildHomeScreen(
-        state = state,
-        onAction = { action ->
-            when (action) {
-                ChildHomeAction.ContinueRequested,
-                ChildHomeAction.LearningPathRequested -> onLearningPath()
-
-                ChildHomeAction.FreePlayRequested -> onFreePlay()
-
-                ChildHomeAction.SwitchProfileRequested -> onSwitchProfile()
-
-                ChildHomeAction.CaregiverEntryRequested -> onCaregiverEntry()
-            }
-        },
-        modifier = modifier
-    )
-}
-
-@Composable
 internal fun LiveLearningPath(
     profileId: ProfileId,
     onLessonChosen: (LessonId) -> Unit,
     onHome: () -> Unit,
     onSwitchProfile: () -> Unit,
+    onFreePlay: () -> Unit,
+    onCaregiverEntry: () -> Unit,
     onUnavailable: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val model: LearningPathViewModel = hiltViewModel()
+    val course: CourseViewModel = hiltViewModel()
     val state by model.state.collectAsStateWithLifecycle()
     val unavailable by model.unavailable.collectAsStateWithLifecycle()
 
     LaunchedEffect(profileId) { model.start(profileId) }
+    // The path is where a child is when no lesson is open, which is the only moment a newer course
+    // may take over. The path is drawn from the live course, so it simply redraws.
+    LaunchedEffect(profileId) { course.switchToNewestCourse() }
     LaunchedEffect(unavailable) { if (unavailable) onUnavailable() }
 
     LearningPathScreen(
@@ -199,14 +171,16 @@ internal fun LiveLearningPath(
 
                 LearningPathAction.SwitchProfileRequested -> onSwitchProfile()
 
+                LearningPathAction.FreePlayRequested -> onFreePlay()
+
+                LearningPathAction.CaregiverEntryRequested -> onCaregiverEntry()
+
                 // Paging is a change of view rather than a destination, so it stays here rather
                 // than going through the back stack: a child stepping between units is not
                 // somewhere Back should have to unwind.
                 LearningPathAction.PreviousUnitRequested -> model.showPreviousUnit()
 
                 LearningPathAction.NextUnitRequested -> model.showNextUnit()
-
-                else -> Unit
             }
         },
         modifier = modifier
@@ -246,14 +220,19 @@ internal fun LiveFreePlay(
 internal fun LiveLessonCelebration(
     profileId: ProfileId,
     lessonId: LessonId,
-    courseVersion: CourseVersion,
     onDone: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val model: LessonCelebrationViewModel = hiltViewModel()
+    val course: CourseViewModel = hiltViewModel()
     val state by model.state.collectAsStateWithLifecycle()
 
-    LaunchedEffect(lessonId) { model.start(profileId, lessonId, courseVersion) }
+    // The live course. Nothing goes live between a lesson ending and this, and a lesson resumed
+    // under an older version is the same lesson in the live one, because published lessons are
+    // never withdrawn.
+    LaunchedEffect(lessonId) {
+        course.liveVersion()?.let { model.start(profileId, lessonId, it) }
+    }
 
     // The reveal is a clock, and ADR 0003 keeps clocks out of the screen. It lives here with the
     // motion token that names the budget, the way the stop-for-now dialog's visibility does.
@@ -277,18 +256,23 @@ internal fun LiveLessonCelebration(
 internal fun LiveLesson(
     profileId: ProfileId,
     lessonId: LessonId,
-    courseVersion: CourseVersion,
     onFinished: () -> Unit,
     onStopConfirmed: () -> Unit,
     onUnavailable: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val model: LessonViewModel = hiltViewModel()
+    val course: CourseViewModel = hiltViewModel()
     val state by model.state.collectAsStateWithLifecycle()
     val unavailable by model.unavailable.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(lessonId) { model.start(profileId, lessonId, courseVersion) }
+    LaunchedEffect(lessonId) {
+        val version = course.lessonVersion(profileId, lessonId)
+        if (version == null) onUnavailable() else model.start(profileId, lessonId, version)
+        // While the child is busy with this one, newer lessons can arrive. Silent either way.
+        course.prefetch()
+    }
     LaunchedEffect(unavailable) { if (unavailable) onUnavailable() }
 
     // Finishing is the host's business, not the screen's: the lesson says it is over and the
@@ -405,7 +389,7 @@ internal fun LiveCaregiverSettings(onBack: () -> Unit, modifier: Modifier = Modi
 
     CaregiverSettingsScreen(
         state = CaregiverSettingsUiState(
-            rows = settingRows(state.settings),
+            rows = settingRows(state.settings, state.lessons),
             expandedRow = expanded,
             saveStatus = state.saveStatus,
             canRestoreDefaults = state.canRestoreDefaults
@@ -425,6 +409,8 @@ internal fun LiveCaregiverSettings(onBack: () -> Unit, modifier: Modifier = Modi
                 }
 
                 CaregiverSettingsAction.RestoreDefaultsRequested -> model.onRestoreDefaults()
+
+                is CaregiverSettingsAction.TaskRequested -> model.onTaskRequested()
             }
         },
         modifier = modifier
@@ -539,6 +525,8 @@ internal fun LiveProfileManagement(
     onAdd: () -> Unit,
     onDelete: (ProfileId) -> Unit,
     onReset: (ProfileId) -> Unit,
+    deleteFocus: FocusRequester,
+    resetFocus: FocusRequester,
     modifier: Modifier = Modifier
 ) {
     val model: ProfileManagementViewModel = hiltViewModel()
@@ -588,7 +576,9 @@ internal fun LiveProfileManagement(
                 is ProfileManagementAction.ChangeAvatarRequested -> Unit
             }
         },
-        modifier = modifier
+        modifier = modifier,
+        deleteFocus = deleteFocus,
+        resetFocus = resetFocus
     )
 }
 
@@ -609,6 +599,7 @@ private fun AgeBand.years(): Int = when (this) {
 internal fun LiveCaregiverConfirmation(
     kind: CaregiverConfirmationKind,
     profileId: ProfileId,
+    focusRestorer: HelloBeFocusRestorer,
     onFinished: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -618,7 +609,12 @@ internal fun LiveCaregiverConfirmation(
     val people by profileModel.state.collectAsStateWithLifecycle()
 
     LaunchedEffect(kind, profileId) { model.start(kind, profileId) }
-    LaunchedEffect(state.done) { if (state.done) onFinished() }
+    LaunchedEffect(state.done) {
+        if (state.done) {
+            model.onFinishHandled()
+            onFinished()
+        }
+    }
 
     val child = people.profiles.firstOrNull { it.id == profileId }
     CaregiverConfirmation(
@@ -630,7 +626,9 @@ internal fun LiveCaregiverConfirmation(
             profileAvatar = child?.avatarId?.value.orEmpty(),
             phase = state.phase
         ),
-        focusRestorer = rememberHelloBeFocusRestorer(),
+        // The caller's restorer, attached to the screen this is raised over. A fresh one here had
+        // nothing attached, so closing the dialog handed focus back to nowhere.
+        focusRestorer = focusRestorer,
         onAction = { action ->
             when (action) {
                 CaregiverConfirmationAction.Dismissed -> onFinished()

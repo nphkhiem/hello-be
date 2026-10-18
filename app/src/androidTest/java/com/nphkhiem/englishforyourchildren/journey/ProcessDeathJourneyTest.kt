@@ -147,7 +147,7 @@ class ProcessDeathJourneyTest {
 
         switchOff()
         switchOn()
-        openLessonOneFromHome()
+        openLessonOneFromHome(arrivingAs = "path_lesson_continue")
 
         // Off the disk, into a ViewModel that has never seen this child before.
         tv.awaitText(SECOND_QUESTION)
@@ -169,7 +169,7 @@ class ProcessDeathJourneyTest {
 
         switchOff()
         switchOn()
-        openLessonOneFromHome()
+        openLessonOneFromHome(arrivingAs = "path_lesson_continue")
 
         // Still the second question. Nothing on this television ever wrote it down, and a pending
         // checkpoint that came back would be the app resurrecting work it told the child it had not
@@ -202,13 +202,21 @@ class ProcessDeathJourneyTest {
         tv.awaitText(AGE)
         tv.press(AGE)
         tv.press(tv.string("create_submit"))
-        openLessonOneFromHome()
+        openLessonOneFromHome(arrivingAs = "path_lesson_start")
     }
 
-    /** With one child stored, the app opens on their home. See `resolveEntry`. */
-    private fun openLessonOneFromHome() {
-        tv.awaitText(tv.string("home_start"))
-        tv.press(tv.string("home_start"))
+    /**
+     * Opens lesson one from the path, first checking what the lesson says it is waiting to do.
+     *
+     * With one child stored the app opens straight onto their learning path; see `resolveEntry`.
+     *
+     * The word is passed in because this one helper meets a child in two different states. Just
+     * created, nothing exists to continue and the lesson says Start. Back after a power cut with an
+     * answer saved, the checkpoint read off the disk is something to continue and it says Continue.
+     * The second is the end-to-end proof that the open checkpoint survives into that word.
+     */
+    private fun openLessonOneFromHome(arrivingAs: String) {
+        tv.awaitText(tv.string(arrivingAs))
         tv.awaitText(FIRST_LESSON)
         tv.press(FIRST_LESSON)
     }

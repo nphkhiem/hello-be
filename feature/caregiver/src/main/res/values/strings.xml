@@ -30,6 +30,7 @@
     <string name="settings_group_language">Language support</string>
     <string name="settings_group_accessibility">Accessibility</string>
     <string name="settings_group_audio">Audio</string>
+    <string name="settings_group_lessons">Lessons</string>
     <!-- State in words. The approved draft keeps setting state visible in text and semantics
          rather than in the colour of a toggle. -->
     <string name="settings_on">On</string>
@@ -92,6 +93,15 @@
     <string name="settings_language_english">English</string>
     <string name="settings_language_vietnamese">Tiếng Việt</string>
     <string name="settings_language_both">English + Tiếng Việt</string>
+    <string name="settings_lessons_title">New lessons</string>
+    <string name="settings_lessons_consequence">Arrive between lessons, never during one</string>
+    <string name="settings_lessons_up_to_date">Up to date</string>
+    <string name="settings_lessons_available">Download new lessons</string>
+    <string name="settings_lessons_checking">Checking\u2026</string>
+    <string name="settings_lessons_downloading">Downloading %1$d of %2$d</string>
+    <string name="settings_lessons_failed_retry">Did not finish. Try again</string>
+    <string name="settings_lessons_needs_update">Update Hello Bé first</string>
+    <string name="settings_lessons_not_usable">Could not be used. Try again later</string>
     <string name="overview_period">This week</string>
     <string name="overview_adventures_label">Adventures finished</string>
     <string name="overview_adventures_note">Sessions completed</string>

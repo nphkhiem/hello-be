@@ -2,7 +2,15 @@ package com.nphkhiem.englishforyourchildren.journey
 
 import android.content.Context
 import android.content.res.AssetManager
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performKeyInput
+import androidx.compose.ui.test.pressKey
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.test.platform.app.InstrumentationRegistry
@@ -165,6 +173,68 @@ class AdultGateJourneyTest {
     }
 
     /** A caregiver string as the screen shows it, which is both languages by default. */
+    @Test
+    fun givenADeleteBeingConsidered_whenTheProfileIsKept_thenFocusIsBackOnDelete() {
+        // Focus restoration to the invoking control, which the information architecture asks every
+        // overlay for. A caregiver who backs out of a deletion should be standing where they were,
+        // not hunting for their place with a remote.
+        openProfiles()
+        val delete = caregiver(CaregiverR.string.profiles_delete)
+        tv.press(delete)
+
+        tv.press(caregiver(CaregiverR.string.confirm_delete_keep))
+
+        tv.awaitText(delete)
+        compose.onNodeWithText(delete).assertIsFocused()
+    }
+
+    @Test
+    fun givenAResetBeingConsidered_whenTheProgressIsKept_thenFocusIsBackOnReset() {
+        openProfiles()
+        val reset = caregiver(CaregiverR.string.profiles_reset)
+        tv.press(reset)
+
+        tv.press(caregiver(CaregiverR.string.confirm_reset_keep))
+
+        tv.awaitText(reset)
+        compose.onNodeWithText(reset).assertIsFocused()
+    }
+
+    @Test
+    fun givenAResetJustCompleted_whenResetIsChosenAgain_thenItAsksAgain() {
+        // The confirmation's ViewModel outlives the dialog, because nothing in this host scopes one
+        // to a destination. A finished reset leaves it marked done, and a second dialog reading that
+        // stale flag would close itself the moment it opened.
+        openProfiles()
+        val reset = caregiver(CaregiverR.string.profiles_reset)
+        val keep = caregiver(CaregiverR.string.confirm_reset_keep)
+
+        tv.press(reset)
+        tv.awaitText(keep)
+        // Confirmed the way a caregiver must: off the safe choice first, then Select.
+        compose.onRoot().performKeyInput { pressKey(Key.DirectionDown) }
+        tv.pressWhateverIsFocused()
+        compose.waitUntil(TIMEOUT_MILLIS) {
+            compose.onAllNodesWithText(keep).fetchSemanticsNodes().isEmpty()
+        }
+
+        tv.press(reset)
+        tv.awaitText(keep)
+        compose.waitForIdle()
+
+        compose.onNodeWithText(keep).assertIsDisplayed()
+    }
+
+    private fun openProfiles() {
+        createChild()
+        tv.press(tv.string("home_grown_ups"))
+        tv.awaitText(CORRECT.toString())
+        tv.press(CORRECT.toString())
+        tv.awaitText(caregiver(CaregiverR.string.caregiver_profiles))
+        tv.press(caregiver(CaregiverR.string.caregiver_profiles))
+        tv.awaitText(caregiver(CaregiverR.string.profiles_delete))
+    }
+
     private fun caregiver(id: Int): String =
         InstrumentationRegistry.getInstrumentation().targetContext
             .caregiverText(CaregiverLanguage.BOTH, id)
@@ -177,7 +247,7 @@ class AdultGateJourneyTest {
     private fun createChild() {
         tv.press(AGE)
         tv.press(tv.string("create_submit"))
-        tv.awaitText(tv.string("home_start"))
+        tv.awaitText(tv.string("path_lesson_start"))
     }
 
     private companion object {

@@ -13,11 +13,11 @@ class EntryResolverTest {
     }
 
     @Test
-    fun givenOneProfile_whenAppStarts_thenChildHomeIsRoot() {
+    fun givenOneProfile_whenAppStarts_thenTheLearningPathIsRoot() {
         val only = ProfileId("minh")
 
         assertThat(resolveEntry(snapshot(profiles = listOf(only))))
-            .isEqualTo(HelloBeKey.ChildHome(profileId = only))
+            .isEqualTo(HelloBeKey.LearningPath(profileId = only))
     }
 
     @Test
@@ -67,11 +67,11 @@ class EntryResolverTest {
     }
 
     @Test
-    fun givenAStaleRememberedProfileAndOneLeft_whenAppStarts_thenChildHomeIsRoot() {
+    fun givenAStaleRememberedProfileAndOneLeft_whenAppStarts_thenTheLearningPathIsRoot() {
         val one = listOf(ProfileId("minh"))
         val stale = snapshot(profiles = one, remembered = ProfileId("deleted"))
 
-        assertThat(resolveEntry(stale)).isEqualTo(HelloBeKey.ChildHome(profileId = one.single()))
+        assertThat(resolveEntry(stale)).isEqualTo(HelloBeKey.LearningPath(profileId = one.single()))
     }
 
     @Test

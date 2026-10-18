@@ -25,6 +25,7 @@
     <string name="settings_group_language">Hỗ trợ ngôn ngữ</string>
     <string name="settings_group_accessibility">Trợ năng</string>
     <string name="settings_group_audio">Âm thanh</string>
+    <string name="settings_group_lessons">Bài học</string>
     <string name="settings_on">Bật</string>
     <string name="settings_off">Tắt</string>
     <string name="settings_saving">Đang lưu\u2026</string>
@@ -79,6 +80,15 @@
     <string name="settings_language_english">Tiếng Anh</string>
     <string name="settings_language_vietnamese">Tiếng Việt</string>
     <string name="settings_language_both">Tiếng Anh + Tiếng Việt</string>
+    <string name="settings_lessons_title">Bài học mới</string>
+    <string name="settings_lessons_consequence">Bài mới chỉ có giữa các bài, không bao giờ giữa chừng</string>
+    <string name="settings_lessons_up_to_date">Đã mới nhất</string>
+    <string name="settings_lessons_available">Tải bài mới về</string>
+    <string name="settings_lessons_checking">Đang kiểm tra\u2026</string>
+    <string name="settings_lessons_downloading">Đang tải %1$d/%2$d</string>
+    <string name="settings_lessons_failed_retry">Chưa tải xong. Hãy thử lại</string>
+    <string name="settings_lessons_needs_update">Cần cập nhật Hello Bé trước</string>
+    <string name="settings_lessons_not_usable">Không dùng được. Hãy thử lại sau</string>
     <string name="overview_period">Tuần này</string>
     <string name="overview_adventures_label">Số buổi đã học xong</string>
     <string name="overview_adventures_note">Số buổi bé đã hoàn thành</string>

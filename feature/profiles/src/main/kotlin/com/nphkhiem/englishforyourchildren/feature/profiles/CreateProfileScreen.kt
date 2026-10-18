@@ -117,9 +117,11 @@ private fun Identity(
         ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // The display hero role, not the learning glyph. The tokens reserve the glyph for a single
+        // letter pair or numeral, and a whole word at that size broke "rabbit" across two lines.
         Text(
             text = state.draft.avatarId,
-            style = HelloBeTheme.typography.learningGlyph,
+            style = HelloBeTheme.typography.displayHero,
             color = HelloBeTheme.colors.textPrimary
         )
         Text(

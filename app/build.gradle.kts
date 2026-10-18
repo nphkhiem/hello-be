@@ -15,8 +15,21 @@ android {
         // Swaps the application for HiltTestApplication so an instrumented test can replace
         // bindings. HelloBeApplication carries nothing but @HiltAndroidApp, so nothing is lost.
         testInstrumentationRunner = "com.nphkhiem.englishforyourchildren.HelloBeTestRunner"
+
+        // Where new lessons are published, and the Ed25519 key they are signed with (raw 32 bytes,
+        // Base64). Both come from Gradle properties rather than this file: the owner hosts the
+        // lessons and holds the signing key, and an unconfigured build simply offers no download.
+        buildConfigField("String", "CONTENT_BASE_URL", quoted("helloBe.contentBaseUrl"))
+        buildConfigField("String", "CONTENT_PUBLIC_KEY", quoted("helloBe.contentPublicKey"))
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 }
+
+fun quoted(property: String): String =
+    "\"" + providers.gradleProperty(property).getOrElse("") + "\""
 
 dependencies {
     implementation(projects.feature.profiles)

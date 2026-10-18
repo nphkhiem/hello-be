@@ -39,8 +39,11 @@ enum class HelloBeActionTone {
     POSITIVE,
 
     /**
-     * The quiet alternative in a dialog. Carries no background at rest, so the affirmative choice
-     * is visibly the heavier of the two and a child is drawn to the safe path first.
+     * The quiet alternative. Carries no background at rest, so the affirmative choice is visibly
+     * the heavier of the two and a child is drawn to the safe path first. It does carry the resting
+     * outline every other control wears: without one, a quiet action on a television read as a
+     * caption rather than as something that could be pressed. A destructive choice is not quiet; it
+     * keeps its own tint.
      */
     QUIET
 }

@@ -3,7 +3,6 @@ import org.gradle.api.tasks.PathSensitivity
 plugins {
     id("english.android.library")
     alias(libs.plugins.ksp)
-    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -35,7 +34,10 @@ ksp {
 
 dependencies {
     implementation(projects.domain)
-    implementation(libs.kotlinx.serialization.json)
+    implementation(projects.content.validation)
+    // Ed25519 for the content signature. The platform only offers it from API 33 and this app
+    // supports 28, and a signature check is not something to write by hand.
+    implementation(libs.tink.android)
     implementation(libs.hilt.android)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)

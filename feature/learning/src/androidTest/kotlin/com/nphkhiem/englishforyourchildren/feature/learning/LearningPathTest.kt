@@ -381,6 +381,11 @@ class LearningPathTest {
         // a unit whose titles all happen to wrap the same way the guard cannot fail, and a test
         // that cannot fail is not a guard.
         setPath(LearningPathFixtures.mixedTitleLengths())
+        // The row at rest. A focused card grows by design, and measured in place it would sit its
+        // title off the line of the others. This passed with entry focus on the row only while
+        // entry focus was held without being drawn, so the growth never happened.
+        composeTestRule.onNodeWithText(resources.getString(R.string.home_grown_ups)).requestFocus()
+        composeTestRule.waitForIdle()
 
         val cards = listOf(
             LearningPathFixtures.EARS to FINISHED,
@@ -445,6 +450,73 @@ class LearningPathTest {
         composeTestRule.onNodeWithText(pendingSave()).assertIsDisplayed()
     }
 
+    @Test
+    fun givenThePath_whenTheGrownUpsControlIsPressed_thenItAsksForTheCaregiverArea() {
+        // The path is becoming the child's root, so the only door to the adult gate has to be on
+        // it. Without this the gate is unreachable and with it every caregiver surface: settings,
+        // profiles, and the two destructive confirmations.
+        val actions = mutableListOf<LearningPathAction>()
+        setPath(LearningPathFixtures.midUnit(), onAction = { actions += it })
+
+        val grownUps = resources.getString(R.string.home_grown_ups)
+        composeTestRule.onNodeWithText(grownUps).requestFocus()
+        composeTestRule.onNodeWithText(grownUps).performKeyInput { pressKey(Key.DirectionCenter) }
+
+        assertThat(actions).containsExactly(LearningPathAction.CaregiverEntryRequested)
+    }
+
+    @Test
+    fun givenThePath_whenFreePlayIsPressed_thenItAsksForFreePlay() {
+        val actions = mutableListOf<LearningPathAction>()
+        setPath(LearningPathFixtures.midUnit(), onAction = { actions += it })
+
+        val freePlay = resources.getString(R.string.home_free_play)
+        composeTestRule.onNodeWithText(freePlay).requestFocus()
+        composeTestRule.onNodeWithText(freePlay).performKeyInput { pressKey(Key.DirectionCenter) }
+
+        assertThat(actions).containsExactly(LearningPathAction.FreePlayRequested)
+    }
+
+    @Test
+    fun givenThePathAsRoot_whenSelectIsPressedOnArriving_thenLearningStartsInOnePress() {
+        // The information architecture's headline claim for making this screen the child's root:
+        // one press from arriving to learning. It is asserted as one chain rather than trusted to
+        // two separate tests, because what matters is that the thing holding entry focus is the
+        // thing that starts the lesson.
+        //
+        // No hero band sits above the row. The recommended card already is the hero: it carries
+        // the word Continue, holds entry focus, and has Pip standing over it, which is the
+        // indication a child who cannot read can follow. A second dominant control was built and
+        // reverted: it repeated the word, squeezed the row past its measured minimums, and broke
+        // the rule that the unit is meant to be seen at once.
+        val actions = mutableListOf<LearningPathAction>()
+        setPath(LearningPathFixtures.midUnit(), onAction = { actions += it })
+
+        composeTestRule.onNodeWithText(LearningPathFixtures.HANDS).assertIsFocused()
+        composeTestRule.onNodeWithText(LearningPathFixtures.HANDS)
+            .performKeyInput { pressKey(Key.DirectionCenter) }
+        composeTestRule.waitForIdle()
+
+        assertThat(actions).containsExactly(LearningPathAction.LessonChosen("hands-and-feet"))
+    }
+
+    @Test
+    fun givenAChildWhoHasNotBegun_whenThePathOpens_thenTheLessonWaitingForThemSaysStart() {
+        // The brief: Continue, or Start when no checkpoint exists. Asserted on the focused card, so
+        // the word is proven to sit on the lesson one press away and not somewhere else.
+        setPath(LearningPathFixtures.firstVisit())
+
+        composeTestRule.onNodeWithText(startLabel()).assertIsFocused()
+        composeTestRule.onNodeWithText(continueLabel()).assertDoesNotExist()
+    }
+
+    @Test
+    fun givenAChildWhoHasBegun_whenThePathOpens_thenTheLessonWaitingForThemSaysContinue() {
+        setPath(LearningPathFixtures.midUnit())
+
+        composeTestRule.onNodeWithText(continueLabel()).assertIsFocused()
+    }
+
     private fun setPath(state: LearningPathUiState, onAction: (LearningPathAction) -> Unit = {}) {
         composeTestRule.setContent {
             HelloBeTheme {
@@ -452,6 +524,10 @@ class LearningPathTest {
             }
         }
     }
+
+    private fun startLabel() = resources.getString(R.string.path_lesson_start)
+
+    private fun continueLabel() = resources.getString(R.string.path_lesson_continue)
 
     private fun later() = resources.getString(R.string.path_lesson_later)
 

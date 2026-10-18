@@ -1,6 +1,8 @@
 package com.nphkhiem.englishforyourchildren.navigation
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -13,7 +15,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.nphkhiem.englishforyourchildren.R
-import com.nphkhiem.englishforyourchildren.domain.model.CourseVersion
 import com.nphkhiem.englishforyourchildren.domain.model.LessonId
 import com.nphkhiem.englishforyourchildren.domain.model.ProfileId
 import com.nphkhiem.englishforyourchildren.feature.caregiver.AdultGateAction
@@ -32,8 +33,6 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellActio
 import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementAction
 import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.CelebrationAction
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeAction
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeScreen
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildRecovery
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildRecoveryAction
 import com.nphkhiem.englishforyourchildren.feature.learning.ChildRecoveryReason
@@ -48,6 +47,7 @@ import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.CreateProfileScreen
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfileAction
 import com.nphkhiem.englishforyourchildren.feature.profiles.ProfilePickerScreen
+import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeFocusRestorer
 import com.nphkhiem.englishforyourchildren.ui.tv.component.StoryLoading
 import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeFocusRestorer
 
@@ -95,7 +95,7 @@ fun HelloBeNavHost(
 
     // The invoking child surface, remembered so closing the session can put it back. It is not a
     // key on the stack: the caregiver area replaces the child surface rather than covering it.
-    var caregiverOrigin by remember { mutableStateOf(ChildReturnTarget.CHILD_HOME) }
+    var caregiverOrigin by remember { mutableStateOf(ChildReturnTarget.LEARNING_PATH) }
 
     fun push(key: HelloBeKey) {
         stack = resolved + key
@@ -167,11 +167,11 @@ fun HelloBeNavHost(
                 onChosen = { replaceAll(afterProfileChosen(it)) },
                 onAddProfile = { push(HelloBeKey.ProfileCreate) },
                 onCaregiverEntry = {
-                    caregiverOrigin = ChildReturnTarget.CHILD_HOME
+                    caregiverOrigin = ChildReturnTarget.LEARNING_PATH
                     push(
                         HelloBeKey.CaregiverGate(
                             profileId = null,
-                            returnTarget = ChildReturnTarget.CHILD_HOME
+                            returnTarget = ChildReturnTarget.LEARNING_PATH
                         )
                     )
                 },
@@ -193,63 +193,11 @@ fun HelloBeNavHost(
                         ProfileAction.AddProfileRequested -> push(HelloBeKey.ProfileCreate)
 
                         ProfileAction.CaregiverEntryRequested -> {
-                            caregiverOrigin = ChildReturnTarget.CHILD_HOME
+                            caregiverOrigin = ChildReturnTarget.LEARNING_PATH
                             push(
                                 HelloBeKey.CaregiverGate(
                                     profileId = null,
-                                    returnTarget = ChildReturnTarget.CHILD_HOME
-                                )
-                            )
-                        }
-                    }
-                },
-                modifier = modifier
-            )
-        }
-
-        is HelloBeKey.ChildHome -> if (content == null) {
-            LiveChildHome(
-                profileId = key.profileId,
-                onLearningPath = { push(HelloBeKey.LearningPath(profileId = key.profileId)) },
-                onFreePlay = { push(HelloBeKey.FreePlay(profileId = key.profileId)) },
-                onSwitchProfile = {
-                    push(HelloBeKey.ProfilePicker(mode = ProfilePickerMode.Switch(key.profileId)))
-                },
-                onCaregiverEntry = {
-                    caregiverOrigin = ChildReturnTarget.CHILD_HOME
-                    push(
-                        HelloBeKey.CaregiverGate(
-                            profileId = key.profileId,
-                            returnTarget = ChildReturnTarget.CHILD_HOME
-                        )
-                    )
-                },
-                modifier = modifier
-            )
-        } else {
-            ChildHomeScreen(
-                state = content.childHome(key.profileId),
-                onAction = { action ->
-                    when (action) {
-                        ChildHomeAction.ContinueRequested,
-                        ChildHomeAction.LearningPathRequested ->
-                            push(HelloBeKey.LearningPath(profileId = key.profileId))
-
-                        ChildHomeAction.FreePlayRequested ->
-                            push(HelloBeKey.FreePlay(profileId = key.profileId))
-
-                        ChildHomeAction.SwitchProfileRequested -> push(
-                            HelloBeKey.ProfilePicker(
-                                mode = ProfilePickerMode.Switch(key.profileId)
-                            )
-                        )
-
-                        ChildHomeAction.CaregiverEntryRequested -> {
-                            caregiverOrigin = ChildReturnTarget.CHILD_HOME
-                            push(
-                                HelloBeKey.CaregiverGate(
-                                    profileId = key.profileId,
-                                    returnTarget = ChildReturnTarget.CHILD_HOME
+                                    returnTarget = ChildReturnTarget.LEARNING_PATH
                                 )
                             )
                         }
@@ -268,6 +216,16 @@ fun HelloBeNavHost(
                 onHome = { replaceAll(afterProfileChosen(key.profileId)) },
                 onSwitchProfile = {
                     push(HelloBeKey.ProfilePicker(mode = ProfilePickerMode.Switch(key.profileId)))
+                },
+                onFreePlay = { push(HelloBeKey.FreePlay(profileId = key.profileId)) },
+                onCaregiverEntry = {
+                    caregiverOrigin = ChildReturnTarget.LEARNING_PATH
+                    push(
+                        HelloBeKey.CaregiverGate(
+                            profileId = key.profileId,
+                            returnTarget = ChildReturnTarget.LEARNING_PATH
+                        )
+                    )
                 },
                 onUnavailable = {
                     replaceAll(
@@ -296,7 +254,24 @@ fun HelloBeNavHost(
                             )
                         )
 
-                        else -> Unit
+                        LearningPathAction.FreePlayRequested ->
+                            push(HelloBeKey.FreePlay(profileId = key.profileId))
+
+                        LearningPathAction.CaregiverEntryRequested -> {
+                            caregiverOrigin = ChildReturnTarget.LEARNING_PATH
+                            push(
+                                HelloBeKey.CaregiverGate(
+                                    profileId = key.profileId,
+                                    returnTarget = ChildReturnTarget.LEARNING_PATH
+                                )
+                            )
+                        }
+
+                        // Unit paging is the screen's own state and never reaches the host. Named
+                        // rather than swallowed by an else: an else is what let two new actions
+                        // compile as dead controls here.
+                        LearningPathAction.PreviousUnitRequested,
+                        LearningPathAction.NextUnitRequested -> Unit
                     }
                 },
                 modifier = modifier
@@ -307,13 +282,11 @@ fun HelloBeNavHost(
             LiveLesson(
                 profileId = key.profileId,
                 lessonId = key.lessonId,
-                courseVersion = SHIPPED_COURSE_VERSION,
                 onFinished = {
                     replaceAll(
                         resolved.dropLast(1) + HelloBeKey.LessonCelebration(
                             profileId = key.profileId,
-                            lessonId = key.lessonId,
-                            returnTarget = LessonReturnTarget.LEARNING_PATH
+                            lessonId = key.lessonId
                         )
                     )
                 },
@@ -348,8 +321,7 @@ fun HelloBeNavHost(
                         LessonAction.ContinueRequested -> replaceAll(
                             resolved.dropLast(1) + HelloBeKey.LessonCelebration(
                                 profileId = key.profileId,
-                                lessonId = key.lessonId,
-                                returnTarget = LessonReturnTarget.LEARNING_PATH
+                                lessonId = key.lessonId
                             )
                         )
 
@@ -364,8 +336,7 @@ fun HelloBeNavHost(
             LiveLessonCelebration(
                 profileId = key.profileId,
                 lessonId = key.lessonId,
-                courseVersion = SHIPPED_COURSE_VERSION,
-                onDone = { replaceAll(afterCelebrationDone(key.profileId, key.returnTarget)) },
+                onDone = { replaceAll(afterCelebrationDone(key.profileId)) },
                 modifier = modifier
             )
         } else {
@@ -376,7 +347,7 @@ fun HelloBeNavHost(
                         CelebrationAction.DoneRequested,
                         CelebrationAction.MaybeLaterRequested,
                         CelebrationAction.PlayTogetherAccepted ->
-                            replaceAll(afterCelebrationDone(key.profileId, key.returnTarget))
+                            replaceAll(afterCelebrationDone(key.profileId))
                     }
                 },
                 modifier = modifier
@@ -518,107 +489,117 @@ fun HelloBeNavHost(
             }
         }
 
-        is HelloBeKey.ProfileManagement -> if (content == null) {
-            CaregiverLanguageScope {
-                LiveCaregiverShell(
-                    profileId = key.selectedProfileId,
-                    section = CaregiverSection.PROFILES,
-                    onSection = { section ->
-                        replaceCaregiver(::replaceAll, resolved, section, key.selectedProfileId)
-                    },
-                    onReturn = {
-                        replaceAll(
-                            afterCaregiverSessionClosed(key.selectedProfileId, caregiverOrigin)
-                        )
-                    },
-                    modifier = modifier
-                ) {
-                    LiveProfileManagement(
-                        onAdd = { push(HelloBeKey.ProfileCreate) },
-                        onDelete = { push(HelloBeKey.DeleteProfileConfirmation(it)) },
-                        onReset = { push(HelloBeKey.ResetProgressConfirmation(it)) }
-                    )
-                }
-            }
-        } else {
-            content.let {
-                CaregiverShell(
-                    content = it,
-                    profileId = key.selectedProfileId,
-                    section = CaregiverSection.PROFILES,
-                    onSection = { section ->
-                        replaceCaregiver(
-                            ::replaceAll,
-                            resolved,
-                            section,
-                            key.selectedProfileId
-                        )
-                    },
-                    onReturn = {
-                        replaceAll(
-                            afterCaregiverSessionClosed(key.selectedProfileId, caregiverOrigin)
-                        )
-                    },
-                    modifier = modifier
-                ) {
-                    ProfileManagementScreen(
-                        state = it.profileManagement(key.selectedProfileId),
-                        onAction = { action ->
-                            when (action) {
-                                is ProfileManagementAction.DeleteProfileRequested -> push(
-                                    HelloBeKey.DeleteProfileConfirmation(ProfileId(action.id))
-                                )
+        is HelloBeKey.ProfileManagement -> {
+            // The two destructive confirmations are raised over this screen rather than replacing
+            // it, and each hands focus back to the control that raised it. As destinations they
+            // replaced the screen, and their restorer was never attached to anything, so a
+            // caregiver who backed out of a deletion was left at the top of the pane.
+            var confirming by remember(key) { mutableStateOf<PendingConfirmation?>(null) }
+            val deleteReturn = rememberHelloBeFocusRestorer()
+            val resetReturn = rememberHelloBeFocusRestorer()
+            fun returnFor(kind: CaregiverConfirmationKind) =
+                if (kind == DELETE) deleteReturn else resetReturn
 
-                                is ProfileManagementAction.ResetProgressRequested -> push(
-                                    HelloBeKey.ResetProgressConfirmation(ProfileId(action.id))
+            if (content == null) {
+                CaregiverLanguageScope {
+                    Box(modifier = modifier) {
+                        LiveCaregiverShell(
+                            profileId = key.selectedProfileId,
+                            section = CaregiverSection.PROFILES,
+                            onSection = { section ->
+                                replaceCaregiver(
+                                    ::replaceAll,
+                                    resolved,
+                                    section,
+                                    key.selectedProfileId
                                 )
-
-                                else -> Unit
-                            }
+                            },
+                            onReturn = {
+                                replaceAll(
+                                    afterCaregiverSessionClosed(
+                                        key.selectedProfileId,
+                                        caregiverOrigin
+                                    )
+                                )
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            LiveProfileManagement(
+                                onAdd = { push(HelloBeKey.ProfileCreate) },
+                                onDelete = { confirming = PendingConfirmation(DELETE, it) },
+                                onReset = { confirming = PendingConfirmation(RESET, it) },
+                                deleteFocus = deleteReturn.returnTarget,
+                                resetFocus = resetReturn.returnTarget
+                            )
                         }
-                    )
+                        confirming?.let { pending ->
+                            LiveCaregiverConfirmation(
+                                kind = pending.kind,
+                                profileId = pending.profileId,
+                                focusRestorer = returnFor(pending.kind),
+                                onFinished = { confirming = null }
+                            )
+                        }
+                    }
                 }
-            } ?: MissingContent(key, onSafeReturn = { pop() }, modifier)
-        }
+            } else {
+                content.let {
+                    Box(modifier = modifier) {
+                        CaregiverShell(
+                            content = it,
+                            profileId = key.selectedProfileId,
+                            section = CaregiverSection.PROFILES,
+                            onSection = { section ->
+                                replaceCaregiver(
+                                    ::replaceAll,
+                                    resolved,
+                                    section,
+                                    key.selectedProfileId
+                                )
+                            },
+                            onReturn = {
+                                replaceAll(
+                                    afterCaregiverSessionClosed(
+                                        key.selectedProfileId,
+                                        caregiverOrigin
+                                    )
+                                )
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            ProfileManagementScreen(
+                                state = it.profileManagement(key.selectedProfileId),
+                                onAction = { action ->
+                                    when (action) {
+                                        is ProfileManagementAction.DeleteProfileRequested ->
+                                            confirming = PendingConfirmation(
+                                                DELETE,
+                                                ProfileId(action.id)
+                                            )
 
-        is HelloBeKey.DeleteProfileConfirmation -> if (content == null) {
-            CaregiverLanguageScope {
-                LiveCaregiverConfirmation(
-                    kind = CaregiverConfirmationKind.DELETE_PROFILE,
-                    profileId = key.profileId,
-                    onFinished = { pop() },
-                    modifier = modifier
-                )
-            }
-        } else {
-            Confirmation(
-                state = content.confirmation(
-                    CaregiverConfirmationKind.DELETE_PROFILE,
-                    key.profileId
-                ),
-                onFinished = { pop() },
-                modifier = modifier
-            )
-        }
+                                        is ProfileManagementAction.ResetProgressRequested ->
+                                            confirming = PendingConfirmation(
+                                                RESET,
+                                                ProfileId(action.id)
+                                            )
 
-        is HelloBeKey.ResetProgressConfirmation -> if (content == null) {
-            CaregiverLanguageScope {
-                LiveCaregiverConfirmation(
-                    kind = CaregiverConfirmationKind.RESET_PROGRESS,
-                    profileId = key.profileId,
-                    onFinished = { pop() },
-                    modifier = modifier
-                )
+                                        else -> Unit
+                                    }
+                                },
+                                deleteFocus = deleteReturn.returnTarget,
+                                resetFocus = resetReturn.returnTarget
+                            )
+                        }
+                        confirming?.let { pending ->
+                            Confirmation(
+                                state = it.confirmation(pending.kind, pending.profileId),
+                                focusRestorer = returnFor(pending.kind),
+                                onFinished = { confirming = null }
+                            )
+                        }
+                    }
+                }
             }
-        } else {
-            Confirmation(
-                state = content.confirmation(
-                    CaregiverConfirmationKind.RESET_PROGRESS,
-                    key.profileId
-                ),
-                onFinished = { pop() },
-                modifier = modifier
-            )
         }
 
         is HelloBeKey.Recovery -> Recovery(
@@ -668,20 +649,19 @@ private fun Recovery(
 @Composable
 private fun Confirmation(
     state: com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverConfirmationState,
-    onFinished: () -> Unit,
-    modifier: Modifier
+    focusRestorer: HelloBeFocusRestorer,
+    onFinished: () -> Unit
 ) {
     CaregiverConfirmation(
         state = state,
-        focusRestorer = rememberHelloBeFocusRestorer(),
+        focusRestorer = focusRestorer,
         onAction = { action ->
             when (action) {
                 CaregiverConfirmationAction.Dismissed -> onFinished()
                 CaregiverConfirmationAction.Confirmed -> onFinished()
                 CaregiverConfirmationAction.RetryRequested -> Unit
             }
-        },
-        modifier = modifier
+        }
     )
 }
 
@@ -729,8 +709,6 @@ private fun profileIdOf(key: HelloBeKey): ProfileId? = when (key) {
     is HelloBeKey.CaregiverDashboard -> key.profileId
     is HelloBeKey.CaregiverSettings -> key.profileId
     is HelloBeKey.ProfileManagement -> key.selectedProfileId
-    is HelloBeKey.DeleteProfileConfirmation -> key.profileId
-    is HelloBeKey.ResetProgressConfirmation -> key.profileId
     else -> null
 }
 
@@ -776,15 +754,6 @@ private fun MissingContent(key: HelloBeKey, onSafeReturn: () -> Unit, modifier: 
     }
 }
 
-/**
- * The content version an installed build carries.
- *
- * One published version ships inside the app, so the lesson a child opens is always this one. When
- * a second version exists, which one a child is working through becomes a stored fact rather than a
- * constant, and it moves to their progress.
- */
-private val SHIPPED_COURSE_VERSION = CourseVersion("2026.09")
-
 private const val DATABASE_CODE = "DB-OPEN-01"
 
 /**
@@ -795,3 +764,12 @@ private const val DATABASE_CODE = "DB-OPEN-01"
  */
 private const val UNBUILT_SCREEN_CODE = "SCREEN-MISSING-01"
 private const val CREATED_PROFILE = "created"
+
+/** A destructive question raised over profile management: which one, and about whom. */
+private data class PendingConfirmation(
+    val kind: CaregiverConfirmationKind,
+    val profileId: ProfileId
+)
+
+private val DELETE = CaregiverConfirmationKind.DELETE_PROFILE
+private val RESET = CaregiverConfirmationKind.RESET_PROGRESS

@@ -16,6 +16,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeActionTone
+import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAvailability
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusGroup
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
@@ -151,10 +152,19 @@ private fun SettingRowCard(
                     when (row.value) {
                         is SettingValue.Toggle -> CaregiverSettingsAction.SettingToggled(row.id)
                         is SettingValue.Choice -> CaregiverSettingsAction.SettingExpanded(row.id)
+                        is SettingValue.Task -> CaregiverSettingsAction.TaskRequested(row.id)
                     }
                 )
             },
-            modifier = modifier
+            modifier = modifier,
+            availability = if (row.value is SettingValue.Task &&
+                row.value.state is TaskState.Working
+            ) {
+                HelloBeAvailability.UNAVAILABLE
+            } else {
+                HelloBeAvailability.ENABLED
+            },
+            announcesChanges = row.value is SettingValue.Task
         )
 
         if (expanded && row.value is SettingValue.Choice) {
@@ -194,10 +204,36 @@ private fun settingValueText(value: SettingValue): String = when (value) {
     }
 
     is SettingValue.Choice -> value.current
+
+    is SettingValue.Task -> taskStateText(value.state)
+}
+
+/**
+ * Where getting lessons stands, and what pressing the row will do, in one phrase: the state and
+ * its action label together, as the information architecture orders them.
+ */
+@Composable
+private fun taskStateText(state: TaskState): String = when (state) {
+    TaskState.UpToDate -> caregiverText(R.string.settings_lessons_up_to_date)
+
+    TaskState.Available -> caregiverText(R.string.settings_lessons_available)
+
+    is TaskState.Working -> if (state.total == 0) {
+        caregiverText(R.string.settings_lessons_checking)
+    } else {
+        caregiverText(R.string.settings_lessons_downloading, state.done, state.total)
+    }
+
+    is TaskState.Failed -> when (state.reason) {
+        TaskFailure.COULD_NOT_FINISH -> caregiverText(R.string.settings_lessons_failed_retry)
+        TaskFailure.APP_UPDATE_NEEDED -> caregiverText(R.string.settings_lessons_needs_update)
+        TaskFailure.NOT_USABLE -> caregiverText(R.string.settings_lessons_not_usable)
+    }
 }
 
 private fun groupHeading(group: SettingGroup): Int = when (group) {
     SettingGroup.LANGUAGE -> R.string.settings_group_language
     SettingGroup.ACCESSIBILITY -> R.string.settings_group_accessibility
     SettingGroup.AUDIO -> R.string.settings_group_audio
+    SettingGroup.LESSONS -> R.string.settings_group_lessons
 }

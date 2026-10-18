@@ -13,21 +13,8 @@ sealed interface ProfilePickerMode {
     data class Switch(val currentProfileId: ProfileId) : ProfilePickerMode
 }
 
-/**
- * Where a finished lesson goes back to.
- *
- * A small enum rather than a nested key, so keys stay flat, comparable and free of recursion. The
- * information architecture only ever returns a completed lesson to child home or to the learning
- * path, and naming those two is enough.
- */
-enum class LessonReturnTarget {
-    CHILD_HOME,
-    LEARNING_PATH
-}
-
 /** The profile-aware child surface an adult gate was opened from. */
 enum class ChildReturnTarget {
-    CHILD_HOME,
     LEARNING_PATH,
     FREE_PLAY
 }
@@ -55,18 +42,12 @@ sealed interface HelloBeKey {
 
     data class ProfilePicker(val mode: ProfilePickerMode) : HelloBeKey
 
-    data class ChildHome(val profileId: ProfileId) : HelloBeKey
-
     data class LearningPath(val profileId: ProfileId, val preferredUnitId: UnitId? = null) :
         HelloBeKey
 
     data class Lesson(val profileId: ProfileId, val lessonId: LessonId) : HelloBeKey
 
-    data class LessonCelebration(
-        val profileId: ProfileId,
-        val lessonId: LessonId,
-        val returnTarget: LessonReturnTarget
-    ) : HelloBeKey
+    data class LessonCelebration(val profileId: ProfileId, val lessonId: LessonId) : HelloBeKey
 
     data class FreePlay(val profileId: ProfileId, val preferredShelfId: ShelfId? = null) :
         HelloBeKey
@@ -80,10 +61,6 @@ sealed interface HelloBeKey {
 
     data class ProfileManagement(val selectedProfileId: ProfileId?) : HelloBeKey
 
-    data class DeleteProfileConfirmation(val profileId: ProfileId) : HelloBeKey
-
-    data class ResetProgressConfirmation(val profileId: ProfileId) : HelloBeKey
-
     data class Recovery(
         val reason: RecoveryReason,
         val safeReturnTarget: ChildReturnTarget? = null
@@ -94,9 +71,7 @@ sealed interface HelloBeKey {
 internal fun HelloBeKey.isCaregiver(): Boolean = when (this) {
     is HelloBeKey.CaregiverDashboard,
     is HelloBeKey.CaregiverSettings,
-    is HelloBeKey.ProfileManagement,
-    is HelloBeKey.DeleteProfileConfirmation,
-    is HelloBeKey.ResetProgressConfirmation -> true
+    is HelloBeKey.ProfileManagement -> true
 
     else -> false
 }

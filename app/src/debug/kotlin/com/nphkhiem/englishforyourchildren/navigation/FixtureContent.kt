@@ -13,8 +13,6 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSettingsUi
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellState
 import com.nphkhiem.englishforyourchildren.feature.learning.CelebrationFixtures
 import com.nphkhiem.englishforyourchildren.feature.learning.CelebrationUiState
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeFixtures
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeUiState
 import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayFixtures
 import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayUiState
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathFixtures
@@ -39,8 +37,6 @@ import com.nphkhiem.englishforyourchildren.feature.profiles.ProfilePickerUiState
 class FixtureContent(
     private val lessonStates: List<LessonUiState> = LessonFixtures.reviewStates().map { it.second }
 ) : HelloBeContent {
-
-    override fun childHome(profileId: ProfileId): ChildHomeUiState = ChildHomeFixtures.returning()
 
     override fun learningPath(profileId: ProfileId, preferredUnitId: UnitId?): LearningPathUiState =
         LearningPathFixtures.midUnit()

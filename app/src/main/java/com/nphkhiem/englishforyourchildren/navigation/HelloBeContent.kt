@@ -12,7 +12,6 @@ import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverSettingsUi
 import com.nphkhiem.englishforyourchildren.feature.caregiver.CaregiverShellState
 import com.nphkhiem.englishforyourchildren.feature.caregiver.ProfileManagementUiState
 import com.nphkhiem.englishforyourchildren.feature.learning.CelebrationUiState
-import com.nphkhiem.englishforyourchildren.feature.learning.ChildHomeUiState
 import com.nphkhiem.englishforyourchildren.feature.learning.FreePlayUiState
 import com.nphkhiem.englishforyourchildren.feature.learning.LearningPathUiState
 import com.nphkhiem.englishforyourchildren.feature.learning.LessonUiState
@@ -34,7 +33,6 @@ import com.nphkhiem.englishforyourchildren.feature.profiles.ProfilePickerUiState
  * still be walked on a television.
  */
 interface HelloBeContent {
-    fun childHome(profileId: ProfileId): ChildHomeUiState
 
     fun learningPath(profileId: ProfileId, preferredUnitId: UnitId?): LearningPathUiState
 

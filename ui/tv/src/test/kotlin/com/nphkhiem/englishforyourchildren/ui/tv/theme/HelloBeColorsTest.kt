@@ -107,6 +107,22 @@ class HelloBeColorsTest {
     }
 
     @Test
+    fun givenAnyPalette_whenTheProgressTrailIsDrawn_thenEverySegmentReadsAgainstTheCanvas() {
+        // A meaningful graphic, so 3:1 (WCAG 1.4.11). Upcoming segments used to borrow the quiet
+        // border and sat at 1.48:1 in Day; finished ones borrowed Night's action blue at 1.48:1.
+        // And finished must still read as different from upcoming, or the trail says nothing.
+        for (mode in HelloBeThemeMode.entries) {
+            for (highContrast in listOf(false, true)) {
+                val colors = helloBeColors(mode, highContrast)
+
+                assertThat(contrastRatio(colors.trailDone, colors.canvas)).isAtLeast(3.0)
+                assertThat(contrastRatio(colors.trailAhead, colors.canvas)).isAtLeast(3.0)
+                assertThat(contrastRatio(colors.trailDone, colors.trailAhead)).isAtLeast(3.0)
+            }
+        }
+    }
+
+    @Test
     fun givenHighContrast_whenQuietTextIsRead_thenItIsStrongerAndTheThreeLevelsRemain() {
         for (mode in HelloBeThemeMode.entries) {
             val standard = helloBeColors(mode = mode)

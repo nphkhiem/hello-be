@@ -26,7 +26,23 @@ object LearningPathFixtures {
         ),
         previousUnit = UnitSummary(unitId = "u1", unitNumber = 1, theme = "My Home"),
         nextUnit = UnitSummary(unitId = "u3", unitNumber = 3, theme = "My Toys"),
-        pendingSave = false
+        pendingSave = false,
+        // Two lessons are finished, so this child has begun and their recommendation continues.
+        begun = true
+    )
+
+    /** A child's very first visit: nothing finished, no checkpoint, so nothing to continue. */
+    fun firstVisit(): LearningPathUiState = midUnit().copy(
+        unit = midUnit().unit?.copy(
+            lessons = listOf(
+                lesson(EYES, LessonProgress.RECOMMENDED),
+                lesson(NOSE, LessonProgress.FUTURE),
+                lesson(HANDS, LessonProgress.FUTURE),
+                lesson(MOVE, LessonProgress.FUTURE),
+                lesson(REVIEW, LessonProgress.FUTURE, LessonKind.REVIEW)
+            )
+        ),
+        begun = false
     )
 
     /** The first unit, where there is no unit behind and the previous control must not appear. */
