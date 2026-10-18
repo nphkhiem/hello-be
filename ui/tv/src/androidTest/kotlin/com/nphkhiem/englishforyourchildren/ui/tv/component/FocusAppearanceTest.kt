@@ -77,12 +77,30 @@ class FocusAppearanceTest {
         assertThat(painted).contains(BACKDROP_COLOR.toArgb())
     }
 
-    private fun paintedColours(): Set<Int> {
+    @Test
+    fun givenAQuietActionAtRest_whenRendered_thenItIsOutlinedLikeAnyOtherControl() {
+        // Without an outline a quiet action read as a caption on a television, not as something
+        // to press. It keeps no fill, so the safe choice beside it is still the heavier one.
+        composeTestRule.setContent {
+            HelloBeTheme {
+                Box(Modifier.size(HOST).background(BACKDROP_COLOR).testTag(HOST_TAG)) {
+                    HelloBeAction(label = LABEL, onClick = {}, tone = HelloBeActionTone.QUIET)
+                }
+            }
+        }
+        composeTestRule.waitForIdle()
+
+        // Every pixel: the outline is a hairline that a sampled scan can step over.
+        assertThat(paintedColours(stride = 1))
+            .contains(helloBeColors(HelloBeThemeMode.DAY).borderSecondary.toArgb())
+    }
+
+    private fun paintedColours(stride: Int = STRIDE): Set<Int> {
         val image = composeTestRule.onNodeWithTag(HOST_TAG).captureToImage()
         val map = image.toPixelMap()
         return buildSet {
-            for (y in 0 until map.height step STRIDE) {
-                for (x in 0 until map.width step STRIDE) {
+            for (y in 0 until map.height step stride) {
+                for (x in 0 until map.width step stride) {
                     add(map[x, y].toArgb())
                 }
             }
