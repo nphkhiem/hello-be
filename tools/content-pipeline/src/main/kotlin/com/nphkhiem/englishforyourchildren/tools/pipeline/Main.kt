@@ -6,6 +6,7 @@ import kotlin.system.exitProcess
 private const val USAGE = """
 Usage:
   keygen                                     make the owner's signing key, once
+  enrich <course folder>                     fetch missing word recordings from Wikimedia Commons
   build <course folder> <output> [--previous <published folder>]
                                              check the course and write packs and a manifest
   sign <output>                              sign the manifest, after a person has reviewed it
@@ -15,6 +16,7 @@ Usage:
 fun main(args: Array<String>) {
     when (args.firstOrNull()) {
         "keygen" -> keygen()
+        "enrich" -> enrich(args.drop(1))
         "build" -> build(args.drop(1))
         "sign" -> sign(args.drop(1))
         else -> fail(USAGE)
@@ -28,6 +30,14 @@ private fun keygen() {
     println()
     println("Private key, for your password manager only. Never commit it or put it in a file:")
     println(key.privateKeyBase64)
+}
+
+private fun enrich(args: List<String>) {
+    val course = args.singleOrNull() ?: fail(USAGE)
+    val result = Enricher(HttpWebSource()).enrich(File(course))
+    result.added.forEach { println("  added: $it") }
+    result.notes.forEach { println("  left for a person: $it") }
+    println("Added ${result.added.size} recordings. Listen to each before building.")
 }
 
 private fun build(args: List<String>) {
