@@ -84,9 +84,9 @@ fun ProgressTrail(
     ) {
         segments.forEach { segment ->
             val target = when (segment) {
-                TrailSegment.COMPLETED -> colors.actionPrimary
+                TrailSegment.COMPLETED -> colors.trailDone
                 TrailSegment.CURRENT -> colors.actionSelected
-                TrailSegment.UPCOMING -> colors.borderSecondary
+                TrailSegment.UPCOMING -> colors.trailAhead
             }
             val segmentColor by animateColorAsState(
                 targetValue = target,
