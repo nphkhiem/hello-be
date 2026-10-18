@@ -26,16 +26,16 @@ class PackagedAssetLocator private constructor(
     private val context: Context,
     private val downloaded: DownloadedMedia,
     private val directory: String,
-    private val extension: String
+    /** In order of preference. The first that exists wins, a pack's before the APK's. */
+    private val extensions: List<String>
 ) {
     fun locate(assetId: AssetId): Uri? {
-        val path = "$directory/${assetId.value}.$extension"
-        val inPack = downloaded.directory()?.let { File(it, path) }?.takeIf { it.isFile }
-        return when {
-            inPack != null -> Uri.fromFile(inPack)
-            exists(path) -> "asset:///$path".toUri()
-            else -> null
+        val paths = extensions.map { "$directory/${assetId.value}.$it" }
+        val inPack = downloaded.directory()?.let { pack ->
+            paths.map { File(pack, it) }.firstOrNull { it.isFile }
         }
+        return inPack?.let(Uri::fromFile)
+            ?: paths.firstOrNull(::exists)?.let { "asset:///$it".toUri() }
     }
 
     /**
@@ -51,13 +51,18 @@ class PackagedAssetLocator private constructor(
 
     companion object {
         fun forAudio(context: Context, downloaded: DownloadedMedia): MediaAssetLocator {
-            val files = PackagedAssetLocator(context, downloaded, "media/audio", "m4a")
+            // Recordings made for the course are m4a. A word fetched from Wikimedia Commons keeps the
+            // container its author uploaded, usually Ogg, so its file is the licensed work itself
+            // rather than a converted copy; Media3 plays all three.
+            val files = PackagedAssetLocator(context, downloaded, "media/audio", AUDIO)
             return MediaAssetLocator { files.locate(it) }
         }
 
         fun forImages(context: Context, downloaded: DownloadedMedia): ImageAssetLocator {
-            val files = PackagedAssetLocator(context, downloaded, "media/image", "webp")
+            val files = PackagedAssetLocator(context, downloaded, "media/image", listOf("webp"))
             return ImageAssetLocator { files.locate(it) }
         }
+
+        private val AUDIO = listOf("m4a", "ogg", "mp3")
     }
 }

@@ -78,6 +78,25 @@ class PackagedAssetLocatorTest {
     }
 
     @Test
+    fun givenAPackRecordingFetchedFromCommons_whenItIsLocated_thenItsOwnContainerIsFound() {
+        // Kept as uploaded, usually Ogg, so the file is the licensed work rather than a copy.
+        val ogg = download("media/audio/aud-en-eyes.ogg")
+        val mp3 = download("media/audio/aud-en-ears.mp3")
+
+        assertThat(locator.locate(AssetId("aud-en-eyes"))).isEqualTo(Uri.fromFile(ogg))
+        assertThat(locator.locate(AssetId("aud-en-ears"))).isEqualTo(Uri.fromFile(mp3))
+    }
+
+    @Test
+    fun givenARecordingInTwoContainers_whenItIsLocated_thenTheCoursesOwnM4aWins() {
+        // A person's recording replaces a fetched one by being added beside it.
+        val m4a = download("media/audio/aud-en-eyes.m4a")
+        download("media/audio/aud-en-eyes.ogg")
+
+        assertThat(locator.locate(AssetId("aud-en-eyes"))).isEqualTo(Uri.fromFile(m4a))
+    }
+
+    @Test
     fun givenAnIdOfOneKind_whenTheOtherKindIsAsked_thenItIsNotFound() {
         // An id is opaque, so neither locator reads it to work out what it names. Asking the wrong
         // one is answered with a missing file rather than with the right file by accident.
