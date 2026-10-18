@@ -6,6 +6,8 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -14,6 +16,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
@@ -25,6 +28,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAction
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
+import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeThemeMode
+import com.nphkhiem.englishforyourchildren.ui.tv.theme.helloBeColors
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -120,6 +125,41 @@ class LessonScaffoldTest {
         composeTestRule.onNodeWithTag(ACTIVITY).assertDoesNotExist()
     }
 
+    @Test
+    fun givenALessonOpensWhilePreparing_whenThePromptStarts_thenReplayIsDrawnFocused() {
+        // The order a lesson really opens in: a stage with nothing in it yet, then the question.
+        // A first lesson opened like this held focus on Replay without drawing it, so the child saw
+        // nothing focused and their first press seemed to start somewhere else.
+        val state = mutableStateOf(LessonUiMapper.preparing())
+        val opened = mutableStateOf(false)
+        composeTestRule.setContent {
+            HelloBeTheme {
+                Box(Modifier.testTag(STAGE)) {
+                    if (opened.value) {
+                        ListenAndChooseActivity(state = state.value, onAction = {})
+                    } else {
+                        HelloBeAction(label = OPEN, onClick = { opened.value = true })
+                    }
+                }
+            }
+        }
+        composeTestRule.onNodeWithText(OPEN).requestFocus()
+        composeTestRule.waitForIdle()
+        composeTestRule.runOnIdle { opened.value = true }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.runOnIdle { state.value = LessonFixtures.prompting() }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText(REPLAY).assertIsFocused()
+        val drawn = composeTestRule.onNodeWithTag(STAGE).captureToImage().toPixelMap()
+        val focusFill = helloBeColors(HelloBeThemeMode.DAY).focusFill.toArgb()
+        val focused = (0 until drawn.height step STRIDE).any { y ->
+            (0 until drawn.width step STRIDE).any { x -> drawn[x, y].toArgb() == focusFill }
+        }
+        assertThat(focused).isTrue()
+    }
+
     private fun setScaffold(state: LessonUiState, onAction: (LessonAction) -> Unit = {}) {
         composeTestRule.setContent {
             HelloBeTheme {
@@ -152,5 +192,8 @@ class LessonScaffoldTest {
         const val PREPARING = "Getting your question ready"
         const val ACTIVITY = "activity"
         const val ACTIVITY_CONTROL = "chair"
+        const val STAGE = "stage"
+        const val OPEN = "Lesson 1"
+        const val STRIDE = 3
     }
 }

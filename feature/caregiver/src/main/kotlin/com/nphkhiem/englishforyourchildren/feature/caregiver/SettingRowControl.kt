@@ -2,7 +2,6 @@
 
 package com.nphkhiem.englishforyourchildren.feature.caregiver
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -27,6 +25,7 @@ import androidx.tv.material3.Text
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeAvailability
 import com.nphkhiem.englishforyourchildren.ui.tv.component.HelloBeFocusFrame
 import com.nphkhiem.englishforyourchildren.ui.tv.component.helloBeFocusClearance
+import com.nphkhiem.englishforyourchildren.ui.tv.component.rememberHelloBeInteractionSource
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeShapes
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
@@ -70,7 +69,7 @@ internal fun SettingRowControl(
     val colors = HelloBeTheme.colors
     val focus = HelloBeTheme.focus
     val shape = HelloBeShapes.large
-    val interactionSource = remember { MutableInteractionSource() }
+    val interactionSource = rememberHelloBeInteractionSource()
 
     Surface(
         onClick = { if (!unavailable) onClick() },

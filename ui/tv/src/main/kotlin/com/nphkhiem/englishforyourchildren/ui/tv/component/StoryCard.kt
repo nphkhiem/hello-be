@@ -2,13 +2,11 @@
 
 package com.nphkhiem.englishforyourchildren.ui.tv.component
 
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
@@ -68,7 +66,7 @@ fun StoryCard(
     val colors = HelloBeTheme.colors
     val focus = HelloBeTheme.focus
     val shape = HelloBeShapes.extraLarge
-    val interactionSource = remember { MutableInteractionSource() }
+    val interactionSource = rememberHelloBeInteractionSource()
 
     Surface(
         selected = selected,

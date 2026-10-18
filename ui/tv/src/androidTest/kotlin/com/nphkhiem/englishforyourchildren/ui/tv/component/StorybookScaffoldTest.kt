@@ -15,11 +15,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.toPixelMap
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotFocused
+import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.getUnclippedBoundsInRoot
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -33,6 +36,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeLayout
 import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeTheme
+import com.nphkhiem.englishforyourchildren.ui.tv.theme.HelloBeThemeMode
+import com.nphkhiem.englishforyourchildren.ui.tv.theme.helloBeColors
 import kotlinx.coroutines.delay
 import org.junit.Rule
 import org.junit.Test
@@ -105,6 +110,40 @@ class StorybookScaffoldTest {
         }
 
         composeTestRule.onNodeWithText(SAFE).assertIsFocused()
+    }
+
+    @Test
+    fun givenStageAppears_whenEntryFocusIsClaimed_thenTheActionIsDrawnFocused() {
+        // Focus that is held but not drawn is worse than none: the first press moves on from a
+        // control the child could not see, so focus seems to start wherever that press lands. The
+        // claim runs before the action has started listening for its own focus, and the action
+        // used to miss it, so it was focused and painted at rest.
+        composeTestRule.setContent {
+            HelloBeTheme {
+                val entry = remember { FocusRequester() }
+                Box(Modifier.testTag(CANVAS)) {
+                    StorybookScaffold(
+                        entryFocus = entry,
+                        header = {
+                            HelloBeAction(
+                                label = SAFE,
+                                onClick = {},
+                                modifier = Modifier.focusRequester(entry)
+                            )
+                        }
+                    ) {}
+                }
+            }
+        }
+        composeTestRule.waitForIdle()
+
+        composeTestRule.onNodeWithText(SAFE).assertIsFocused()
+        val drawn = composeTestRule.onNodeWithTag(CANVAS).captureToImage().toPixelMap()
+        val focusFill = helloBeColors(HelloBeThemeMode.DAY).focusFill.toArgb()
+        val focused = (0 until drawn.height step STRIDE).any { y ->
+            (0 until drawn.width step STRIDE).any { x -> drawn[x, y].toArgb() == focusFill }
+        }
+        assertThat(focused).isTrue()
     }
 
     @Test
@@ -257,6 +296,7 @@ class StorybookScaffoldTest {
         const val CONTENT = "content"
         const val SUPPORT = "support"
         const val TOLERANCE = 0.5f
+        const val STRIDE = 3
 
         // The three profiles differ by raster density, not by dp layout.
         const val DENSITY_720P = 1.0f
