@@ -112,7 +112,15 @@ fun HelloBeAction(
             ),
         border =
             ClickableSurfaceDefaults.border(
-                border = if (unavailable) HelloBeFocusFrame.unavailable(shape) else Border.None,
+                border = when {
+                    unavailable -> HelloBeFocusFrame.unavailable(shape)
+
+                    // Outlined at rest, the way cards and settings rows are, so a quiet action
+                    // still reads as something to press rather than as a caption beside one.
+                    tone == HelloBeActionTone.QUIET -> HelloBeFocusFrame.resting(shape)
+
+                    else -> Border.None
+                },
                 focusedBorder = HelloBeFocusFrame.ring(shape),
                 pressedBorder = HelloBeFocusFrame.ring(shape)
             )
