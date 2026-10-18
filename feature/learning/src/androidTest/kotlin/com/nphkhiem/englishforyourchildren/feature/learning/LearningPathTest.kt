@@ -381,6 +381,11 @@ class LearningPathTest {
         // a unit whose titles all happen to wrap the same way the guard cannot fail, and a test
         // that cannot fail is not a guard.
         setPath(LearningPathFixtures.mixedTitleLengths())
+        // The row at rest. A focused card grows by design, and measured in place it would sit its
+        // title off the line of the others. This passed with entry focus on the row only while
+        // entry focus was held without being drawn, so the growth never happened.
+        composeTestRule.onNodeWithText(resources.getString(R.string.home_grown_ups)).requestFocus()
+        composeTestRule.waitForIdle()
 
         val cards = listOf(
             LearningPathFixtures.EARS to FINISHED,
