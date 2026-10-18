@@ -4,17 +4,22 @@ package com.nphkhiem.englishforyourchildren.feature.caregiver
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.style.TextAlign
 import androidx.tv.material3.ClickableSurfaceDefaults
 import androidx.tv.material3.ExperimentalTvMaterial3Api
 import androidx.tv.material3.Surface
@@ -53,7 +58,13 @@ internal fun SettingRowControl(
      * and stops it being pressed. A row that dropped out of focus while it worked would move the
      * caregiver's place under them.
      */
-    availability: HelloBeAvailability = HelloBeAvailability.ENABLED
+    availability: HelloBeAvailability = HelloBeAvailability.ENABLED,
+    /**
+     * Whether a change to [value] is announced even when the row does not hold focus. For a row that
+     * runs something, such as a download a caregiver may have walked away from; a switch changes
+     * only when pressed, while it is focused, and announcing it twice would be noise.
+     */
+    announcesChanges: Boolean = false
 ) {
     val unavailable = availability == HelloBeAvailability.UNAVAILABLE
     val colors = HelloBeTheme.colors
@@ -67,7 +78,10 @@ internal fun SettingRowControl(
             .fillMaxWidth()
             .defaultMinSize(minHeight = HelloBeLayout.caregiverControlMinHeight)
             .helloBeFocusClearance()
-            .semantics { stateDescription = value },
+            .semantics {
+                stateDescription = value
+                if (announcesChanges) liveRegion = LiveRegionMode.Polite
+            },
         interactionSource = interactionSource,
         shape = ClickableSurfaceDefaults.shape(shape = shape),
         colors = ClickableSurfaceDefaults.colors(
@@ -89,25 +103,39 @@ internal fun SettingRowControl(
             pressedBorder = HelloBeFocusFrame.ring(shape)
         )
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    horizontal = HelloBeTheme.spacing.space5,
-                    vertical = HelloBeTheme.spacing.space3
-                ),
-            horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space1)
+        BoxWithConstraints {
+            val valueMaxWidth = maxWidth * VALUE_MAX_FRACTION
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        horizontal = HelloBeTheme.spacing.space5,
+                        vertical = HelloBeTheme.spacing.space3
+                    ),
+                horizontalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.cardGap),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = title, style = HelloBeTheme.typography.titleSmall)
-                Text(text = consequence, style = HelloBeTheme.typography.bodyMedium)
-            }
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(HelloBeTheme.spacing.space1)
+                ) {
+                    Text(text = title, style = HelloBeTheme.typography.titleSmall)
+                    Text(text = consequence, style = HelloBeTheme.typography.bodyMedium)
+                }
 
-            Text(text = value, style = HelloBeTheme.typography.titleSmall)
+                // Capped and allowed to wrap. A short value takes only the width it needs; a long one,
+                // such as a download's state in two languages at the largest text size, used to stay
+                // on one line and squeeze the title beside it into a column of single words.
+                Text(
+                    text = value,
+                    style = HelloBeTheme.typography.titleSmall,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.widthIn(max = valueMaxWidth)
+                )
+            }
         }
     }
 }
+
+/** The most of a row its value may take, so the title and its consequence keep the rest. */
+private const val VALUE_MAX_FRACTION = 0.4f
