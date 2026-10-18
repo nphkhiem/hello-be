@@ -33,6 +33,13 @@ data class HelloBeColors(
     val onSelected: Color,
     val borderPrimary: Color,
     val borderSecondary: Color,
+    /**
+     * The progress trail's finished and upcoming segments. Their own roles because the trail is a
+     * meaningful graphic, held to 3:1 against the canvas, and the action and border colours it used
+     * to borrow are not: upcoming segments sat at 1.48:1 in Day and finished ones at 1.48:1 in Night.
+     */
+    val trailDone: Color,
+    val trailAhead: Color,
     val focusRing: Color,
     val focusGuard: Color,
     val scrim: Color,
@@ -78,6 +85,8 @@ private val dayColors =
         onSelected = Color(0xFFFFF9F0),
         borderPrimary = Color(0xFF7A8C94),
         borderSecondary = Color(0xFFD4C8AD),
+        trailDone = Color(0xFF123A5A),
+        trailAhead = Color(0xFF7A8C94),
         focusRing = Color(0xFF000000),
         focusGuard = Color(0xFF102F4C),
         scrim = Color(red = 0x08, green = 0x2A, blue = 0x4A, alpha = 0xB8),
@@ -123,6 +132,8 @@ private val nightColors =
         onSelected = Color(0xFF102F4C),
         borderPrimary = Color(0xFFAFC3C8),
         borderSecondary = Color(0xFF3B5668),
+        trailDone = Color(0xFFD6E2E5),
+        trailAhead = Color(0xFF5F7E92),
         focusRing = Color(0xFF000000),
         focusGuard = Color(0xFF061624),
         scrim = Color(red = 0x04, green = 0x11, blue = 0x1D, alpha = 0xC7),
